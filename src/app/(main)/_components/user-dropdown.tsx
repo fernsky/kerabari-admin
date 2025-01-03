@@ -25,7 +25,6 @@ import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/loading-button";
 import { ExclamationTriangleIcon } from "@/components/icons";
 import { logout } from "@/lib/auth/actions";
-import { APP_TITLE } from "@/lib/constants";
 import { toast } from "sonner";
 import { User } from "lucide-react";
 

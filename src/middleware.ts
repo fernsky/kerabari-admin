@@ -5,11 +5,11 @@ import type { NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
   if (request.method === "GET") {
-    if (request.nextUrl.pathname === "/" || request.nextUrl.pathname === "/dashboard") {
-      const url = request.nextUrl.clone();
-      url.pathname = "/dashboard/parts";
-      return NextResponse.redirect(url);
-    }
+    // if (request.nextUrl.pathname === "/" || request.nextUrl.pathname === "/dashboard") {
+    //   const url = request.nextUrl.clone();
+    //   url.pathname = "/dashboard";
+    //   return NextResponse.redirect(url);
+    // }
     return NextResponse.next();
   }
   const originHeader = request.headers.get("Origin");

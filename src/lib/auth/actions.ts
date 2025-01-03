@@ -18,7 +18,6 @@ import {
 import { users } from "@/server/db/schema";
 import { validateRequest } from "@/lib/auth/validate-request";
 import { Paths } from "../constants";
-import { createNewUserSchema, type CreateNewUserInput } from "@/lib/validators/auth";
 
 export interface ActionResponse<T> {
   fieldError?: Partial<Record<keyof T, string | undefined>>;
@@ -75,11 +74,14 @@ export async function signup(_: any, formData: FormData): Promise<ActionResponse
       fieldError: {
         userName: err.fieldErrors.userName?.[0],
         password: err.fieldErrors.password?.[0],
+        name: err.fieldErrors.name?.[0],
+        email: err.fieldErrors.email?.[0],
+        phoneNumber: err.fieldErrors.phoneNumber?.[0],
       },
     };
   }
 
-  const { userName, password } = parsed.data;
+  const { userName, password, name, email, phoneNumber } = parsed.data;
 
   const existingUser = await db.query.users.findFirst({
     where: (table, { eq }) => eq(table.userName, userName),
@@ -93,11 +95,16 @@ export async function signup(_: any, formData: FormData): Promise<ActionResponse
   }
 
   const userId = generateId(21);
+
   const hashedPassword = await new Scrypt().hash(password);
+
   await db.insert(users).values({
     id: userId,
     userName,
     hashedPassword,
+    name,
+    email,
+    phoneNumber
   });
 
   const session = await lucia.createSession(userId, {});
@@ -161,61 +168,62 @@ export async function resetPassword(
   cookies().set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
   redirect(Paths.Dashboard);
 }
-export async function createUser(
-  _: any,
-  formData: FormData,
-): Promise<{ error?: string; success?: boolean }> {
-  try {
-    // Verify current user is admin
-    const { user: currentUser } = await validateRequest();
-    if (!currentUser || currentUser.role !== "admin") {
-      return { error: "Unauthorized access" };
-    }
 
-    const obj = Object.fromEntries(formData.entries());
-    const parsed = createNewUserSchema.safeParse(obj);
+// export async function createUser(
+//   _: any,
+//   formData: FormData,
+// ): Promise<{ error?: string; success?: boolean }> {
+//   try {
+//     // Verify current user is admin
+//     const { user: currentUser } = await validateRequest();
+//     if (!currentUser || currentUser.role !== "admin") {
+//       return { error: "Unauthorized access" };
+//     }
 
-    if (!parsed.success) {
-      const err = parsed.error.flatten();
-      console.log(err, obj);
-      return {
-        error:
-          err.fieldErrors.userName?.[0] ??
-          err.fieldErrors.password?.[0] ??
-          err.fieldErrors.role?.[0] ??
-          err.fieldErrors.domain?.[0] ??
-          err.fieldErrors.wardNumber?.[0],
-      };
-    }
+//     const obj = Object.fromEntries(formData.entries());
+//     const parsed = createNewUserSchema.safeParse(obj);
 
-    const { userName, password, role, domain, wardNumber } = parsed.data;
+//     if (!parsed.success) {
+//       const err = parsed.error.flatten();
+//       console.log(err, obj);
+//       return {
+//         error:
+//           err.fieldErrors.userName?.[0] ??
+//           err.fieldErrors.password?.[0] ??
+//           err.fieldErrors.role?.[0] ??
+//           err.fieldErrors.domain?.[0] ??
+//           err.fieldErrors.wardNumber?.[0],
+//       };
+//     }
 
-    // Check if username already exists
-    const existingUser = await db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.userName, userName),
-    });
+//     const { userName, password, role, domain, wardNumber } = parsed.data;
 
-    if (existingUser) {
-      return { error: "Username already exists" };
-    }
+//     // Check if username already exists
+//     const existingUser = await db.query.users.findFirst({
+//       where: (users, { eq }) => eq(users.userName, userName),
+//     });
 
-    // Hash password
-    const hashedPassword = await new Scrypt().hash(password);
+//     if (existingUser) {
+//       return { error: "Username already exists" };
+//     }
 
-    // Create user
-    const userId = generateId(21);
-    await db.insert(users).values({
-      id: userId,
-      userName,
-      hashedPassword,
-      role,
-      domain,
-      wardNumber: domain === "ward" ? wardNumber : null,
-    });
+//     // Hash password
+//     const hashedPassword = await new Scrypt().hash(password);
 
-    return { success: true };
-  } catch (error) {
-    console.error("Error creating user:", error);
-    return { error: "Failed to create user" };
-  }
-}
+//     // Create user
+//     const userId = generateId(21);
+//     await db.insert(users).values({
+//       id: userId,
+//       userName,
+//       hashedPassword,
+//       role,
+//       domain,
+//       wardNumber: domain === "ward" ? wardNumber : null,
+//     });
+
+//     return { success: true };
+//   } catch (error) {
+//     console.error("Error creating user:", error);
+//     return { error: "Failed to create user" };
+//   }
+// }

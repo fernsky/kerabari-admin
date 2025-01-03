@@ -1,4 +1,4 @@
-export const APP_TITLE = "Likhupike";
+export const APP_TITLE = "Buddhashanti";
 export const DATABASE_PREFIX = "acme";
 export const TEST_DB_PREFIX = "test_acme";
 

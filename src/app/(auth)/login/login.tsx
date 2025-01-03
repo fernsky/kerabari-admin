@@ -27,7 +27,7 @@ export function Login() {
             <Input
               required
               id="userName"
-              placeholder="Ram"
+              placeholder="Ram Prasad Koirala"
               autoComplete="userName"
               name="userName"
               type="text"

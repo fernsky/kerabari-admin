@@ -2,6 +2,9 @@ import { z } from "zod";
 
 export const signupSchema = z.object({
   userName: z.string().min(1, "Please enter a valid username."),
+  name:z.string().min(1, "Please enter your name."),
+  email:z.string().email(),
+  phoneNumber: z.string().min(10, "Please enter a valid phone number."),
   password: z.string().min(1, "Please provide your password.").max(255),
 });
 export type SignupInput = z.infer<typeof signupSchema>;
