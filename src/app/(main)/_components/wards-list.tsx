@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table";
 
 import { api } from "@/trpc/react";
+import { Edit3 } from "lucide-react";
 import Link from "next/link";
 
 export function WardsList() {
@@ -38,7 +39,7 @@ export function WardsList() {
               <TableCell>{ward.wardAreaCode}</TableCell>
               <TableCell>
                 <Link href={`/dashboard/ward/update/${ward.wardNumber}`}>
-                  Edit
+                  <Edit3 className="inline-block mr-2 w-4 h-4" />
                 </Link>
               </TableCell>
             </TableRow>

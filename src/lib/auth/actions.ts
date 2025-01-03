@@ -66,7 +66,9 @@ export async function login(_: any, formData: FormData): Promise<ActionResponse<
 
 export async function signup(_: any, formData: FormData): Promise<ActionResponse<SignupInput>> {
   const obj = Object.fromEntries(formData.entries());
-
+  if (obj.wardNumber) {
+    obj.wardNumber = parseInt(obj.wardNumber as unknown as string) as unknown as FormDataEntryValue;
+  }
   const parsed = signupSchema.safeParse(obj);
   if (!parsed.success) {
     const err = parsed.error.flatten();
@@ -77,11 +79,12 @@ export async function signup(_: any, formData: FormData): Promise<ActionResponse
         name: err.fieldErrors.name?.[0],
         email: err.fieldErrors.email?.[0],
         phoneNumber: err.fieldErrors.phoneNumber?.[0],
+        wardNumber: err.fieldErrors.wardNumber?.[0],
       },
     };
   }
 
-  const { userName, password, name, email, phoneNumber } = parsed.data;
+  const { userName, password, name, email, phoneNumber, wardNumber } = parsed.data;
 
   const existingUser = await db.query.users.findFirst({
     where: (table, { eq }) => eq(table.userName, userName),
@@ -104,7 +107,8 @@ export async function signup(_: any, formData: FormData): Promise<ActionResponse
     hashedPassword,
     name,
     email,
-    phoneNumber
+    phoneNumber,
+    wardNumber,
   });
 
   const session = await lucia.createSession(userId, {});

@@ -1,5 +1,7 @@
 import { pgTableCreator, index, timestamp, varchar, pgEnum, integer } from "drizzle-orm/pg-core";
 import { DATABASE_PREFIX as prefix } from "@/lib/constants";
+import { geometry } from "./geographical";
+
 
 export const pgTable = pgTableCreator((name) => `${prefix}_${name}`);
 
@@ -15,7 +17,7 @@ export const users = pgTable(
     phoneNumber: varchar("phone_number", { length: 10 }), 
     email: varchar("email", { length: 255 }),
     avatar: varchar("avatar", { length: 255 }),
-    wardNumber: varchar("ward_number", { length: 2 }),
+    wardNumber: integer("ward_number"),
     role: rolesEnum("role").default("enumerator"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(() => new Date()),
@@ -51,6 +53,12 @@ export const wards = pgTable(
     wardNumberIdx: index("ward_number_idx").on(t.wardNumber),
   }),
 );
+
+export const areas = pgTable("areas", {
+  code: integer("code").primaryKey(),
+  wardNumber: integer("ward").notNull().references(() => wards.wardNumber),
+  geometry: geometry("geometry", { type: "Polygon" }),
+});
 
 
 export type Ward = typeof wards.$inferSelect;

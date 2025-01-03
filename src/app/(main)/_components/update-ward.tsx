@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -37,6 +37,7 @@ const UpdateWardAreaCode: React.FC<UpdateWardProps> = ({ wardNumber }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const updateWard = api.ward.updateWard.useMutation();
+  const ward = api.ward.getWardByNumber.useQuery({ wardNumber });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -44,6 +45,14 @@ const UpdateWardAreaCode: React.FC<UpdateWardProps> = ({ wardNumber }) => {
       areaCode: "",
     },
   });
+
+  useEffect(() => {
+    if (ward.data) {
+      form.reset({
+        areaCode: ward.data.wardAreaCode.toString(),
+      });
+    }
+  }, [ward.data, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);

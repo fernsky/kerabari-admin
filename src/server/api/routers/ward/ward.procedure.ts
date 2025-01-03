@@ -1,4 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import { z } from "zod";
 import { wards } from "@/server/db/schema";
 import { createWardSchema, updateWardAreaCodeSchema } from "@/server/api/routers/ward/ward.schema";
 import { eq } from "drizzle-orm";
@@ -8,6 +9,17 @@ export const wardRouter = createTRPCRouter({
         const allWards = await ctx.db.select().from(wards);
         return allWards;
     }),
+
+    getWardByNumber: protectedProcedure
+        .input(z.object({ wardNumber: z.number() }))
+        .query(async ({ ctx, input }) => {
+            const ward = await ctx.db
+                .select()
+                .from(wards)
+                .where(eq(wards.wardNumber, input.wardNumber))
+                .limit(1);
+            return ward[0];
+        }),
 
     createWard: protectedProcedure
         .input(createWardSchema)

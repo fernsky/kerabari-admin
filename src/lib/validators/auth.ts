@@ -6,6 +6,7 @@ export const signupSchema = z.object({
   email:z.string().email(),
   phoneNumber: z.string().min(10, "Please enter a valid phone number."),
   password: z.string().min(1, "Please provide your password.").max(255),
+  wardNumber: z.number().int()
 });
 export type SignupInput = z.infer<typeof signupSchema>;
 
