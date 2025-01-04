@@ -15,7 +15,6 @@ export const areaRouter = createTRPCRouter({
             return newArea;
         }),
 
-
     getAreas: protectedProcedure.query(async ({ ctx }) => {
         const allAreas = await ctx.db.select().from(areas);
         return allAreas;

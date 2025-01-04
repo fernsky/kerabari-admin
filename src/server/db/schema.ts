@@ -9,6 +9,7 @@ import {
 import { DATABASE_PREFIX as prefix } from "@/lib/constants";
 import { geometry } from "./geographical";
 
+
 export const pgTable = pgTableCreator((name) => `${prefix}_${name}`);
 
 export const rolesEnum = pgEnum("roles", ["enumerator", "supervisor"]);
@@ -70,6 +71,7 @@ export const areas = pgTable("areas", {
     .notNull()
     .references(() => wards.wardNumber),
   geometry: geometry("geometry", { type: "Polygon" }),
+  assignedTo: varchar("assigned_to", { length: 21 }).references(() => users.id),
 });
 
 export type Ward = typeof wards.$inferSelect;
