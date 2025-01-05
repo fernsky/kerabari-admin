@@ -1,11 +1,9 @@
-import { type ReactNode } from "react";
+import AdminPanelLayout from "@/components/admin-panel/admin-panel-layout";
 
-const MainLayout = ({ children }: { children: ReactNode }) => {
-  return (
-    <>
-      <div className="mb-20">{children}</div>
-    </>
-  );
-};
-
-export default MainLayout;
+export default function DemoLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <AdminPanelLayout>{children}</AdminPanelLayout>;
+}

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { areas } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { createAreaSchema } from "./area.schema";
-
+import { assignAreaToEnumeratorSchema } from "./area.schema";
 
 
 export const areaRouter = createTRPCRouter({
@@ -32,5 +32,15 @@ export const areaRouter = createTRPCRouter({
             return area[0];
         }),
 
+    assignAreaToEnumerator: protectedProcedure
+        .input(assignAreaToEnumeratorSchema)
+        .mutation(async ({ ctx, input }) => {
+            const updatedArea = await ctx.db
+                .update(areas)
+                .set({ assignedTo: input.enumeratorId })
+                .where(eq(areas.code, input.areaCode))
+                .returning();
+            return updatedArea;
+        })
   
 });

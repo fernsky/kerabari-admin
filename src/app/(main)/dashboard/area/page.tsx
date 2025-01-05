@@ -17,12 +17,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+import { assignAreaToEnumeratorSchema } from "@/server/api/routers/areas/area.schema";
+import { toast } from "sonner";
+
+import type { z } from "zod";
+
 import { api } from "@/trpc/react";
 
 export default function AreaPage() {
   const [areas] = api.useQueries((t) => [t.area.getAreas()]);
 
   const [enumerators] = api.useQueries((t) => [t.admin.getEnumerators()]);
+
+  const assignAreaToEnumerator = api.area.assignAreaToEnumerator.useMutation();
+
+  async function handleAssignment(
+    values: z.infer<typeof assignAreaToEnumeratorSchema>,
+  ) {
+    try {
+      await assignAreaToEnumerator.mutateAsync(values);
+      toast.success("Area created successfully");
+    } catch (error) {
+      toast.error("Failed to create area");
+    }
+  }
 
   if (!areas.data?.length) {
     return (
@@ -48,7 +67,15 @@ export default function AreaPage() {
                 <TableCell>{area.wardNumber}</TableCell>
                 <TableCell>{area.code}</TableCell>
                 <TableCell>
-                  <Select>
+                  <Select
+                    defaultValue={area.assignedTo ?? ""}
+                    onValueChange={async (value) => {
+                      await handleAssignment({
+                        areaCode: area.code,
+                        enumeratorId: value,
+                      });
+                    }}
+                  >
                     <SelectTrigger className="">
                       <SelectValue placeholder="Select enumerator" />
                     </SelectTrigger>
