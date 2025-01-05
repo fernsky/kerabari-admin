@@ -43,13 +43,13 @@ export function Signup() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="space-y-4 text-center">
-        <CardTitle>{APP_TITLE}</CardTitle>
-        <CardDescription>
-          Create a new account to access the dashboard
+        <CardTitle className="text-xl">{APP_TITLE}</CardTitle>
+        <CardDescription className="text-sm">
+          Log in to your account to access the dashboard
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={formAction} className="grid gap-4">
+        <form action={formAction} className="grid gap-4 mb-6">
           <div className="space-y-2">
             <Label htmlFor="name">Name</Label>
             <Input
@@ -156,10 +156,18 @@ export function Signup() {
           <SubmitButton className="w-full" aria-label="submit-btn">
             Sign Up
           </SubmitButton>
-          <Button variant="outline" className="w-full" asChild>
-            <Link href="/">Cancel</Link>
-          </Button>
         </form>
+        <p className="my-3 flex gap-2 justify-center">
+          <span className="text-sm text-gray-400 font-light">
+            Already have an account?
+          </span>
+          <Link
+            href="/login"
+            className="text-blue-900 text-sm text-center underline"
+          >
+            Login
+          </Link>
+        </p>
       </CardContent>
     </Card>
   );

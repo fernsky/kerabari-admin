@@ -4,7 +4,13 @@ import Link from "next/link";
 import { useFormState } from "react-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { PasswordInput } from "@/components/password-input";
 import { APP_TITLE } from "@/lib/constants";
 import { login } from "@/lib/auth/actions";
@@ -17,11 +23,13 @@ export function Login() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="space-y-4 text-center">
-        <CardTitle>{APP_TITLE}</CardTitle>
-        <CardDescription>Log in to your account to access the dashboard</CardDescription>
+        <CardTitle className="text-xl">{APP_TITLE}</CardTitle>
+        <CardDescription className="text-sm">
+          Log in to your account to access the dashboard
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={formAction} className="grid gap-4">
+        <form action={formAction} className="grid gap-4 mb-8">
           <div className="space-y-2">
             <Label htmlFor="userName">Username</Label>
             <Input
@@ -61,10 +69,18 @@ export function Login() {
           <SubmitButton className="w-full" aria-label="submit-btn">
             Log In
           </SubmitButton>
-          <Button variant="outline" className="w-full" asChild>
-            <Link href="/">Cancel</Link>
-          </Button>
         </form>
+        <p className="my-3 flex gap-2 justify-center">
+          <span className="text-sm text-gray-400 font-light">
+            Do not have an account?
+          </span>
+          <Link
+            href="/signup"
+            className="text-blue-900 text-sm text-center underline"
+          >
+            Singup
+          </Link>
+        </p>
       </CardContent>
     </Card>
   );

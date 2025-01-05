@@ -20,11 +20,12 @@ export default async function AccountPage() {
     <main className="container mx-auto min-h-screen p-4">
       <Card className="max-w-sm">
         <CardHeader>
-          <CardTitle> {user.email}!</CardTitle>
+          <CardTitle> {user.userName}</CardTitle>
           <CardDescription>You've successfully logged in!</CardDescription>
         </CardHeader>
         <CardContent>This is a private page.</CardContent>
         <CardFooter>
+          {/* @ts-ignore */}
           <form action={logout}>
             <SubmitButton variant="outline">Logout</SubmitButton>
           </form>
