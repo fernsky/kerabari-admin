@@ -9,7 +9,6 @@ import {
 import { DATABASE_PREFIX as prefix } from "@/lib/constants";
 import { geometry } from "./geographical";
 
-
 export const pgTable = pgTableCreator((name) => `${prefix}_${name}`);
 
 export const rolesEnum = pgEnum("roles", ["enumerator", "supervisor"]);
