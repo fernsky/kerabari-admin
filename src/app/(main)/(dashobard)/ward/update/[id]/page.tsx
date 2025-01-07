@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { validateRequest } from "@/lib/auth/validate-request";
 import { Paths } from "@/lib/constants";
 import UpdateWardAreaCode from "@/app/(main)/_components/update-ward";
+import { ContentLayout } from "@/components/admin-panel/content-layout";
 
 interface WardUpdatePageProps {
   params: {
@@ -15,9 +16,9 @@ export default async function EditorPage({ params }: WardUpdatePageProps) {
   console.log(params);
 
   return (
-    <div>
+    <ContentLayout title="Update Ward">
       <div className="mb-6 space-y-2"></div>
       <UpdateWardAreaCode wardNumber={parseInt(params.id)} />
-    </div>
+    </ContentLayout>
   );
 }

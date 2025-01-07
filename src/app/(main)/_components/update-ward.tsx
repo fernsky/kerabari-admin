@@ -63,7 +63,7 @@ const UpdateWardAreaCode: React.FC<UpdateWardProps> = ({ wardNumber }) => {
       };
       await updateWard.mutateAsync(payload);
       toast.success("Ward area code updated successfully");
-      router.push("/dashboard/ward");
+      router.push("/ward");
     } catch (error) {
       toast.error("Failed to update ward area code");
     } finally {
@@ -72,7 +72,7 @@ const UpdateWardAreaCode: React.FC<UpdateWardProps> = ({ wardNumber }) => {
   }
 
   return (
-    <Card className="w-[600px]">
+    <Card className="">
       <CardHeader className="space-y-2">
         <CardTitle>Update Area Code for Ward {wardNumber}</CardTitle>
         <CardDescription>Update the area code for the ward</CardDescription>

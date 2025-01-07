@@ -33,6 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ContentLayout } from "@/components/admin-panel/content-layout";
 
 const wards = [
   { value: "1", label: "1" },
@@ -71,7 +72,7 @@ const CreateAreaPage = () => {
       //@ts-expect-error: code needs to be parsed as an integer
       await createArea.mutateAsync(values);
       toast.success("Area created successfully");
-      router.push("/dashboard/area");
+      router.push("/area");
     } catch (error) {
       toast.error("Failed to create area");
     } finally {
@@ -80,67 +81,67 @@ const CreateAreaPage = () => {
   }
 
   return (
-    <Card className="w-[600px]">
-      <CardHeader className="space-y-2">
-        <CardTitle>Create New Area</CardTitle>
-        <CardDescription>Fill the details to create a new area</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-4">
-              <FormField
-                name="code"
-                control={form.control}
-                render={({ field }) => (
-                  <FormControl>
-                    <div>
-                      <FormLabel>Area Code</FormLabel>
-                      <Input type="number" {...field} />
-                      <FormMessage />
-                    </div>
-                  </FormControl>
-                )}
-              />
-              <div className="space-y-2">
-                <Label htmlFor="wardNumber">Ward Number</Label>
-                <Controller
-                  name="wardNumber"
+    <ContentLayout title="Create Area">
+      <Card className="pt-10">
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-4">
+                <FormField
+                  name="code"
                   control={form.control}
                   render={({ field }) => (
-                    <Select
-                      value={field.value?.toString()}
-                      onValueChange={(value) => field.onChange(parseInt(value))}
-                      required
-                    >
-                      <SelectTrigger className="">
-                        <SelectValue placeholder="Select your ward" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {wards.map((ward) => {
-                            return (
-                              <SelectItem key={ward.value} value={ward.value}>
-                                {ward.label}
-                              </SelectItem>
-                            );
-                          })}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <div>
+                        <FormLabel>Area Code</FormLabel>
+                        <Input type="number" {...field} />
+                        <FormMessage />
+                      </div>
+                    </FormControl>
                   )}
                 />
+                <div className="space-y-2">
+                  <Label htmlFor="wardNumber">Ward Number</Label>
+                  <Controller
+                    name="wardNumber"
+                    control={form.control}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value?.toString()}
+                        onValueChange={(value) =>
+                          field.onChange(parseInt(value))
+                        }
+                        required
+                      >
+                        <SelectTrigger className="">
+                          <SelectValue placeholder="Select your ward" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {wards.map((ward) => {
+                              return (
+                                <SelectItem key={ward.value} value={ward.value}>
+                                  {ward.label}
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
               </div>
-            </div>
-            <div className="flex justify-end">
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? <LoadingButton /> : "Save Changes"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+              <div className="flex justify-end">
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? <LoadingButton /> : "Save Changes"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </ContentLayout>
   );
 };
 

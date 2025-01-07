@@ -18,7 +18,9 @@ export function WardsList() {
 
   if (!wards.data?.length) {
     return (
-      <div className="text-center text-muted-foreground">No wards found</div>
+      <div className="text-center text-muted-foreground mt-20">
+        No wards found
+      </div>
     );
   }
 
@@ -38,7 +40,7 @@ export function WardsList() {
               <TableCell>{ward.wardNumber}</TableCell>
               <TableCell>{ward.wardAreaCode}</TableCell>
               <TableCell>
-                <Link href={`/dashboard/ward/update/${ward.wardNumber}`}>
+                <Link href={`/ward/update/${ward.wardNumber}`}>
                   <Edit3 className="inline-block mr-2 w-4 h-4" />
                 </Link>
               </TableCell>

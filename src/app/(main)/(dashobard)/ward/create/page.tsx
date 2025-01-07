@@ -24,6 +24,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { ContentLayout } from "@/components/admin-panel/content-layout";
 
 const formSchema = z.object({
   wardNumber: z.string().min(1, "Ward number is required"),
@@ -52,7 +53,7 @@ const CreateWardPage = () => {
       };
       await createWard.mutateAsync(payload);
       toast.success("Ward created successfully");
-      router.push("/dashboard/ward");
+      router.push("/ward");
     } catch (error) {
       toast.error("Failed to create ward");
     } finally {
@@ -61,51 +62,49 @@ const CreateWardPage = () => {
   }
 
   return (
-    <Card className="w-[600px]">
-      <CardHeader className="space-y-2">
-        <CardTitle>Create New Ward</CardTitle>
-        <CardDescription>Fill the details to create a new ward</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-4">
-              <FormField
-                name="wardNumber"
-                control={form.control}
-                render={({ field }) => (
-                  <FormControl>
-                    <div>
-                      <FormLabel>Ward Number</FormLabel>
-                      <Input {...field} />
-                      <FormMessage />
-                    </div>
-                  </FormControl>
-                )}
-              />
-              <FormField
-                name="areaCode"
-                control={form.control}
-                render={({ field }) => (
-                  <FormControl>
-                    <div>
-                      <FormLabel>Area Code</FormLabel>
-                      <Input {...field} />
-                      <FormMessage />
-                    </div>
-                  </FormControl>
-                )}
-              />
-            </div>
-            <div className="flex justify-end">
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? <LoadingButton /> : "Save Changes"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+    <ContentLayout title="Create Ward">
+      <Card className="max-w[600px] pt-10">
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-4">
+                <FormField
+                  name="wardNumber"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormControl>
+                      <div>
+                        <FormLabel>Ward Number</FormLabel>
+                        <Input {...field} />
+                        <FormMessage />
+                      </div>
+                    </FormControl>
+                  )}
+                />
+                <FormField
+                  name="areaCode"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormControl>
+                      <div>
+                        <FormLabel>Area Code</FormLabel>
+                        <Input {...field} />
+                        <FormMessage />
+                      </div>
+                    </FormControl>
+                  )}
+                />
+              </div>
+              <div className="flex justify-end">
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? <LoadingButton /> : "Save Changes"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </ContentLayout>
   );
 };
 

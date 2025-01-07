@@ -1,14 +1,15 @@
-import React from 'react';
-import { EnumeratorsList } from '../../_components/enumerators-list';
+import React from "react";
+import { EnumeratorsList } from "../../_components/enumerators-list";
+import { ContentLayout } from "@/components/admin-panel/content-layout";
 
 const EnumeratorsPage: React.FC = () => {
-    return (
-        <div className="container">
-            <h1>Enumerators Dashboard</h1>
-            <p>Welcome to the Enumerators Dashboard. Here you can manage and view all enumerators.</p>
-            <EnumeratorsList/>
-        </div>
-    );
+  return (
+    <ContentLayout title="Enumerators">
+      <div className="container">
+        <EnumeratorsList />
+      </div>
+    </ContentLayout>
+  );
 };
 
 export default EnumeratorsPage;

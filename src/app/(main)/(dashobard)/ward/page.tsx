@@ -1,10 +1,17 @@
+import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { WardsList } from "../../_components/wards-list";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function WardPage() {
-    return (
-        <div>
-            <h1>Wards</h1>
-            <WardsList />
-        </div>
-    );
+  return (
+    <ContentLayout title="Wards">
+      <div className="flex justify-end mb-4">
+        <Link href="/ward/create">
+          <Button type="button">Create Ward</Button>
+        </Link>
+      </div>
+      <WardsList />
+    </ContentLayout>
+  );
 }

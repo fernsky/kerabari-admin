@@ -118,7 +118,7 @@ export function Menu({ isOpen }: MenuProps) {
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
                   {/* @ts-ignore */}
-                  <form action={logout}>
+                  <form action={logout} className="w-full">
                     <Button
                       onClick={() => {}}
                       variant="outline"
