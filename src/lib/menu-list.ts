@@ -1,4 +1,10 @@
-import { LayoutGrid, LucideIcon } from "lucide-react";
+import {
+  LayoutGrid,
+  LucideIcon,
+  LandPlot,
+  UsersRound,
+  AreaChart,
+} from "lucide-react";
 
 type Submenu = {
   href: string;
@@ -28,6 +34,24 @@ export function getMenuList(pathname: string): Group[] {
           href: "/",
           label: "My Areas",
           icon: LayoutGrid,
+          submenus: [],
+        },
+        {
+          href: "/ward",
+          label: "Wards",
+          icon: AreaChart,
+          submenus: [],
+        },
+        {
+          href: "/area",
+          label: "Areas",
+          icon: LandPlot,
+          submenus: [],
+        },
+        {
+          href: "/enumerators",
+          label: "Enumerators",
+          icon: UsersRound,
           submenus: [],
         },
       ],
