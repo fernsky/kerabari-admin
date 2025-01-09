@@ -33,7 +33,7 @@ const formSchema = z.object({
   id: z.string().min(1, "Form ID is required"),
   name: z.string().min(1, "Form name is required"),
   siteEndpoint: z.string().url().optional(),
-  odkFormId: z.string().length(255),
+  odkFormId: z.string().max(255),
   odkProjectId: z.number().int().nonnegative(),
   userName: z.string().optional(),
   password: z.string().optional(),
@@ -146,11 +146,15 @@ const CreateFormPage = () => {
                 <FormField
                   name="odkProjectId"
                   control={form.control}
-                  render={({ field }) => (
+                  render={({ field: { value, onChange } }) => (
                     <FormControl>
                       <div>
                         <FormLabel>ODK Project ID</FormLabel>
-                        <Input type="number" {...field} />
+                        <Input
+                          type="number"
+                          value={value}
+                          onChange={(e) => onChange(Number(e.target.value))}
+                        />
                         <FormMessage />
                       </div>
                     </FormControl>
@@ -219,8 +223,17 @@ const CreateFormPage = () => {
                                   <SelectItem value="audio_monitoring">
                                     Audio Monitoring
                                   </SelectItem>
-                                  <SelectItem value="survey_image">
-                                    Survey Image
+                                  <SelectItem value="house_image">
+                                    House Image
+                                  </SelectItem>
+                                  <SelectItem value="house_image_selfie">
+                                    House Image Selfie
+                                  </SelectItem>
+                                  <SelectItem value="business_image">
+                                    Business Image
+                                  </SelectItem>
+                                  <SelectItem value="business_image_selfie">
+                                    Business Image Selfie
                                   </SelectItem>
                                 </SelectGroup>
                               </SelectContent>

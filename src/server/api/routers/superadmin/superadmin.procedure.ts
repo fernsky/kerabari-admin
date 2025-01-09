@@ -1,11 +1,12 @@
 import { fetchSubmissionsSchema, surveyFormSchema } from "./superadmin.schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { surveyAttachments, surveyData, surveyForms } from "@/server/db/schema";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 import axios from "axios";
 import dotenv from "dotenv";
 import { FormAttachment } from "@/types";
 import { v4 as uuidv4 } from "uuid";
+import * as z from "zod";
 
 dotenv.config();
 
@@ -22,6 +23,28 @@ export const superadminRouter = createTRPCRouter({
     const allSurveyForms = await ctx.db.select().from(surveyForms);
     return allSurveyForms;
   }),
+
+  /**
+   * Retrieves a specific survey form by ID.
+   *
+   * @param {string} id - The ID of the survey form.
+   * @returns {Promise<Object>} A promise that resolves to the survey form.
+   */
+  getForm: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const form = await ctx.db
+        .select()
+        .from(surveyForms)
+        .where(eq(surveyForms.id, input.id))
+        .limit(1);
+
+      if (!form.length) {
+        throw new Error("Survey form not found");
+      }
+
+      return form[0];
+    }),
 
   /**
    * Creates a new survey form.
@@ -124,7 +147,7 @@ export const superadminRouter = createTRPCRouter({
       const { startDate, endDate, count } = input;
 
       // First get the token
-      const token = getODKToken(
+      const token = await getODKToken(
         siteEndpoint as string,
         userName as string,
         password as string,
@@ -143,9 +166,10 @@ export const superadminRouter = createTRPCRouter({
         $expand: "*",
         $count: true,
         $wkt: true,
-        $filter: `__system/submissionDate ge ${startDate ?? defaultStartDate.toISOString()} and __system/submissionDate le ${endDate ?? defaultEndDate.toISOString()}`,
+        //$filter: `__system/submissionDate ge ${startDate ?? defaultStartDate.toISOString()} and __system/submissionDate le ${endDate ?? defaultEndDate.toISOString()}`,
       };
 
+      console.log(queryParams);
       try {
         const queryString = Object.entries(queryParams)
           .map(
@@ -157,50 +181,80 @@ export const superadminRouter = createTRPCRouter({
           `${siteEndpoint}/v1/projects/${odkProjectId}/forms/${odkFormId}.svc/Submissions?${queryString}`,
           {
             headers: {
-              Authorization: `Bearer ${await token}`,
+              Authorization: `Bearer ${token}`,
             },
           },
         );
         const submissions = response.data.value;
         for (let submission of submissions) {
-          await ctx.db.insert(surveyData).values({
-            id: submission.__id,
-            formId: input.id,
-            data: submission,
-          });
+          await ctx.db
+            .insert(surveyData)
+            .values({
+              id: submission.__id,
+              formId: input.id,
+              data: submission,
+            })
+            .onConflictDoNothing();
 
           if (attachmentPaths) {
+            console.log(attachmentPaths);
             for (let attachmentPath of attachmentPaths as FormAttachment[]) {
               const attachmentName = getValueFromNestedField(
                 submission,
                 attachmentPath.path,
               );
+
+              // Check if the attachment already exists in the database
+              const existingAttachment = await ctx.db
+                .select()
+                .from(surveyAttachments)
+                .where(
+                  and(
+                    eq(surveyAttachments.dataId, submission.__id),
+                    eq(surveyAttachments.name, attachmentName),
+                  ),
+                )
+                .limit(1);
+
+              if (existingAttachment.length > 0) {
+                console.log(
+                  `Attachment ${attachmentName} for submission ${submission.__id} already exists in the database.`,
+                );
+                continue;
+              }
+
               const attachmentUrl = `${siteEndpoint}/v1/projects/${odkProjectId}/forms/${odkFormId}/submissions/${submission.__id}/attachments/${attachmentName}`;
               const attachment = await axios.get(attachmentUrl, {
                 headers: {
-                  Authorization: `Bearer ${await token}`,
+                  Authorization: `Bearer ${token}`,
                 },
+                responseType: "arraybuffer",
               });
 
               if (!process.env.BUCKET_NAME)
                 throw new Error("Bucket name not found");
 
+              console.log("Sending object to minio", attachmentName);
+              console.log(process.env.BUCKET_NAME, attachmentName);
               await ctx.minio.putObject(
                 process.env.BUCKET_NAME,
                 attachmentName,
                 attachment.data,
               );
 
-              await ctx.db.insert(surveyAttachments).values({
-                id: uuidv4(),
-                dataId: submission.__id,
-                type: attachmentPath.type,
-                name: attachmentName,
-              });
+              await ctx.db
+                .insert(surveyAttachments)
+                .values({
+                  dataId: submission.__id,
+                  type: attachmentPath.type,
+                  name: attachmentName,
+                })
+                .onConflictDoNothing();
             }
           }
         }
       } catch (error) {
+        console.log(error);
         throw new Error(`Failed to get submissions: ${(error as any).message}`);
       }
     }),

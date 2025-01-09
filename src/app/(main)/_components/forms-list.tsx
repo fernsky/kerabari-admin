@@ -13,10 +13,20 @@ import { api } from "@/trpc/react";
 import { Edit3 } from "lucide-react";
 import Link from "next/link";
 import { useMediaQuery } from "react-responsive";
+import { useRouter } from "next/navigation";
 
 export function FormsList() {
   const [forms] = api.useQueries((t) => [t.superadmin.getSurveyForms()]);
   const isMobile = useMediaQuery({ maxWidth: 767 });
+  const router = useRouter();
+
+  const handleRowClick = (formId: string, event: React.MouseEvent) => {
+    // Prevent navigation if clicking edit link
+    const isEditClick = (event.target as HTMLElement).closest("a");
+    if (!isEditClick) {
+      router.push(`/forms/show/${formId}`);
+    }
+  };
 
   if (!forms.data?.length) {
     return (
@@ -30,7 +40,11 @@ export function FormsList() {
     return (
       <div className="space-y-4 p-4">
         {forms.data.map((form) => (
-          <Card key={form.id} className="shadow-lg">
+          <Card
+            key={form.id}
+            className="shadow-lg cursor-pointer"
+            onClick={(e) => handleRowClick(form.id, e)}
+          >
             <CardHeader>
               <CardTitle className="text-lg font-semibold">
                 {form.name}
@@ -70,7 +84,11 @@ export function FormsList() {
         </TableHeader>
         <TableBody className="bg-white divide-y divide-gray-200">
           {forms.data.map((form) => (
-            <TableRow key={form.id} className="hover:bg-gray-100">
+            <TableRow
+              key={form.id}
+              className="hover:bg-gray-100 cursor-pointer"
+              onClick={(e) => handleRowClick(form.id, e)}
+            >
               <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                 {form.id}
               </TableCell>
@@ -79,7 +97,7 @@ export function FormsList() {
               </TableCell>
               <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-blue-500">
                 <Link
-                  href={`/form/update/${form.id}`}
+                  href={`/forms/update/${form.id}`}
                   className="flex items-center hover:underline"
                 >
                   <Edit3 className="inline-block mr-2 w-4 h-4" />

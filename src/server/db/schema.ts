@@ -8,6 +8,7 @@ import {
   json,
   text,
   customType,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 import { DATABASE_PREFIX as prefix } from "@/lib/constants";
 import { geometry } from "./geographical";
@@ -100,7 +101,7 @@ export const surveyForms = pgTable("odk_survey_forms", {
 
 export const surveyData = pgTable("odk_survey_data", {
   id: varchar("id", { length: 55 }).primaryKey(),
-  formId: varchar("form_id", { length: 21 })
+  formId: varchar("form_id", { length: 255 })
     .notNull()
     .references(() => surveyForms.id),
   data: json("data").notNull(),
@@ -109,18 +110,26 @@ export const surveyData = pgTable("odk_survey_data", {
 
 export const attachmentTypesEnum = pgEnum("attachment", [
   "audio_monitoring",
-  "survey_image",
+  "house_image",
+  "house_image_selfie",
+  "business_image",
+  "business_image_selfie",
 ]);
 
-export const surveyAttachments = pgTable("odk_survey_attachments", {
-  id: varchar("id", { length: 55 }).primaryKey(),
-  dataId: varchar("data_id", { length: 21 })
-    .notNull()
-    .references(() => surveyData.id),
-  type: attachmentTypesEnum("type").default("survey_image").notNull(),
-  name: varchar("name", { length: 255 }).notNull(),
-  created_at: timestamp("created_at").defaultNow().notNull(),
-});
+export const surveyAttachments = pgTable(
+  "odk_survey_attachments",
+  {
+    dataId: varchar("data_id", { length: 55 })
+      .notNull()
+      .references(() => surveyData.id),
+    type: attachmentTypesEnum("type").default("house_image").notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+    created_at: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    pk: primaryKey(t.dataId, t.name),
+  }),
+);
 
 export type Ward = typeof wards.$inferSelect;
 export type NewWard = typeof wards.$inferInsert;

@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 export const surveyFormSchema = z.object({
-  id: z.string().length(255),
+  id: z.string().max(255),
   name: z.string().min(1, "Form name is required").max(255),
   siteEndpoint: z.string().url().optional(),
-  odkFormId: z.string().length(255),
+  odkFormId: z.string().max(255),
   odkProjectId: z.number().int().nonnegative(),
   userName: z.string().optional(),
   password: z.string().optional(),

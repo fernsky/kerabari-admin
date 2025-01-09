@@ -1,7 +1,8 @@
+"use client";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
@@ -22,12 +23,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/loading-button";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const formSchema = z.object({
   id: z.string().min(1, "Form ID is required"),
   name: z.string().min(1, "Form name is required"),
   siteEndpoint: z.string().url().optional(),
-  odkFormId: z.string().length(255),
+  odkFormId: z.string().max(255),
   odkProjectId: z.number().int().nonnegative(),
   userName: z.string().optional(),
   password: z.string().optional(),
@@ -46,7 +55,7 @@ export const FormsEdit = ({ formId }: { formId: string }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [initialData, setInitialData] = useState<z.infer<typeof formSchema>>();
   const updateForm = api.superadmin.updateSurveyForm.useMutation();
-  const getForm = api.superadmin.getSurveyForms.useQuery();
+  const formData = api.superadmin.getSurveyForms.useQuery();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -60,7 +69,6 @@ export const FormsEdit = ({ formId }: { formId: string }) => {
 
   useEffect(() => {
     async function fetchData() {
-      const formData = await getForm.refetch();
       const formToEdit = formData.data?.find((form) => form.id === formId);
       if (formToEdit) {
         const initialData = {
@@ -79,7 +87,7 @@ export const FormsEdit = ({ formId }: { formId: string }) => {
       }
     }
     fetchData();
-  }, [formId, form, getForm]);
+  }, [formData.data]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -191,8 +199,15 @@ export const FormsEdit = ({ formId }: { formId: string }) => {
                   </FormControl>
                 )}
               />
-              <div>
-                <FormLabel>Attachment Paths</FormLabel>
+              <div className="grid gap-2">
+                <Button
+                  type="button"
+                  onClick={() => append({ path: "", type: "survey_image" })}
+                  variant="secondary"
+                  className="mt-2"
+                >
+                  Add Attachment Path
+                </Button>
                 {fields.map((field, index) => (
                   <div key={field.id} className="flex items-center space-x-2">
                     <FormField
@@ -209,7 +224,33 @@ export const FormsEdit = ({ formId }: { formId: string }) => {
                       control={form.control}
                       render={({ field }) => (
                         <FormControl>
-                          <Input {...field} placeholder="Type" />
+                          <Select
+                            defaultValue={field.value ?? ""}
+                            onValueChange={field.onChange}
+                          >
+                            <SelectTrigger className="">
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectGroup>
+                                <SelectItem value="audio_monitoring">
+                                  Audio Monitoring
+                                </SelectItem>
+                                <SelectItem value="house_image">
+                                  House Image
+                                </SelectItem>
+                                <SelectItem value="house_image_selfie">
+                                  House Image Selfie
+                                </SelectItem>
+                                <SelectItem value="business_image">
+                                  Business Image
+                                </SelectItem>
+                                <SelectItem value="business_image_selfie">
+                                  Business Image Selfie
+                                </SelectItem>
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
                         </FormControl>
                       )}
                     />
@@ -222,13 +263,6 @@ export const FormsEdit = ({ formId }: { formId: string }) => {
                     </Button>
                   </div>
                 ))}
-                <Button
-                  type="button"
-                  onClick={() => append({ path: "", type: "survey_image" })}
-                  variant="secondary"
-                >
-                  Add Attachment Path
-                </Button>
               </div>
             </div>
             <div className="flex justify-end">
