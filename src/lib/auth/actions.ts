@@ -25,7 +25,10 @@ export interface ActionResponse<T> {
   success?: boolean;
 }
 
-export async function login(_: any, formData: FormData): Promise<ActionResponse<LoginInput>> {
+export async function login(
+  _: any,
+  formData: FormData,
+): Promise<ActionResponse<LoginInput>> {
   const obj = Object.fromEntries(formData.entries());
 
   const parsed = loginSchema.safeParse(obj);
@@ -51,7 +54,10 @@ export async function login(_: any, formData: FormData): Promise<ActionResponse<
     };
   }
 
-  const validPassword = await new Scrypt().verify(existingUser.hashedPassword, password);
+  const validPassword = await new Scrypt().verify(
+    existingUser.hashedPassword,
+    password,
+  );
   if (!validPassword) {
     return {
       formError: "Incorrect username or password",
@@ -60,14 +66,23 @@ export async function login(_: any, formData: FormData): Promise<ActionResponse<
 
   const session = await lucia.createSession(existingUser.id, {});
   const sessionCookie = lucia.createSessionCookie(session.id);
-  cookies().set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
+  cookies().set(
+    sessionCookie.name,
+    sessionCookie.value,
+    sessionCookie.attributes,
+  );
   return redirect(Paths.Dashboard);
 }
 
-export async function signup(_: any, formData: FormData): Promise<ActionResponse<SignupInput>> {
+export async function signup(
+  _: any,
+  formData: FormData,
+): Promise<ActionResponse<SignupInput>> {
   const obj = Object.fromEntries(formData.entries());
   if (obj.wardNumber) {
-    obj.wardNumber = parseInt(obj.wardNumber as unknown as string) as unknown as FormDataEntryValue;
+    obj.wardNumber = parseInt(
+      obj.wardNumber as unknown as string,
+    ) as unknown as FormDataEntryValue;
   }
   const parsed = signupSchema.safeParse(obj);
   if (!parsed.success) {
@@ -84,7 +99,8 @@ export async function signup(_: any, formData: FormData): Promise<ActionResponse
     };
   }
 
-  const { userName, password, name, email, phoneNumber, wardNumber } = parsed.data;
+  const { userName, password, name, email, phoneNumber, wardNumber } =
+    parsed.data;
 
   const existingUser = await db.query.users.findFirst({
     where: (table, { eq }) => eq(table.userName, userName),
@@ -93,7 +109,7 @@ export async function signup(_: any, formData: FormData): Promise<ActionResponse
 
   if (existingUser) {
     return {
-      formError: "Cannot create account with that email",
+      formError: "Cannot create account with that username",
     };
   }
 
@@ -113,7 +129,11 @@ export async function signup(_: any, formData: FormData): Promise<ActionResponse
 
   const session = await lucia.createSession(userId, {});
   const sessionCookie = lucia.createSessionCookie(session.id);
-  cookies().set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
+  cookies().set(
+    sessionCookie.name,
+    sessionCookie.value,
+    sessionCookie.attributes,
+  );
   return redirect(Paths.Dashboard);
 }
 
@@ -126,7 +146,11 @@ export async function logout(): Promise<{ error: string } | void> {
   }
   await lucia.invalidateSession(session.id);
   const sessionCookie = lucia.createBlankSessionCookie();
-  cookies().set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
+  cookies().set(
+    sessionCookie.name,
+    sessionCookie.value,
+    sessionCookie.attributes,
+  );
   return redirect("/");
 }
 
@@ -159,7 +183,10 @@ export async function resetPassword(
     return { error: "User not found" };
   }
 
-  const validOldPassword = await new Scrypt().verify(existingUser.hashedPassword, oldPassword);
+  const validOldPassword = await new Scrypt().verify(
+    existingUser.hashedPassword,
+    oldPassword,
+  );
   if (!validOldPassword) {
     return { error: "Incorrect old password" };
   }
@@ -169,7 +196,11 @@ export async function resetPassword(
   await lucia.invalidateUserSessions(user.id);
   const session = await lucia.createSession(user.id, {});
   const sessionCookie = lucia.createSessionCookie(session.id);
-  cookies().set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
+  cookies().set(
+    sessionCookie.name,
+    sessionCookie.value,
+    sessionCookie.attributes,
+  );
   redirect(Paths.Dashboard);
 }
 

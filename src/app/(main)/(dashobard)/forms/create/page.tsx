@@ -78,9 +78,8 @@ const CreateFormPage = () => {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("Inside submite");
     setIsLoading(true);
-    console.log("Inside submite");
+
     try {
       await createForm.mutateAsync(values);
       toast.success("Form created successfully");
