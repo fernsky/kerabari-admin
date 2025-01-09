@@ -64,6 +64,7 @@ export const wards = pgTable(
   {
     wardNumber: integer("ward_number").primaryKey(),
     wardAreaCode: integer("ward_area_code").notNull(),
+    geometry: geometry("geometry", { type: "Polygon" }),
   },
   (t) => ({
     wardNumberIdx: index("ward_number_idx").on(t.wardNumber),

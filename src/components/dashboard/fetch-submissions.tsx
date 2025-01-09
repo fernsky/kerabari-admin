@@ -38,19 +38,18 @@ export const FetchSubmissions = ({ formId }: { formId: string }) => {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-3">
-            <div className="flex space-x-4">
-              <div className="flex-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
                 <label className="block text-sm font-medium mb-1">
                   Start Date
                 </label>
-
                 <Input
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                 />
               </div>
-              <div className="flex-1">
+              <div>
                 <label className="block text-sm font-medium mb-1">
                   End Date
                 </label>
