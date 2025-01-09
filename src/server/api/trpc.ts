@@ -10,6 +10,7 @@
 import { uncachedValidateRequest } from "@/lib/auth/validate-request";
 import { stripe } from "@/lib/stripe";
 import { db } from "@/server/db";
+import { minio } from "@/server/minio";
 import { initTRPC, TRPCError, type inferAsyncReturnType } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
@@ -32,6 +33,7 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
     session,
     user,
     db,
+    minio,
     headers: opts.headers,
     stripe: stripe,
   };
@@ -51,7 +53,8 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
       ...shape,
       data: {
         ...shape.data,
-        zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
+        zodError:
+          error.cause instanceof ZodError ? error.cause.flatten() : null,
       },
     };
   },

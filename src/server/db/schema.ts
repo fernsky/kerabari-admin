@@ -5,13 +5,20 @@ import {
   varchar,
   pgEnum,
   integer,
+  json,
+  text,
+  customType,
 } from "drizzle-orm/pg-core";
 import { DATABASE_PREFIX as prefix } from "@/lib/constants";
 import { geometry } from "./geographical";
 
 export const pgTable = pgTableCreator((name) => `${prefix}_${name}`);
 
-export const rolesEnum = pgEnum("roles", ["enumerator", "supervisor"]);
+export const rolesEnum = pgEnum("roles", [
+  "enumerator",
+  "supervisor",
+  "superadmin",
+]);
 
 export const users = pgTable(
   "users",
@@ -71,6 +78,48 @@ export const areas = pgTable("areas", {
     .references(() => wards.wardNumber),
   geometry: geometry("geometry", { type: "Polygon" }),
   assignedTo: varchar("assigned_to", { length: 21 }).references(() => users.id),
+});
+
+export const surveyForms = pgTable("odk_survey_forms", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  siteEndpoint: json("url"),
+  odkProjectId: integer("odk_project_id").notNull(),
+  odkFormId: varchar("odk_form_id", { length: 255 }).notNull(),
+  userName: json("username"),
+  password: json("password"),
+  /*
+  Form attachments
+    {
+      path: "double.underscored.path",
+      type: "survey_image" 
+    }
+  */
+  attachmentPaths: json("attachment_paths").array(),
+});
+
+export const surveyData = pgTable("odk_survey_data", {
+  id: varchar("id", { length: 55 }).primaryKey(),
+  formId: varchar("form_id", { length: 21 })
+    .notNull()
+    .references(() => surveyForms.id),
+  data: json("data").notNull(),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const attachmentTypesEnum = pgEnum("attachment", [
+  "audio_monitoring",
+  "survey_image",
+]);
+
+export const surveyAttachments = pgTable("odk_survey_attachments", {
+  id: varchar("id", { length: 55 }).primaryKey(),
+  dataId: varchar("data_id", { length: 21 })
+    .notNull()
+    .references(() => surveyData.id),
+  type: attachmentTypesEnum("type").default("survey_image").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  created_at: timestamp("created_at").defaultNow().notNull(),
 });
 
 export type Ward = typeof wards.$inferSelect;

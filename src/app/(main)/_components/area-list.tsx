@@ -40,9 +40,9 @@ export default function AreaList() {
   ) {
     try {
       await assignAreaToEnumerator.mutateAsync(values);
-      toast.success("Area created successfully");
+      toast.success("Sucessfully assigned area to enumerator.");
     } catch (error) {
-      toast.error("Failed to create area");
+      toast.error("Failed to assign area to enumerator.");
     }
   }
 

@@ -5,5 +5,5 @@ export const TEST_DB_PREFIX = "test_acme";
 export enum Paths {
   Home = "/",
   Login = "/login",
-  Dashboard = "/dashboard",
+  Dashboard = "/",
 }

@@ -4,6 +4,7 @@ import {
   LandPlot,
   UsersRound,
   AreaChart,
+  FormInput,
 } from "lucide-react";
 
 type Submenu = {
@@ -53,6 +54,11 @@ export function getMenuList(pathname: string): Group[] {
           label: "Enumerators",
           icon: UsersRound,
           submenus: [],
+        },
+        {
+          href: "/forms",
+          label: "Forms",
+          icon: FormInput,
         },
       ],
     },

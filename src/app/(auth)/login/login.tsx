@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useFormState } from "react-dom";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -35,7 +34,7 @@ export function Login() {
             <Input
               required
               id="userName"
-              placeholder="Ram Prasad Koirala"
+              placeholder="ramprasadkoirala"
               autoComplete="userName"
               name="userName"
               type="text"
