@@ -1,4 +1,4 @@
-import { FormsList } from "@/app/(main)/_components/forms-list";
+import { FormsList } from "@/components/dashboard/forms-list";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";

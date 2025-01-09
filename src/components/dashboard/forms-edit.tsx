@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FormAttachmentType } from "@/types";
 
 const formSchema = z.object({
   id: z.string().min(1, "Form ID is required"),
@@ -44,7 +45,13 @@ const formSchema = z.object({
     .array(
       z.object({
         path: z.string().optional(),
-        type: z.enum(["audio_monitoring", "survey_image"]).optional(),
+        type: z.enum([
+          "audio_monitoring",
+          "house_image",
+          "house_image_selfie",
+          "business_image",
+          "business_image_selfie",
+        ]),
       }),
     )
     .optional(),
@@ -79,9 +86,10 @@ export const FormsEdit = ({ formId }: { formId: string }) => {
           userName: formToEdit.userName as string | undefined,
           password: formToEdit.password as string | undefined,
           attachmentPaths: formToEdit.attachmentPaths as
-            | { path?: string; type?: "audio_monitoring" | "survey_image" }[]
+            | { path?: string; type?: FormAttachmentType }[]
             | undefined,
         };
+        //@ts-ignore
         setInitialData(initialData);
         form.reset(initialData);
       }
@@ -91,6 +99,7 @@ export const FormsEdit = ({ formId }: { formId: string }) => {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+    console.log("Sending");
     try {
       await updateForm.mutateAsync(values);
       toast.success("Form updated successfully");
@@ -202,7 +211,7 @@ export const FormsEdit = ({ formId }: { formId: string }) => {
               <div className="grid gap-2">
                 <Button
                   type="button"
-                  onClick={() => append({ path: "", type: "survey_image" })}
+                  onClick={() => append({ path: "", type: "house_image" })}
                   variant="secondary"
                   className="mt-2"
                 >

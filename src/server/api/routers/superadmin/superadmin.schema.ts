@@ -12,7 +12,13 @@ export const surveyFormSchema = z.object({
     .array(
       z.object({
         path: z.string().optional(),
-        type: z.enum(["audio_monitoring", "survey_image"]).optional(),
+        type: z.enum([
+          "audio_monitoring",
+          "house_image",
+          "house_image_selfie",
+          "business_image",
+          "business_image_selfie",
+        ]),
       }),
     )
     .optional(),

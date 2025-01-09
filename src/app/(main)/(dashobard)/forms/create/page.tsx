@@ -41,7 +41,13 @@ const formSchema = z.object({
     .array(
       z.object({
         path: z.string().optional(),
-        type: z.enum(["audio_monitoring", "survey_image"]).optional(),
+        type: z.enum([
+          "audio_monitoring",
+          "house_image",
+          "house_image_selfie",
+          "business_image",
+          "business_image_selfie",
+        ]),
       }),
     )
     .optional(),
@@ -72,7 +78,9 @@ const CreateFormPage = () => {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log("Inside submite");
     setIsLoading(true);
+    console.log("Inside submite");
     try {
       await createForm.mutateAsync(values);
       toast.success("Form created successfully");
@@ -189,7 +197,7 @@ const CreateFormPage = () => {
                 <div className="grid gap-2">
                   <Button
                     type="button"
-                    onClick={() => append({ path: "", type: "survey_image" })}
+                    onClick={() => append({ path: "", type: "house_image" })}
                     variant="secondary"
                     className="mt-2"
                   >

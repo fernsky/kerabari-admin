@@ -6,8 +6,6 @@ import {
   pgEnum,
   integer,
   json,
-  text,
-  customType,
   primaryKey,
 } from "drizzle-orm/pg-core";
 import { DATABASE_PREFIX as prefix } from "@/lib/constants";

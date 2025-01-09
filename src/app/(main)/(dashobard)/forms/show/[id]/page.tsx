@@ -1,5 +1,5 @@
 import { ContentLayout } from "@/components/admin-panel/content-layout";
-import { ShowForm } from "@/app/(main)/_components/show-form";
+import { ShowForm } from "@/components/dashboard/show-form";
 
 const ShowFormPage = ({ params }: { params: { id: string } }) => {
   return (

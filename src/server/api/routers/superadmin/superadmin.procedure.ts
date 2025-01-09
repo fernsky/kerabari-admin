@@ -204,52 +204,54 @@ export const superadminRouter = createTRPCRouter({
                 attachmentPath.path,
               );
 
-              // Check if the attachment already exists in the database
-              const existingAttachment = await ctx.db
-                .select()
-                .from(surveyAttachments)
-                .where(
-                  and(
-                    eq(surveyAttachments.dataId, submission.__id),
-                    eq(surveyAttachments.name, attachmentName),
-                  ),
-                )
-                .limit(1);
+              if (attachmentName) {
+                // Check if the attachment already exists in the database
+                const existingAttachment = await ctx.db
+                  .select()
+                  .from(surveyAttachments)
+                  .where(
+                    and(
+                      eq(surveyAttachments.dataId, submission.__id),
+                      eq(surveyAttachments.name, attachmentName),
+                    ),
+                  )
+                  .limit(1);
 
-              if (existingAttachment.length > 0) {
-                console.log(
-                  `Attachment ${attachmentName} for submission ${submission.__id} already exists in the database.`,
+                if (existingAttachment.length > 0) {
+                  console.log(
+                    `Attachment ${attachmentName} for submission ${submission.__id} already exists in the database.`,
+                  );
+                  continue;
+                }
+
+                const attachmentUrl = `${siteEndpoint}/v1/projects/${odkProjectId}/forms/${odkFormId}/submissions/${submission.__id}/attachments/${attachmentName}`;
+                const attachment = await axios.get(attachmentUrl, {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                  responseType: "arraybuffer",
+                });
+
+                if (!process.env.BUCKET_NAME)
+                  throw new Error("Bucket name not found");
+
+                console.log("Sending object to minio", attachmentName);
+                console.log(process.env.BUCKET_NAME, attachmentName);
+                await ctx.minio.putObject(
+                  process.env.BUCKET_NAME,
+                  attachmentName,
+                  attachment.data,
                 );
-                continue;
+
+                await ctx.db
+                  .insert(surveyAttachments)
+                  .values({
+                    dataId: submission.__id,
+                    type: attachmentPath.type,
+                    name: attachmentName,
+                  })
+                  .onConflictDoNothing();
               }
-
-              const attachmentUrl = `${siteEndpoint}/v1/projects/${odkProjectId}/forms/${odkFormId}/submissions/${submission.__id}/attachments/${attachmentName}`;
-              const attachment = await axios.get(attachmentUrl, {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-                responseType: "arraybuffer",
-              });
-
-              if (!process.env.BUCKET_NAME)
-                throw new Error("Bucket name not found");
-
-              console.log("Sending object to minio", attachmentName);
-              console.log(process.env.BUCKET_NAME, attachmentName);
-              await ctx.minio.putObject(
-                process.env.BUCKET_NAME,
-                attachmentName,
-                attachment.data,
-              );
-
-              await ctx.db
-                .insert(surveyAttachments)
-                .values({
-                  dataId: submission.__id,
-                  type: attachmentPath.type,
-                  name: attachmentName,
-                })
-                .onConflictDoNothing();
             }
           }
         }

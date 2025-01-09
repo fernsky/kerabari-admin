@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DatePicker } from "@/components/ui/date-picker";
 
 export const FetchSubmissions = ({ formId }: { formId: string }) => {
   const [startDate, setStartDate] = useState<string>("");
@@ -44,12 +43,7 @@ export const FetchSubmissions = ({ formId }: { formId: string }) => {
                 <label className="block text-sm font-medium mb-1">
                   Start Date
                 </label>
-                <DatePicker
-                  date={new Date(startDate)}
-                  onDateChange={(value) =>
-                    setStartDate(value?.toISOString() as string)
-                  }
-                />
+
                 <Input
                   type="date"
                   value={startDate}

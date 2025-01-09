@@ -1,5 +1,5 @@
 import { ContentLayout } from "@/components/admin-panel/content-layout";
-import { FormsEdit } from "@/app/(main)/_components/forms-edit";
+import { FormsEdit } from "@/components/dashboard/forms-edit";
 
 const EditFormPage = ({ params }: { params: { id: string } }) => {
   return (

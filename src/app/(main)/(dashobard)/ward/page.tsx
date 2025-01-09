@@ -1,5 +1,5 @@
 import { ContentLayout } from "@/components/admin-panel/content-layout";
-import { WardsList } from "../../_components/wards-list";
+import { WardsList } from "@/components/dashboard/wards-list";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
-import AreaList from "../../_components/area-list";
+import AreaList from "@/components/dashboard/area-list";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 

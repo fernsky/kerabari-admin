@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { UserDropdown } from "@/app/(main)/_components/user-dropdown";
+import { UserDropdown } from "./user-dropdown";
 import { validateRequest } from "@/lib/auth/validate-request";
 
 export const Header = async () => {

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { validateRequest } from "@/lib/auth/validate-request";
 import { Paths } from "@/lib/constants";
-import UpdateWardAreaCode from "@/app/(main)/_components/update-ward";
+import UpdateWardAreaCode from "@/components/dashboard/update-ward";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 
 interface WardUpdatePageProps {
