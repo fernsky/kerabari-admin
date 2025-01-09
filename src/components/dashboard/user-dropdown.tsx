@@ -28,7 +28,13 @@ import { logout } from "@/lib/auth/actions";
 import { toast } from "sonner";
 import { User } from "lucide-react";
 
-export const UserDropdown = ({ email, className }: { email: string; className?: string }) => {
+export const UserDropdown = ({
+  email,
+  className,
+}: {
+  email: string;
+  className?: string;
+}) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -37,14 +43,22 @@ export const UserDropdown = ({ email, className }: { email: string; className?: 
         <User className="h-4 w-4 text-gray-700" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel className="text-muted-foreground">{email}</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-muted-foreground">
+          {email}
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem className="cursor-pointer text-muted-foreground" asChild>
-            <Link href="/dashboard">Dashboard</Link>
+          <DropdownMenuItem
+            className="cursor-pointer text-muted-foreground"
+            asChild
+          >
+            <Link href="/">Dashboard</Link>
           </DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer text-muted-foreground" asChild>
-            <Link href="/dashboard/settings">Settings</Link>
+          <DropdownMenuItem
+            className="cursor-pointer text-muted-foreground"
+            asChild
+          >
+            <Link href="///settings">Settings</Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
@@ -69,7 +83,9 @@ const SignoutConfirmation = () => {
     } catch (error) {
       if (error instanceof Error) {
         toast(error.message, {
-          icon: <ExclamationTriangleIcon className="h-4 w-4 text-destructive" />,
+          icon: (
+            <ExclamationTriangleIcon className="h-4 w-4 text-destructive" />
+          ),
         });
       }
     } finally {
@@ -92,11 +108,16 @@ const SignoutConfirmation = () => {
             Sign out from Dashboard?
           </AlertDialogTitle>
           <AlertDialogDescription className="text-left text-sm text-muted-foreground">
-            You will be signed out of your account and redirected to the login page.
+            You will be signed out of your account and redirected to the login
+            page.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="mt-6 flex flex-col-reverse justify-end gap-2 sm:flex-row">
-          <Button variant="outline" onClick={() => setOpen(false)} className="sm:min-w-[100px]">
+          <Button
+            variant="outline"
+            onClick={() => setOpen(false)}
+            className="sm:min-w-[100px]"
+          >
             Cancel
           </Button>
           <LoadingButton

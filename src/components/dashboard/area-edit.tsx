@@ -21,6 +21,15 @@ import { LoadingButton } from "@/components/loading-button";
 import { CreateAreaMap } from "./create-area";
 import { useMapContext } from "@/lib/map-state";
 
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 export const AreaEdit = ({ areaCode }: { areaCode: number }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -35,6 +44,16 @@ export const AreaEdit = ({ areaCode }: { areaCode: number }) => {
   const form = useForm<z.infer<typeof updateAreaSchema>>({
     resolver: zodResolver(updateAreaSchema),
   });
+
+  const wards = [
+    { value: "1", label: "1" },
+    { value: "2", label: "2" },
+    { value: "3", label: "3" },
+    { value: "4", label: "4" },
+    { value: "5", label: "5" },
+    { value: "6", label: "6" },
+    { value: "7", label: "7" },
+  ];
 
   useEffect(() => {
     if (areaData) {
@@ -90,7 +109,7 @@ export const AreaEdit = ({ areaCode }: { areaCode: number }) => {
                 <FormControl>
                   <div>
                     <FormLabel>Area Code</FormLabel>
-                    <Input {...field} type="number" disabled />
+                    <Input {...field} type="number" />
                     <FormMessage />
                   </div>
                 </FormControl>
@@ -103,7 +122,26 @@ export const AreaEdit = ({ areaCode }: { areaCode: number }) => {
                 <FormControl>
                   <div>
                     <FormLabel>Ward Number</FormLabel>
-                    <Input {...field} type="number" />
+                    <Select
+                      value={field.value?.toString()}
+                      onValueChange={(value) => field.onChange(parseInt(value))}
+                      required
+                    >
+                      <SelectTrigger className="">
+                        <SelectValue placeholder="Select your ward" />
+                      </SelectTrigger>
+                      <SelectContent className="z-[1000]">
+                        <SelectGroup>
+                          {wards.map((ward) => {
+                            return (
+                              <SelectItem key={ward.value} value={ward.value}>
+                                {ward.label}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </div>
                 </FormControl>

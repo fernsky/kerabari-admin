@@ -9,12 +9,25 @@ import { useEffect, useRef } from "react";
 import { GeoJSON } from "geojson";
 import L from "leaflet";
 
+const isValidGeometry = (geom: any): boolean => {
+  try {
+    if (!geom || !geom.type || !geom.coordinates) return false;
+    // Basic validation - ensure geometry has required properties
+    if (!["Polygon", "MultiPolygon"].includes(geom.type)) return false;
+    // Ensure coordinates are properly structured
+    if (!Array.isArray(geom.coordinates)) return false;
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
+
 export const MapDrawer = () => {
   const { geometry, setGeometry } = useMapContext();
   const featureGroupRef = useRef<any>(null);
 
   useEffect(() => {
-    if (featureGroupRef.current && geometry) {
+    if (featureGroupRef.current && geometry && isValidGeometry(geometry)) {
       const leafletFG = featureGroupRef.current;
       // Clear existing layers
       leafletFG.clearLayers();
@@ -28,13 +41,19 @@ export const MapDrawer = () => {
 
   const handleCreated = (e: any) => {
     const layer = e.layer;
-    setGeometry(layer.toGeoJSON());
+    const geojson = layer.toGeoJSON();
+    if (isValidGeometry(geojson.geometry)) {
+      setGeometry(geojson);
+    }
   };
 
   const handleEdited = (e: any) => {
     const layers = e.layers;
     layers.eachLayer((layer: any) => {
-      setGeometry(layer.toGeoJSON());
+      const geojson = layer.toGeoJSON();
+      if (isValidGeometry(geojson.geometry)) {
+        setGeometry(geojson);
+      }
     });
   };
 
