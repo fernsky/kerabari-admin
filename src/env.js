@@ -45,10 +45,11 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
 
     MINIO_ENDPOINT: process.env.MINIO_ENDPOINT,
-    MINIO_PORT: process.env.MINIO_PORT,
+    MINIO_PORT: parseInt(process.env.MINIO_PORT),
     MINIO_CLIENT_ACCESS_KEY: process.env.MINIO_CLIENT_ACCESS_KEY,
     MINIO_CLIENT_SECRET_KEY: process.env.MINIO_CLIENT_SECRET_KEY,
-    MINIO_USE_SSL: process.env.MINIO_USE_SSL,
+    MINIO_USE_SSL:
+      process.env.MINIO_USE_SSL === "true" || process.env.MINIO_USE_SSL === "1",
     BUCKET_NAME: process.env.BUCKET_NAME,
     // Client-side env vars
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,

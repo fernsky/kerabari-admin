@@ -8,7 +8,6 @@
  */
 
 import { uncachedValidateRequest } from "@/lib/auth/validate-request";
-import { stripe } from "@/lib/stripe";
 import { db } from "@/server/db";
 import { minio } from "@/server/minio";
 import { initTRPC, TRPCError, type inferAsyncReturnType } from "@trpc/server";
@@ -35,7 +34,6 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
     db,
     minio,
     headers: opts.headers,
-    stripe: stripe,
   };
 };
 

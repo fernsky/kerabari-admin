@@ -2,8 +2,6 @@ services:
   ## High performance S3 compabitle object storage
   minio:
     image: quay.io/minio/minio
-    env_file:
-      - .env.docker
     container_name: minio
     restart: always
     ports:
@@ -19,8 +17,6 @@ services:
 
   postgres:
     image: postgis/postgis
-    env_file:
-      - .env.docker
     container_name: ${POSTGRES_HOSTNAME}
     restart: always
     environment:
