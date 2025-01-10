@@ -53,7 +53,7 @@ export function FormsList() {
             <CardContent className="space-y-2">
               <p className="text-sm text-muted-foreground">ID: {form.id}</p>
               <Link
-                href={`/form/update/${form.id}`}
+                href={`/forms/update/${form.id}`}
                 className="text-blue-500 hover:underline flex items-center"
               >
                 <Edit3 className="inline-block mr-2 w-4 h-4" />
