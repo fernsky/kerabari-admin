@@ -5,6 +5,7 @@ import {
   UsersRound,
   AreaChart,
   FormInput,
+  GitPullRequest,
 } from "lucide-react";
 
 type Submenu = {
@@ -47,6 +48,12 @@ export function getMenuList(pathname: string): Group[] {
           href: "/area",
           label: "Areas",
           icon: LandPlot,
+          submenus: [],
+        },
+        {
+          href: "/area/requested-areas",
+          label: "Requested Areas",
+          icon: GitPullRequest,
           submenus: [],
         },
         {

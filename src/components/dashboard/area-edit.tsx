@@ -54,6 +54,7 @@ export const AreaEdit = ({ areaCode }: { areaCode: number }) => {
     { value: "6", label: "6" },
     { value: "7", label: "7" },
   ];
+  const [wardNumber, setWardNumber] = useState<number | null>(null);
 
   useEffect(() => {
     if (areaData) {
@@ -62,6 +63,7 @@ export const AreaEdit = ({ areaCode }: { areaCode: number }) => {
         wardNumber: areaData.wardNumber,
         geometry: areaData.geometry,
       });
+      setWardNumber(areaData.wardNumber);
       setGeometry(
         // @ts-ignore
         JSON.parse(areaData.geometry as string),
@@ -82,7 +84,7 @@ export const AreaEdit = ({ areaCode }: { areaCode: number }) => {
         geometry: geometry,
       });
       toast.success("Area updated successfully");
-      router.push("/areas");
+      router.push("/area");
     } catch (error) {
       toast.error("Failed to update area");
     } finally {
@@ -109,7 +111,11 @@ export const AreaEdit = ({ areaCode }: { areaCode: number }) => {
                 <FormControl>
                   <div>
                     <FormLabel>Area Code</FormLabel>
-                    <Input {...field} type="number" />
+                    <Input
+                      {...field}
+                      type="number"
+                      onChange={(e) => field.onChange(parseInt(e.target.value))}
+                    />
                     <FormMessage />
                   </div>
                 </FormControl>
@@ -123,8 +129,14 @@ export const AreaEdit = ({ areaCode }: { areaCode: number }) => {
                   <div>
                     <FormLabel>Ward Number</FormLabel>
                     <Select
-                      value={field.value?.toString()}
-                      onValueChange={(value) => field.onChange(parseInt(value))}
+                      value={wardNumber?.toString()}
+                      defaultValue={field.value?.toString()}
+                      onValueChange={(value) => {
+                        if (value) {
+                          setWardNumber(parseInt(value));
+                          field.onChange(parseInt(value));
+                        }
+                      }}
                       required
                     >
                       <SelectTrigger className="">

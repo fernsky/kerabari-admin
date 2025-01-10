@@ -132,3 +132,28 @@ export const surveyAttachments = pgTable(
 
 export type Ward = typeof wards.$inferSelect;
 export type NewWard = typeof wards.$inferInsert;
+
+export const areaRequestsEnum = pgEnum("area_request_status", [
+  "pending",
+  "approved",
+  "rejected",
+]);
+
+export const areaRequests = pgTable(
+  "area_requests",
+  {
+    areaCode: integer("area_code")
+      .notNull()
+      .references(() => areas.code),
+    userId: varchar("user_id", { length: 21 })
+      .notNull()
+      .references(() => users.id),
+    status: areaRequestsEnum("status").default("pending"),
+    message: varchar("message", { length: 500 }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
+  },
+  (t) => ({
+    pk: primaryKey(t.areaCode, t.userId),
+  }),
+);

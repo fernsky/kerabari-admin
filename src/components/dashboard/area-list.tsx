@@ -82,13 +82,14 @@ export default function AreaList() {
               <div className="mt-2">
                 <Select
                   //@ts-ignore
-                  defaultValue={area.assignedTo ?? ""}
-                  onValueChange={(value) =>
-                    handleAssignment({
-                      areaCode: area.code,
-                      enumeratorId: value,
-                    })
-                  }
+                  defaultValue={area.assignedTo ?? undefined}
+                  onValueChange={(value) => {
+                    if (value)
+                      handleAssignment({
+                        areaCode: area.code,
+                        enumeratorId: value,
+                      });
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Assign Enumerator" />
@@ -143,59 +144,66 @@ export default function AreaList() {
           </TableRow>
         </TableHeader>
         <TableBody className="bg-white divide-y divide-gray-200">
-          {areas.data.map((area) => (
-            <TableRow
-              key={area.code}
-              className="hover:bg-gray-100 cursor-pointer"
-              onClick={(e) => handleRowClick(area.code, e)}
-            >
-              <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                {area.wardNumber}
-              </TableCell>
-              <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {area.code}
-              </TableCell>
-              <TableCell className="px-6 py-4 whitespace-nowrap text-sm">
-                <Select
-                  //@ts-ignore
-                  defaultValue={area.assignedTo ?? ""}
-                  onValueChange={(value) =>
-                    handleAssignment({
-                      areaCode: area.code,
-                      enumeratorId: value,
-                    })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Assign Enumerator" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {enumerators.data
-                        ?.filter(
-                          (enumerator) =>
-                            enumerator.wardNumber === area.wardNumber,
-                        )
-                        .map((enumerator) => (
-                          <SelectItem key={enumerator.id} value={enumerator.id}>
-                            {enumerator.name}
-                          </SelectItem>
-                        ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </TableCell>
-              <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-blue-500">
-                <Link
-                  href={`/area/update/${area.code}`}
-                  className="flex items-center hover:underline"
-                >
-                  <Edit3 className="inline-block mr-2 w-4 h-4" />
-                  Edit
-                </Link>
-              </TableCell>
-            </TableRow>
-          ))}
+          {areas.data.map((area) => {
+            console.log(area);
+            return (
+              <TableRow
+                key={area.code}
+                className="hover:bg-gray-100 cursor-pointer"
+                onClick={(e) => handleRowClick(area.code, e)}
+              >
+                <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {area.wardNumber}
+                </TableCell>
+                <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {area.code}
+                </TableCell>
+                <TableCell className="px-6 py-4 whitespace-nowrap text-sm">
+                  <Select
+                    //@ts-ignore
+                    defaultValue={area.assignedTo}
+                    onValueChange={(value) => {
+                      if (value)
+                        handleAssignment({
+                          areaCode: area.code,
+                          enumeratorId: value,
+                        });
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Assign Enumerator" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {enumerators.data
+                          ?.filter(
+                            (enumerator) =>
+                              enumerator.wardNumber === area.wardNumber,
+                          )
+                          .map((enumerator) => (
+                            <SelectItem
+                              key={enumerator.id}
+                              value={enumerator.id}
+                            >
+                              {enumerator.name}
+                            </SelectItem>
+                          ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </TableCell>
+                <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-blue-500">
+                  <Link
+                    href={`/area/update/${area.code}`}
+                    className="flex items-center hover:underline"
+                  >
+                    <Edit3 className="inline-block mr-2 w-4 h-4" />
+                    Edit
+                  </Link>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>

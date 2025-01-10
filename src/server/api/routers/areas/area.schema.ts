@@ -17,8 +17,29 @@ export const updateAreaSchema = z.object({
   geometry: z.any().optional(),
 });
 
+export const createAreaRequestSchema = z.object({
+  areaCode: z.number(),
+  message: z.string().max(500).optional(),
+});
+
+export const updateAreaRequestStatusSchema = z.object({
+  areaCode: z.number(),
+  userId: z.string(),
+  status: z.enum(["pending", "approved", "rejected"]),
+});
+
 export interface Area {
   code: number;
   wardNumber: number;
   geometry?: JSON | FeatureCollection<Polygon>;
+}
+
+export interface AreaRequest {
+  id: string;
+  areaCode: number;
+  userId: string;
+  status: "pending" | "approved" | "rejected";
+  message?: string;
+  createdAt: Date;
+  updatedAt?: Date;
 }
