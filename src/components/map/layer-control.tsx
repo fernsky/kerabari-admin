@@ -15,13 +15,17 @@ import { useEffect, useState } from "react";
 import { Layers, X } from "lucide-react"; // Import icons
 
 export const LayerControl = () => {
-  const { data: wards, isLoading: isLoadingWards } =
+  const { data: wardsData, isLoading: isLoadingWards } =
     api.ward.getWards.useQuery();
-  const { data: areas, isLoading: isLoadingAreas } =
+  const { data: areasData, isLoading: isLoadingAreas } =
     api.area.getAreas.useQuery();
 
   const {
+    wards,
+    areas,
     wardLayers,
+    setWards,
+    setAreas,
     setWardVisibility,
     setAreaVisibility,
     initializeWardLayer,
@@ -29,10 +33,25 @@ export const LayerControl = () => {
 
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const handleWardVisibility = (wardNumber: string, checked: boolean) => {
+    setWardVisibility(wardNumber, checked);
+    // Remove this if you want completely independent behavior
+    // if (!checked) {
+    //   const wardAreas = areas.filter((area) => area.wardNumber.toString() === wardNumber);
+    //   wardAreas.forEach((area) => {
+    //     setAreaVisibility(wardNumber, area.id, false);
+    //   });
+    // }
+  };
+
+  // Initialize store with data
   useEffect(() => {
-    if (wards && areas) {
-      wards.forEach((ward) => {
-        const wardAreas = areas.filter(
+    if (wardsData && areasData) {
+      setWards(wardsData);
+      setAreas(areasData);
+
+      wardsData.forEach((ward) => {
+        const wardAreas = areasData.filter(
           (area) => area.wardNumber === ward.wardNumber,
         );
         initializeWardLayer(
@@ -41,7 +60,7 @@ export const LayerControl = () => {
         );
       });
     }
-  }, [wards, areas, initializeWardLayer]);
+  }, [wardsData, areasData, setWards, setAreas, initializeWardLayer]);
 
   if (isLoadingWards || isLoadingAreas) {
     return null;
@@ -78,7 +97,7 @@ export const LayerControl = () => {
                       <Checkbox
                         checked={wardLayers[ward.wardNumber]?.visible}
                         onCheckedChange={(checked) =>
-                          setWardVisibility(
+                          handleWardVisibility(
                             ward.wardNumber.toString(),
                             checked as boolean,
                           )
@@ -93,7 +112,7 @@ export const LayerControl = () => {
                   <AccordionContent>
                     <div className="ml-6 space-y-2">
                       {areas
-                        ?.filter((area) => area.wardNumber === ward.wardNumber)
+                        .filter((area) => area.wardNumber === ward.wardNumber)
                         .map((area) => (
                           <div
                             key={area.id}

@@ -40,7 +40,7 @@ export const AreaEdit = ({ id }: { id: string }) => {
       });
       setGeometry(
         // @ts-ignore
-        JSON.parse(areaData.geometry as string),
+        areaData.geometry as string,
       );
     }
   }, [areaData, form]);

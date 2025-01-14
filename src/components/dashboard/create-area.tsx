@@ -36,10 +36,8 @@ interface CreateAreaMapProps {
 
 const CreateAreaMap = ({ onGeometryChange }: CreateAreaMapProps) => {
   const { geometry } = useMapContext();
-  const wardLayers = useLayerStore((state) => state.wardLayers);
-
-  const { data: wards } = api.ward.getWards.useQuery();
-  const { data: areas } = api.area.getAreas.useQuery();
+  const { wards, areas, wardLayers } = useLayerStore();
+  console.log(areas, wards, wardLayers);
 
   React.useEffect(() => {
     onGeometryChange(geometry);
@@ -58,10 +56,10 @@ const CreateAreaMap = ({ onGeometryChange }: CreateAreaMapProps) => {
         />
 
         {/* Background Layers */}
-        {wards?.map((ward) => {
+        {wards.map((ward) => {
           if (!wardLayers[ward.wardNumber]?.visible || !ward.geometry)
             return null;
-
+          console.log(ward.geometry);
           return (
             <GeoJSON
               key={`ward-${ward.wardNumber}`}
@@ -77,15 +75,10 @@ const CreateAreaMap = ({ onGeometryChange }: CreateAreaMapProps) => {
           );
         })}
 
-        {areas?.map((area) => {
-          const wardLayer = wardLayers[area.wardNumber];
-          if (
-            !wardLayer?.visible ||
-            !wardLayer.areas[area.id] ||
-            !area.geometry
-          )
+        {areas.map((area) => {
+          if (!wardLayers[area.wardNumber]?.areas[area.id] || !area.geometry)
             return null;
-
+          console.log(area.geometry);
           return (
             <GeoJSON
               key={`area-${area.id}`}

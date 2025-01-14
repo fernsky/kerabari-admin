@@ -1,5 +1,6 @@
 import { FeatureCollection, Polygon } from "geojson";
 import { z } from "zod";
+import { GeoJSON } from "geojson";
 
 export const assignAreaToEnumeratorSchema = z.object({
   id: z.string(),
@@ -19,12 +20,12 @@ export const updateAreaSchema = z.object({
 });
 
 export const createAreaRequestSchema = z.object({
-  areaCode: z.number(),
+  areaId: z.string(),
   message: z.string().max(500).optional(),
 });
 
 export const updateAreaRequestStatusSchema = z.object({
-  areaCode: z.number(),
+  areaId: z.string(),
   userId: z.string(),
   status: z.enum(["pending", "approved", "rejected"]),
 });
@@ -33,7 +34,9 @@ export interface Area {
   id: string;
   code: number;
   wardNumber: number;
-  geometry?: JSON | FeatureCollection<Polygon>;
+  assignedTo?: string | null;
+  geometry: GeoJSON | null;
+  centroid?: GeoJSON | null;
 }
 
 export interface AreaRequest {

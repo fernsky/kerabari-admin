@@ -31,16 +31,34 @@ export const areaRouter = createTRPCRouter({
     }),
 
   getAreas: protectedProcedure.query(async ({ ctx }) => {
-    const allAreas = await ctx.db
-      .select({
-        id: areas.id,
-        code: areas.code,
-        wardNumber: areas.wardNumber,
-        assignedTo: areas.assignedTo,
-      })
-      .from(areas)
-      .orderBy(areas.code);
-    return allAreas as unknown as Area[];
+    const allAreas = await ctx.db.execute(
+      sql`SELECT 
+        ${areas.id} as "id",
+        ${areas.code} as "code",
+        ${areas.wardNumber} as "wardNumber",
+        ${areas.assignedTo} as "assignedTo",
+        ST_AsGeoJSON(${areas.geometry}) as "geometry",
+        ST_AsGeoJSON(ST_Centroid(${areas.geometry})) as "centroid"
+      FROM ${areas}
+      ORDER BY ${areas.code}`,
+    );
+
+    return allAreas.map((area) => {
+      try {
+        return {
+          ...area,
+          geometry: area.geometry ? JSON.parse(area.geometry as string) : null,
+          centroid: area.centroid ? JSON.parse(area.centroid as string) : null,
+        };
+      } catch (e) {
+        console.error(`Error parsing geometry for area ${area.id}:`, e);
+        return {
+          ...area,
+          geometry: null,
+          centroid: null,
+        };
+      }
+    }) as Area[];
   }),
 
   getAreaById: protectedProcedure
@@ -53,7 +71,45 @@ export const areaRouter = createTRPCRouter({
             ST_AsGeoJSON(${areas.geometry}) as "geometry"
             FROM ${areas} WHERE ${areas.id} = ${input.id} LIMIT 1`,
       );
-      return area[0] as unknown as Area;
+      return {
+        ...area[0],
+        geometry: area[0].geometry
+          ? JSON.parse(area[0].geometry as string)
+          : null,
+      } as Area;
+    }),
+
+  getAreasByWard: protectedProcedure
+    .input(z.object({ wardNumber: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const wardAreas = await ctx.db.execute(
+        sql`SELECT 
+          ${areas.id} as "id",
+          ${areas.code} as "code",
+          ${areas.wardNumber} as "wardNumber",
+          ${areas.assignedTo} as "assignedTo",
+          ST_AsGeoJSON(${areas.geometry}) as "geometry"
+        FROM ${areas}
+        WHERE ${areas.wardNumber} = ${input.wardNumber}
+        ORDER BY ${areas.code}`,
+      );
+
+      return wardAreas.map((area) => {
+        try {
+          return {
+            ...area,
+            geometry: area.geometry
+              ? JSON.parse(area.geometry as string)
+              : null,
+          };
+        } catch (e) {
+          console.error(`Error parsing geometry for area ${area.id}:`, e);
+          return {
+            ...area,
+            geometry: null,
+          };
+        }
+      }) as Area[];
     }),
 
   assignAreaToEnumerator: protectedProcedure
@@ -130,7 +186,7 @@ export const areaRouter = createTRPCRouter({
     .input(createAreaRequestSchema)
     .mutation(async ({ ctx, input }) => {
       const request = await ctx.db.insert(areaRequests).values({
-        areaCode: input.areaCode,
+        areaId: input.areaId,
         userId: ctx.user!.id,
         message: input.message,
       });
@@ -163,7 +219,7 @@ export const areaRouter = createTRPCRouter({
       })
       .from(areaRequests)
       .leftJoin(users, eq(areaRequests.userId, users.id))
-      .leftJoin(areas, eq(areaRequests.areaCode, areas.code))
+      .leftJoin(areas, eq(areaRequests.areaId, areas.id))
       .orderBy(areaRequests.createdAt);
     return requests;
   }),
@@ -171,26 +227,26 @@ export const areaRouter = createTRPCRouter({
   updateAreaRequestStatus: protectedProcedure
     .input(updateAreaRequestStatusSchema)
     .mutation(async ({ ctx, input }) => {
-      const { areaCode, userId, status } = input;
+      const { areaId, userId, status } = input;
 
       await ctx.db.transaction(async (tx) => {
         await tx
           .update(areaRequests)
           .set({ status, updatedAt: new Date() })
           .where(
-            sql`${areaRequests.areaCode} = ${areaCode} AND ${areaRequests.userId} = ${userId}`,
+            sql`${areaRequests.areaId} = ${areaId} AND ${areaRequests.userId} = ${userId}`,
           );
 
         if (status === "approved") {
           await tx
             .update(areas)
             .set({ assignedTo: userId })
-            .where(eq(areas.id, areaCode));
+            .where(eq(areas.id, areaId));
         } else if (status === "rejected" || status === "pending") {
           await tx
             .update(areas)
             .set({ assignedTo: null })
-            .where(eq(areas.id, areaCode));
+            .where(eq(areas.id, areaId));
         }
       });
 
