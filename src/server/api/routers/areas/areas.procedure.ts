@@ -1,6 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 import { z } from "zod";
-import { areas, users, areaRequests } from "@/server/db/schema";
+import { areas, users, areaRequests } from "@/server/db/schema/basic";
 import { eq, sql } from "drizzle-orm";
 import { Area, createAreaSchema } from "./area.schema";
 import { assignAreaToEnumeratorSchema } from "./area.schema";

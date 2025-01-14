@@ -10,7 +10,7 @@ import {
   boolean,
 } from "drizzle-orm/pg-core";
 import { DATABASE_PREFIX as prefix } from "@/lib/constants";
-import { geometry } from "./geographical";
+import { geometry } from "../geographical";
 
 export const pgTable = pgTableCreator((name) => `${prefix}_${name}`);
 

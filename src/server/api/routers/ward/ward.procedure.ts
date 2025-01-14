@@ -1,6 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 import { z } from "zod";
-import { wards } from "@/server/db/schema";
+import { wards } from "@/server/db/schema/basic";
 import {
   createWardSchema,
   updateWardAreaCodeSchema,
