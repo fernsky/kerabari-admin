@@ -32,7 +32,7 @@ export default function RequestAreaPage() {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const areas = api.area.getAreasByWard.useQuery(
+  const areas = api.area.getAreasByWardforRequest.useQuery(
     { wardNumber: selectedWard! },
     { enabled: !!selectedWard },
   );

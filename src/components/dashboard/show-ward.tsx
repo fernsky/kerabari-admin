@@ -1,11 +1,11 @@
 "use client";
 
 import { api } from "@/trpc/react";
-import type { FeatureCollection, Polygon } from "geojson";
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import { Loader2 } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import { useEffect } from "react";
+import { GeoJsonObject } from "geojson";
 
 export const ShowWard = ({ wardNumber }: { wardNumber: number }) => {
   const ward = api.ward.getWardByNumber.useQuery({ wardNumber });
@@ -36,9 +36,7 @@ export const ShowWard = ({ wardNumber }: { wardNumber: number }) => {
     );
   }
 
-  const geoJSON = JSON.parse(
-    ward.data.geometry as unknown as string,
-  ) as FeatureCollection<Polygon>;
+  const geoJSON = ward.data.geometry as unknown as string;
 
   return (
     <div className="space-y-6">
@@ -76,7 +74,7 @@ export const ShowWard = ({ wardNumber }: { wardNumber: number }) => {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           <GeoJSON
-            data={geoJSON}
+            data={geoJSON as unknown as GeoJsonObject}
             style={{
               color: "#2563eb",
               weight: 2,

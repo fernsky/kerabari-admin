@@ -1,4 +1,3 @@
-import { FeatureCollection, Polygon } from "geojson";
 import { z } from "zod";
 import { GeoJSON } from "geojson";
 

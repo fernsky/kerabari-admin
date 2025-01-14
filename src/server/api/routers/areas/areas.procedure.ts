@@ -79,19 +79,24 @@ export const areaRouter = createTRPCRouter({
       } as Area;
     }),
 
-  getAreasByWard: protectedProcedure
+  getAreasByWardforRequest: protectedProcedure
     .input(z.object({ wardNumber: z.number() }))
     .query(async ({ ctx, input }) => {
       const wardAreas = await ctx.db.execute(
         sql`SELECT 
-          ${areas.id} as "id",
-          ${areas.code} as "code",
-          ${areas.wardNumber} as "wardNumber",
-          ${areas.assignedTo} as "assignedTo",
-          ST_AsGeoJSON(${areas.geometry}) as "geometry"
-        FROM ${areas}
-        WHERE ${areas.wardNumber} = ${input.wardNumber}
-        ORDER BY ${areas.code}`,
+        a.id as "id",
+        a.code as "code",
+        a.ward as "wardNumber",
+        a.assigned_to as "assignedTo",
+        ST_AsGeoJSON(a.geometry) as "geometry"
+      FROM ${areas} a
+      LEFT JOIN ${areaRequests} ar 
+        ON a.id = ar.area_id 
+        AND ar.user_id = ${ctx.user!.id}
+        AND ar.status = 'pending'
+      WHERE a.ward = ${input.wardNumber}
+      AND ar.area_id IS NULL
+      ORDER BY a.code`,
       );
 
       return wardAreas.map((area) => {
@@ -242,11 +247,18 @@ export const areaRouter = createTRPCRouter({
             .update(areas)
             .set({ assignedTo: userId })
             .where(eq(areas.id, areaId));
-        } else if (status === "rejected" || status === "pending") {
+
           await tx
-            .update(areas)
-            .set({ assignedTo: null })
-            .where(eq(areas.id, areaId));
+            .delete(areaRequests)
+            .where(
+              sql`${areaRequests.areaId} = ${areaId} AND ${areaRequests.userId} = ${userId}`,
+            );
+        } else if (status === "rejected") {
+          await tx
+            .delete(areaRequests)
+            .where(
+              sql`${areaRequests.areaId} = ${areaId} AND ${areaRequests.userId} = ${userId}`,
+            );
         }
       });
 
