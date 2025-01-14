@@ -11,7 +11,7 @@ interface AreaWrapperProps {
 export function AreaWrapper({ children, initialGeometry }: AreaWrapperProps) {
   return (
     <MapStateProvider>
-      <div className="container mx-auto py-10">{children}</div>
+      <div className="py-4">{children}</div>
     </MapStateProvider>
   );
 }

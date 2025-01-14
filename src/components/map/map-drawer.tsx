@@ -22,7 +22,7 @@ const isValidGeometry = (geom: any): boolean => {
   }
 };
 
-export const MapDrawer = () => {
+export const MapDrawer = ({ zIndex = 1000 }: { zIndex?: number }) => {
   const { geometry, setGeometry } = useMapContext();
   const featureGroupRef = useRef<any>(null);
 
@@ -69,12 +69,24 @@ export const MapDrawer = () => {
         onEdited={handleEdited}
         onDeleted={handleDeleted}
         draw={{
-          rectangle: true,
+          rectangle: false,
           circle: false,
           circlemarker: false,
           marker: false,
           polyline: false,
-          polygon: true,
+          polygon: {
+            allowIntersection: false,
+            drawError: {
+              color: "#e1e4e8",
+              message: "<strong>Oh snap!<strong> you can't draw that!",
+            },
+            shapeOptions: {
+              color: "#000",
+              fillOpacity: 0.2,
+              weight: 2,
+              zIndex: zIndex, // Apply zIndex here
+            },
+          },
         }}
       />
     </FeatureGroup>

@@ -4,6 +4,7 @@ import { userRouter } from "./routers/user/user.procedure";
 import { createTRPCRouter } from "./trpc";
 import { areaRouter } from "./routers/areas/areas.procedure";
 import { superadminRouter } from "./routers/superadmin/superadmin.procedure";
+import { enumeratorRouter } from "./routers/enumerators/enumerators.procedure";
 
 export const appRouter = createTRPCRouter({
   user: userRouter,
@@ -11,6 +12,7 @@ export const appRouter = createTRPCRouter({
   area: areaRouter,
   ward: wardRouter,
   superadmin: superadminRouter,
+  enumerator: enumeratorRouter,
 });
 
 export type AppRouter = typeof appRouter;

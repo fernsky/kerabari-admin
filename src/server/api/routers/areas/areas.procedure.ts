@@ -23,6 +23,7 @@ export const areaRouter = createTRPCRouter({
         throw new Error("Invalid GeoJSON representation");
       }
       const newArea = await ctx.db.insert(areas).values({
+        id: nanoid(),
         ...input,
         geometry: sql`ST_GeomFromGeoJSON(${geoJson})`,
       });
@@ -32,6 +33,7 @@ export const areaRouter = createTRPCRouter({
   getAreas: protectedProcedure.query(async ({ ctx }) => {
     const allAreas = await ctx.db
       .select({
+        id: areas.id,
         code: areas.code,
         wardNumber: areas.wardNumber,
         assignedTo: areas.assignedTo,
@@ -41,14 +43,15 @@ export const areaRouter = createTRPCRouter({
     return allAreas as unknown as Area[];
   }),
 
-  getAreaByCode: protectedProcedure
-    .input(z.object({ code: z.number() }))
+  getAreaById: protectedProcedure
+    .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const area = await ctx.db.execute(
-        sql`SELECT ${areas.code} as "code", 
+        sql`SELECT ${areas.id} as "id", 
+            ${areas.code} as "code", 
             ${areas.wardNumber} as "wardNumber", 
             ST_AsGeoJSON(${areas.geometry}) as "geometry"
-            FROM ${areas} WHERE ${areas.code} = ${input.code} LIMIT 1`,
+            FROM ${areas} WHERE ${areas.id} = ${input.id} LIMIT 1`,
       );
       return area[0] as unknown as Area;
     }),
@@ -59,7 +62,7 @@ export const areaRouter = createTRPCRouter({
       const updatedArea = await ctx.db
         .update(areas)
         .set({ assignedTo: input.enumeratorId })
-        .where(eq(areas.code, input.areaCode));
+        .where(eq(areas.id, input.id));
 
       return { success: true };
     }),
@@ -81,7 +84,7 @@ export const areaRouter = createTRPCRouter({
             wardNumber: input.wardNumber,
             geometry: sql`ST_GeomFromGeoJSON(${geoJson})`,
           })
-          .where(eq(areas.code, input.code));
+          .where(eq(areas.id, input.id));
         return { success: true };
       }
 
@@ -93,7 +96,7 @@ export const areaRouter = createTRPCRouter({
           wardNumber: payload.wardNumber,
           code: payload.code,
         })
-        .where(eq(areas.code, input.code));
+        .where(eq(areas.id, input.id));
       return { success: true };
     }),
 
@@ -111,7 +114,8 @@ export const areaRouter = createTRPCRouter({
       const user = fetchedUser[0];
 
       const surveyableAreas = await ctx.db.execute(
-        sql`SELECT ${areas.code} as "code", 
+        sql`SELECT ${areas.id} as "id", 
+        ${areas.code} as "code", 
         ${areas.wardNumber} as "wardNumber",
         ST_AsGeoJSON(${areas.geometry}) as "geometry"
         FROM ${areas} 
@@ -151,6 +155,7 @@ export const areaRouter = createTRPCRouter({
           phoneNumber: users.phoneNumber,
         },
         area: {
+          id: areas.id,
           code: areas.code,
           wardNumber: areas.wardNumber,
           geometry: sql`ST_AsGeoJSON(${areas.geometry})`,
@@ -180,15 +185,38 @@ export const areaRouter = createTRPCRouter({
           await tx
             .update(areas)
             .set({ assignedTo: userId })
-            .where(eq(areas.code, areaCode));
+            .where(eq(areas.id, areaCode));
         } else if (status === "rejected" || status === "pending") {
           await tx
             .update(areas)
             .set({ assignedTo: null })
-            .where(eq(areas.code, areaCode));
+            .where(eq(areas.id, areaCode));
         }
       });
 
       return { success: true };
+    }),
+
+  getAvailableAreaCodes: protectedProcedure
+    .input(z.object({ wardNumber: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const startCode = input.wardNumber * 1000 + 1;
+      const endCode = input.wardNumber * 1000 + 999;
+
+      // Get all used codes for this ward
+      const usedCodes = await ctx.db
+        .select({ code: areas.code })
+        .from(areas)
+        .where(eq(areas.wardNumber, input.wardNumber));
+
+      const usedCodesSet = new Set(usedCodes.map((a) => a.code));
+
+      // Generate available codes
+      const availableCodes = Array.from(
+        { length: endCode - startCode + 1 },
+        (_, i) => startCode + i,
+      ).filter((code) => !usedCodesSet.has(code));
+
+      return availableCodes;
     }),
 });

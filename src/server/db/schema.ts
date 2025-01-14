@@ -7,6 +7,7 @@ import {
   integer,
   json,
   primaryKey,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { DATABASE_PREFIX as prefix } from "@/lib/constants";
 import { geometry } from "./geographical";
@@ -31,6 +32,7 @@ export const users = pgTable(
     avatar: varchar("avatar", { length: 255 }),
     wardNumber: integer("ward_number"),
     role: rolesEnum("role").default("enumerator"),
+    isActive: boolean("is_active").default(true),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(
       () => new Date(),
@@ -72,7 +74,8 @@ export const wards = pgTable(
 );
 
 export const areas = pgTable("areas", {
-  code: integer("code").primaryKey(),
+  id: varchar("id", { length: 36 }).primaryKey(),
+  code: integer("code").notNull(),
   wardNumber: integer("ward")
     .notNull()
     .references(() => wards.wardNumber),
@@ -142,9 +145,9 @@ export const areaRequestsEnum = pgEnum("area_request_status", [
 export const areaRequests = pgTable(
   "area_requests",
   {
-    areaCode: integer("area_code")
+    areaId: varchar("area_id")
       .notNull()
-      .references(() => areas.code),
+      .references(() => areas.id),
     userId: varchar("user_id", { length: 21 })
       .notNull()
       .references(() => users.id),
@@ -154,6 +157,6 @@ export const areaRequests = pgTable(
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },
   (t) => ({
-    pk: primaryKey(t.areaCode, t.userId),
+    pk: primaryKey(t.areaId, t.userId),
   }),
 );

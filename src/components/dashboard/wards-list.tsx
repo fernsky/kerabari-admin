@@ -41,25 +41,25 @@ export function WardsList() {
         {wards.data.map((ward) => (
           <Card
             key={ward.wardNumber}
-            className="shadow-lg cursor-pointer"
+            className="shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer border-l-4 border-l-primary bg-gradient-to-r from-white to-gray-50"
             onClick={(e) => handleRowClick(ward.wardNumber, e)}
           >
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">
-                Ward Number: {ward.wardNumber}
-              </CardTitle>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl font-bold  text-gray-700">
+                  Ward {ward.wardNumber}
+                </CardTitle>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                Area Code: {ward.wardAreaCode}
-              </p>
-              <Link
-                href={`/ward/update/${ward.wardNumber}`}
-                className="text-blue-500 hover:underline flex items-center"
-              >
-                <Edit3 className="inline-block mr-2 w-4 h-4" />
-                Edit
-              </Link>
+            <CardContent>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-medium text-gray-600">
+                  Area Code:
+                </span>
+                <span className="text-sm bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                  {ward.wardAreaCode}
+                </span>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -68,42 +68,32 @@ export function WardsList() {
   }
 
   return (
-    <div className="rounded-md border shadow-lg p-4 bg-white">
-      <Table className="min-w-full divide-y divide-gray-200">
-        <TableHeader className="bg-gray-50">
-          <TableRow>
-            <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    <div className="rounded-lg border shadow-lg p-6 bg-white">
+      <Table className="min-w-full">
+        <TableHeader>
+          <TableRow className="bg-primary/5">
+            <TableHead className="py-4 text-left text-sm font-semibold  text-gray-700">
               Ward Number
             </TableHead>
-            <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <TableHead className="py-4 text-left text-sm font-semibold  text-gray-700">
               Area Code
-            </TableHead>
-            <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Actions
             </TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody className="bg-white divide-y divide-gray-200">
+        <TableBody>
           {wards.data.map((ward) => (
             <TableRow
               key={ward.wardNumber}
-              className="hover:bg-gray-100 cursor-pointer"
+              className="hover:bg-muted/50 transition-colors cursor-pointer border-b"
               onClick={(e) => handleRowClick(ward.wardNumber, e)}
             >
-              <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                {ward.wardNumber}
+              <TableCell className="py-4 text-sm font-medium  text-gray-700">
+                Ward {ward.wardNumber}
               </TableCell>
-              <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {ward.wardAreaCode}
-              </TableCell>
-              <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-blue-500">
-                <Link
-                  href={`/ward/update/${ward.wardNumber}`}
-                  className="flex items-center hover:underline"
-                >
-                  <Edit3 className="inline-block mr-2 w-4 h-4" />
-                  Edit
-                </Link>
+              <TableCell className="py-4">
+                <span className="bg-primary/10 text-primary text-sm px-3 py-1 rounded-full">
+                  {ward.wardAreaCode}
+                </span>
               </TableCell>
             </TableRow>
           ))}

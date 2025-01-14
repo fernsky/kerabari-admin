@@ -9,49 +9,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { assignAreaToEnumeratorSchema } from "@/server/api/routers/areas/area.schema";
 import { api } from "@/trpc/react";
-import { Edit3 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMediaQuery } from "react-responsive";
-import { toast } from "sonner";
-import type { z } from "zod";
 
 export default function AreaList() {
   const [areas] = api.useQueries((t) => [t.area.getAreas()]);
-  const [enumerators] = api.useQueries((t) => [t.admin.getEnumerators()]);
-  const assignAreaToEnumerator = api.area.assignAreaToEnumerator.useMutation();
   const isMobile = useMediaQuery({ maxWidth: 767 });
   const router = useRouter();
 
-  const handleRowClick = (areaCode: number, event: React.MouseEvent) => {
-    const isEditClick = (event.target as HTMLElement).closest(
-      "a,select,button",
-    );
+  const handleRowClick = (id: string, event: React.MouseEvent) => {
+    const isEditClick = (event.target as HTMLElement).closest("a");
     if (!isEditClick) {
-      router.push(`/area/update/${areaCode}`);
+      router.push(`/area/update/${id}`);
     }
   };
-
-  async function handleAssignment(
-    values: z.infer<typeof assignAreaToEnumeratorSchema>,
-  ) {
-    try {
-      await assignAreaToEnumerator.mutateAsync(values);
-      toast.success("Successfully assigned area to enumerator.");
-    } catch (error) {
-      toast.error("Failed to assign area to enumerator.");
-    }
-  }
 
   if (!areas.data?.length) {
     return (
@@ -66,57 +38,24 @@ export default function AreaList() {
       <div className="space-y-4 p-4">
         {areas.data.map((area) => (
           <Card
-            key={area.code}
-            className="shadow-lg cursor-pointer"
-            onClick={(e) => handleRowClick(area.code, e)}
+            key={area.id}
+            className="shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer border-l-4 border-l-primary bg-gradient-to-r from-white to-gray-50"
+            onClick={(e) => handleRowClick(area.id, e)}
           >
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">
-                Area Code: {area.code}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                Ward Number: {area.wardNumber}
-              </p>
-              <div className="mt-2">
-                <Select
-                  //@ts-ignore
-                  defaultValue={area.assignedTo ?? undefined}
-                  onValueChange={(value) => {
-                    if (value)
-                      handleAssignment({
-                        areaCode: area.code,
-                        enumeratorId: value,
-                      });
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Assign Enumerator" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {enumerators.data
-                        ?.filter(
-                          (enumerator) =>
-                            enumerator.wardNumber === area.wardNumber,
-                        )
-                        .map((enumerator) => (
-                          <SelectItem key={enumerator.id} value={enumerator.id}>
-                            {enumerator.name}
-                          </SelectItem>
-                        ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl font-bold  text-gray-700">
+                  Area {area.code}
+                </CardTitle>
               </div>
-              <Link
-                href={`/area/update/${area.code}`}
-                className="text-blue-500 hover:underline flex items-center mt-2"
-              >
-                <Edit3 className="inline-block mr-2 w-4 h-4" />
-                Edit
-              </Link>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-medium text-gray-600">Ward</span>
+                <span className="text-sm bg-primary/10  text-gray-700 px-2 py-0.5 rounded-full">
+                  {area.wardNumber}
+                </span>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -125,85 +64,35 @@ export default function AreaList() {
   }
 
   return (
-    <div className="rounded-md border shadow-lg p-4 bg-white">
-      <Table className="min-w-full divide-y divide-gray-200">
-        <TableHeader className="bg-gray-50">
-          <TableRow>
-            <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+    <div className="rounded-lg border shadow-lg p-6 bg-white">
+      <Table className="min-w-full">
+        <TableHeader>
+          <TableRow className="bg-primary/5">
+            <TableHead className="py-4 text-left text-sm font-semibold text-primary">
               Ward Number
             </TableHead>
-            <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <TableHead className="py-4 text-left text-sm font-semibold text-primary">
               Area Code
-            </TableHead>
-            <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Assign To
-            </TableHead>
-            <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Actions
             </TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody className="bg-white divide-y divide-gray-200">
-          {areas.data.map((area) => {
-            console.log(area);
-            return (
-              <TableRow
-                key={area.code}
-                className="hover:bg-gray-100 cursor-pointer"
-                onClick={(e) => handleRowClick(area.code, e)}
-              >
-                <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {area.wardNumber}
-                </TableCell>
-                <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        <TableBody>
+          {areas.data.map((area) => (
+            <TableRow
+              key={area.id}
+              className="hover:bg-muted/50 transition-colors cursor-pointer border-b"
+              onClick={(e) => handleRowClick(area.id, e)}
+            >
+              <TableCell className="py-4 text-sm font-medium">
+                Ward {area.wardNumber}
+              </TableCell>
+              <TableCell className="py-4">
+                <span className="bg-primary/10 text-primary text-sm px-3 py-1 rounded-full">
                   {area.code}
-                </TableCell>
-                <TableCell className="px-6 py-4 whitespace-nowrap text-sm">
-                  <Select
-                    //@ts-ignore
-                    defaultValue={area.assignedTo}
-                    onValueChange={(value) => {
-                      if (value)
-                        handleAssignment({
-                          areaCode: area.code,
-                          enumeratorId: value,
-                        });
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Assign Enumerator" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {enumerators.data
-                          ?.filter(
-                            (enumerator) =>
-                              enumerator.wardNumber === area.wardNumber,
-                          )
-                          .map((enumerator) => (
-                            <SelectItem
-                              key={enumerator.id}
-                              value={enumerator.id}
-                            >
-                              {enumerator.name}
-                            </SelectItem>
-                          ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </TableCell>
-                <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-blue-500">
-                  <Link
-                    href={`/area/update/${area.code}`}
-                    className="flex items-center hover:underline"
-                  >
-                    <Edit3 className="inline-block mr-2 w-4 h-4" />
-                    Edit
-                  </Link>
-                </TableCell>
-              </TableRow>
-            );
-          })}
+                </span>
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
     </div>

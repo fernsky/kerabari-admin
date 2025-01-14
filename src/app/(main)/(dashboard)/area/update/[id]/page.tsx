@@ -6,7 +6,7 @@ export default function UpdateAreaPage({ params }: { params: { id: string } }) {
   return (
     <ContentLayout title="Update Area">
       <AreaWrapper>
-        <AreaEdit areaCode={parseInt(params.id)} />
+        <AreaEdit id={params.id} />
       </AreaWrapper>
     </ContentLayout>
   );
