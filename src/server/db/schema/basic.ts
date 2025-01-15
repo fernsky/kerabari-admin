@@ -73,14 +73,30 @@ export const wards = pgTable(
   }),
 );
 
-export const areaStatusEnum = pgEnum("attachment", [
-  "audio_monitoring",
-  "building_image",
-  "building_selfie",
-  "family_head_image",
-  "family_head_selfie",
-  "business_image",
-  "business_selfie",
+/*
+The area status works in the following way:
+1. unassigned: The area is not assigned to any enumerator
+2. newly_assigned: The area is newly assigned to an enumerator. 
+                   This occurs when an area request is approved.
+3. ongoing_survey: The enumerator is currently surveying the area.
+                   This occurrs if there is any survey data for the area by
+                   the approved enumerator.
+4. revision:       The enumerator has said he has completed the survey but the
+                    supervisor has requested for a revision in that area.
+5. asked_for_completion: The enumerator has completed the survey and asked for completion 
+                   from the supervisor
+6. asked_for_revision_completion: The enumerator has completed the revision and asked for completion.
+7. asked_for_withdrawl: The enumerator has asked for withdrawl from surveying the area.
+*/
+
+export const areaStatusEnum = pgEnum("area_status_enum", [
+  "unassigned",
+  "newly_assigned",
+  "ongoing_survey",
+  "revision",
+  "asked_for_completion",
+  "asked_for_revision_completion",
+  "asked_for_withdrawl",
 ]);
 
 export const areas = pgTable("areas", {
@@ -91,6 +107,7 @@ export const areas = pgTable("areas", {
     .references(() => wards.wardNumber),
   geometry: geometry("geometry", { type: "Polygon" }),
   assignedTo: varchar("assigned_to", { length: 21 }).references(() => users.id),
+  areaStatus: areaStatusEnum("area_status").default("unassigned"),
 });
 
 export type Area = typeof areas.$inferSelect;

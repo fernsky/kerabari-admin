@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LayoutGrid, LogOut, User } from "lucide-react";
+import { LayoutGrid, LogOut, User as UserIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,8 +20,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { type User } from "lucia";
 
-export function UserNav() {
+export function UserNav({ user }: { user: User }) {
   return (
     <DropdownMenu>
       <TooltipProvider disableHoverableContent>
@@ -34,7 +35,9 @@ export function UserNav() {
               >
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="#" alt="Avatar" />
-                  <AvatarFallback className="bg-transparent">JD</AvatarFallback>
+                  <AvatarFallback className="bg-transparent">
+                    {user.name.at(0)}
+                  </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
@@ -46,9 +49,9 @@ export function UserNav() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">John Doe</p>
+            <p className="text-sm font-medium leading-none">{user.name}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              johndoe@example.com
+              {user.userName}
             </p>
           </div>
         </DropdownMenuLabel>
@@ -62,7 +65,7 @@ export function UserNav() {
           </DropdownMenuItem>
           <DropdownMenuItem className="hover:cursor-pointer" asChild>
             <Link href="/account" className="flex items-center">
-              <User className="w-4 h-4 mr-3 text-muted-foreground" />
+              <UserIcon className="w-4 h-4 mr-3 text-muted-foreground" />
               Account
             </Link>
           </DropdownMenuItem>

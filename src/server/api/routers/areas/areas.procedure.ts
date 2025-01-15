@@ -308,7 +308,7 @@ export const areaRouter = createTRPCRouter({
         if (status === "approved") {
           await tx
             .update(areas)
-            .set({ assignedTo: userId })
+            .set({ assignedTo: userId, areaStatus: "newly_assigned" })
             .where(eq(areas.id, areaId));
 
           // Once approved delete all requests for that area

@@ -1,6 +1,7 @@
 import { ModeToggle } from "@/components/mode-toggle";
 import { UserNav } from "@/components/admin-panel/user-nav";
 import { SheetMenu } from "@/components/admin-panel/sheet-menu";
+import { validateRequest } from "@/lib/auth/validate-request";
 
 interface NavbarProps {
   title: string;
@@ -8,7 +9,8 @@ interface NavbarProps {
   actions?: React.ReactNode;
 }
 
-export function Navbar({ title, subtitle, actions }: NavbarProps) {
+export async function Navbar({ title, subtitle, actions }: NavbarProps) {
+  const user = await validateRequest();
   return (
     <div className="sticky top-0  w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-4 flex h-14 items-center justify-between sm:mx-8">
@@ -27,7 +29,7 @@ export function Navbar({ title, subtitle, actions }: NavbarProps) {
             <div className="hidden sm:flex items-center gap-2">{actions}</div>
           )}
           <ModeToggle />
-          <UserNav />
+          <UserNav user={user} />
         </div>
       </div>
 
