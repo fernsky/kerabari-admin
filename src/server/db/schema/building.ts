@@ -5,6 +5,7 @@ import {
   timestamp,
   decimal,
   boolean,
+  doublePrecision,
 } from "drizzle-orm/pg-core";
 import { geometry } from "../geographical";
 
@@ -83,8 +84,8 @@ export const buildings = pgTable("buddhashanti_buildings", {
   // Media (audio & images stored as bucket keys)
   surveyAudioRecording: varchar("survey_audio_recording", { length: 255 }),
   gps: geometry("gps", { type: "Point" }),
-  altitude: decimal("altitude"),
-  gpsAccuracy: decimal("gps_accuracy"),
+  altitude: doublePrecision("altitude"),
+  gpsAccuracy: doublePrecision("gps_accuracy"),
   buildingImage: varchar("building_image", { length: 255 }),
   enumeratorSelfie: varchar("enumerator_selfie", { length: 255 }),
 
