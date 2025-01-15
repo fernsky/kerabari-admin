@@ -12,7 +12,11 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface Option {
   value: string;
@@ -46,7 +50,9 @@ export function ComboboxSearchable({
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {value ? options.find((option) => option.value === value)?.label : placeholder}
+          {value
+            ? options.find((option) => option.value === value)?.label
+            : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -59,9 +65,11 @@ export function ComboboxSearchable({
               {options.map((option) => (
                 <CommandItem
                   key={option.value}
-                  value={option.value}
-                  onSelect={(currentValue) => {
-                    onChange(currentValue === value ? "" : currentValue);
+                  // Use label for searching
+                  value={option.label}
+                  // But use value (id) for selection
+                  onSelect={() => {
+                    onChange(option.value === value ? "" : option.value);
                     setOpen(false);
                   }}
                 >

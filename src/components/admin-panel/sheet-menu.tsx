@@ -25,7 +25,7 @@ export function SheetMenu() {
       >
         <SheetHeader>
           <Button
-            className="flex justify-center items-center pb-2 pt-1"
+            className="flex justify-start items-center pb-2 pt-1"
             variant="link"
             asChild
           >

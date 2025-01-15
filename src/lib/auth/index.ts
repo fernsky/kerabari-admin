@@ -21,6 +21,7 @@ export const lucia = new Lucia(adapter, {
       id: attributes.id,
       userName: attributes.userName,
       role: attributes.role,
+      wardNumber: attributes.wardNumber,
       createdAt: attributes.createdAt,
       updatedAt: attributes.updatedAt,
     };

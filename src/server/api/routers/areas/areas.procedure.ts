@@ -1,7 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 import { z } from "zod";
 import { areas, users, areaRequests } from "@/server/db/schema/basic";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, ilike, sql } from "drizzle-orm";
 import { Area, createAreaSchema } from "./area.schema";
 import { assignAreaToEnumeratorSchema } from "./area.schema";
 import {
@@ -207,27 +207,90 @@ export const areaRouter = createTRPCRouter({
     return requests;
   }),
 
-  getAllAreaRequests: protectedProcedure.query(async ({ ctx }) => {
-    const requests = await ctx.db
-      .select({
-        request: areaRequests,
-        user: {
-          name: users.name,
-          phoneNumber: users.phoneNumber,
+  getAllAreaRequests: protectedProcedure
+    .input(
+      z.object({
+        filters: z
+          .object({
+            code: z.number().optional(),
+            wardNumber: z.number().optional(),
+            enumeratorId: z.string().optional(),
+            status: z.enum(["pending", "approved", "rejected"]).optional(),
+          })
+          .optional(),
+        limit: z.number().min(1).max(100).default(10),
+        offset: z.number().min(0).default(0),
+        sortBy: z
+          .enum(["created_at", "status", "ward_number"])
+          .default("created_at"),
+        sortOrder: z.enum(["asc", "desc"]).default("desc"),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { filters, limit, offset, sortBy, sortOrder } = input;
+
+      let conditions = sql`TRUE`;
+      if (filters) {
+        const filterConditions = [];
+        if (filters.code) {
+          filterConditions.push(eq(areas.code, filters.code));
+        }
+        if (filters.wardNumber) {
+          filterConditions.push(eq(areas.wardNumber, filters.wardNumber));
+        }
+        if (filters.enumeratorId) {
+          filterConditions.push(eq(areaRequests.userId, filters.enumeratorId));
+        }
+        if (filters.status) {
+          filterConditions.push(eq(areaRequests.status, filters.status));
+        }
+        if (filterConditions.length > 0) {
+          const andCondition = and(...filterConditions);
+          if (andCondition) conditions = andCondition;
+        }
+      }
+
+      const [requests, totalCount] = await Promise.all([
+        ctx.db
+          .select({
+            request: areaRequests,
+            user: {
+              name: users.name,
+              phoneNumber: users.phoneNumber,
+            },
+            area: {
+              id: areas.id,
+              code: areas.code,
+              wardNumber: areas.wardNumber,
+              geometry: sql`ST_AsGeoJSON(${areas.geometry})`,
+            },
+          })
+          .from(areaRequests)
+          .leftJoin(users, eq(areaRequests.userId, users.id))
+          .leftJoin(areas, eq(areaRequests.areaId, areas.id))
+          .where(conditions)
+          .orderBy(sql`${sql.identifier(sortBy)} ${sql.raw(sortOrder)}`)
+          .limit(limit)
+          .offset(offset),
+
+        ctx.db
+          .select({ count: sql<number>`count(*)` })
+          .from(areaRequests)
+          .leftJoin(users, eq(areaRequests.userId, users.id))
+          .leftJoin(areas, eq(areaRequests.areaId, areas.id))
+          .where(conditions)
+          .then((result) => result[0].count),
+      ]);
+
+      return {
+        data: requests,
+        pagination: {
+          total: totalCount,
+          pageSize: limit,
+          offset,
         },
-        area: {
-          id: areas.id,
-          code: areas.code,
-          wardNumber: areas.wardNumber,
-          geometry: sql`ST_AsGeoJSON(${areas.geometry})`,
-        },
-      })
-      .from(areaRequests)
-      .leftJoin(users, eq(areaRequests.userId, users.id))
-      .leftJoin(areas, eq(areaRequests.areaId, areas.id))
-      .orderBy(areaRequests.createdAt);
-    return requests;
-  }),
+      };
+    }),
 
   updateAreaRequestStatus: protectedProcedure
     .input(updateAreaRequestStatusSchema)
@@ -248,11 +311,10 @@ export const areaRouter = createTRPCRouter({
             .set({ assignedTo: userId })
             .where(eq(areas.id, areaId));
 
+          // Once approved delete all requests for that area
           await tx
             .delete(areaRequests)
-            .where(
-              sql`${areaRequests.areaId} = ${areaId} AND ${areaRequests.userId} = ${userId}`,
-            );
+            .where(sql`${areaRequests.areaId} = ${areaId}`);
         } else if (status === "rejected") {
           await tx
             .delete(areaRequests)

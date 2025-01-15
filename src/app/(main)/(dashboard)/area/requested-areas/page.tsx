@@ -10,13 +10,29 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
-import { Loader2, AlertCircle } from "lucide-react";
+import {
+  Loader2,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  MapPin,
+  User2,
+  Phone,
+  MessageSquare,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
+import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/lib/hooks/use-debounce";
+import { FilterDrawer } from "@/components/shared/filters/filter-drawer";
+import { AreaRequestFilters } from "@/components/area-requests/area-request-filters";
+import { useMediaQuery } from "react-responsive";
+import { Button } from "@/components/ui/button";
 
 const statusColors = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -25,20 +41,41 @@ const statusColors = {
 } as const;
 
 export default function RequestedAreas() {
-  const [updating, setUpdating] = useState<string | null>(null);
+  const [filters, setFilters] = useState({
+    code: undefined as number | undefined,
+    wardNumber: undefined as number | undefined,
+    enumeratorId: undefined as string | undefined,
+    status: undefined as "pending" | "approved" | "rejected" | undefined,
+  });
+  const [page, setPage] = useState(0);
+  const debouncedFilters = useDebounce(filters, 500);
+  const isDesktop = useMediaQuery({ minWidth: 1024 });
 
   const {
     data: requests,
     isLoading,
     error,
-  } = api.area.getAllAreaRequests.useQuery(undefined, {
-    refetchInterval: 5000, // Auto refresh every 5 seconds
+    refetch: refetchRequests,
+  } = api.area.getAllAreaRequests.useQuery({
+    limit: 10,
+    offset: page * 10,
+    filters: debouncedFilters,
+    sortBy: "created_at",
+    sortOrder: "desc",
   });
+
+  const handleFilterChange = (key: string, value: any) => {
+    setFilters((prev) => ({ ...prev, [key]: value || undefined }));
+    setPage(0);
+  };
+
+  const [updating, setUpdating] = useState<string | null>(null);
 
   const updateStatus = api.area.updateAreaRequestStatus.useMutation({
     onSuccess: () => {
       toast("The area request status has been updated.");
       setUpdating(null);
+      refetchRequests();
     },
     onError: (error) => {
       toast(`Error updating status ${error.message}`);
@@ -85,27 +122,60 @@ export default function RequestedAreas() {
   return (
     <ContentLayout title="Area Access Requests">
       <div className="container mx-auto space-y-6 p-4 pt-1">
-        <div>
+        <div className="flex flex-col gap-4">
           <p className="text-sm text-muted-foreground">
             Manage area access requests from enumerators
           </p>
+
+          {/* Compact Filter Section */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative flex-1 min-w-[200px] max-w-[300px]">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search by area code..."
+                className="w-full pl-9 h-9"
+                value={filters.code || ""}
+                onChange={(e) =>
+                  handleFilterChange(
+                    "code",
+                    e.target.value ? parseInt(e.target.value) : undefined,
+                  )
+                }
+              />
+            </div>
+
+            {!isDesktop ? (
+              <FilterDrawer title="Filters">
+                <AreaRequestFilters
+                  filters={filters}
+                  onFilterChange={handleFilterChange}
+                />
+              </FilterDrawer>
+            ) : (
+              <AreaRequestFilters
+                filters={filters}
+                onFilterChange={handleFilterChange}
+              />
+            )}
+          </div>
         </div>
 
-        {requests?.length === 0 ? (
+        {requests?.data.length === 0 ? (
           <div className="mt-8 rounded-lg border border-dashed p-8 text-center">
-            <p className="text-muted-foreground">No area requests found</p>
+            <MapPin className="mx-auto h-8 w-8 text-muted-foreground/50" />
+            <p className="mt-2 text-muted-foreground">No area requests found</p>
           </div>
         ) : (
-          <div className="flex gap-4">
-            {requests?.map((request) => (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {requests?.data.map((request) => (
               <Card
                 key={`${request.request.areaId}-${request.request.userId}`}
-                className="transition-all duration-200 hover:shadow-md w-[280px]"
+                className="overflow-hidden transition-all hover:shadow-md"
               >
                 {request.area?.geometry! && (
-                  <div className="h-[150px] w-full overflow-hidden rounded-t-lg">
+                  <div className="h-[140px] w-full">
                     <MapContainer
-                      className="h-full w-full"
+                      className="h-full w-full z-[1000]"
                       zoom={13}
                       scrollWheelZoom={false}
                       center={[26.72069444681497, 88.04840072844279]}
@@ -128,46 +198,52 @@ export default function RequestedAreas() {
                   </div>
                 )}
 
-                <CardHeader className="space-y-1 p-4 pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">
-                      Area {request.area?.code}
-                    </CardTitle>
-                    <Badge variant="outline">
-                      Ward {request.area?.wardNumber}
-                    </Badge>
-                  </div>
-                  <CardDescription className="text-xs">
-                    Requested{" "}
-                    {formatDistanceToNow(new Date(request.request.createdAt), {
-                      addSuffix: true,
-                    })}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3 p-4 pt-2">
-                  <div className="space-y-1 text-sm">
+                <CardContent className="p-4">
+                  <div className="mb-4 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Requester</span>
-                      <span className="font-medium">{request.user?.name}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Phone</span>
-                      <span className="font-medium">
-                        {request.user?.phoneNumber}
-                      </span>
-                    </div>
-                    {request.request.message && (
-                      <div className="mt-2 rounded-md bg-muted/50 p-2">
-                        <p className="text-xs italic">
-                          "{request.request.message}"
+                      <div>
+                        <h3 className="text-lg font-semibold">
+                          Area {request.area?.code}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {formatDistanceToNow(
+                            new Date(request.request.createdAt),
+                            {
+                              addSuffix: true,
+                            },
+                          )}
                         </p>
                       </div>
-                    )}
+                      <Badge variant="outline">
+                        Ward {request.area?.wardNumber}
+                      </Badge>
+                    </div>
+
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <User2 className="h-4 w-4" />
+                        <span>{request.user?.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Phone className="h-4 w-4" />
+                        <span>{request.user?.phoneNumber}</span>
+                      </div>
+                      {request.request.message && (
+                        <div className="flex items-start gap-2 text-muted-foreground">
+                          <MessageSquare className="h-4 w-4 mt-0.5" />
+                          <p className="text-xs italic flex-1">
+                            "{request.request.message}"
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {request.request.status === "pending" ? (
                     <div className="flex gap-2">
-                      <button
+                      <Button
+                        variant="secondary"
+                        className="flex-1 bg-green-100 hover:bg-green-200 text-green-800"
                         disabled={!!updating}
                         onClick={() => {
                           setUpdating(
@@ -179,11 +255,12 @@ export default function RequestedAreas() {
                             status: "approved",
                           });
                         }}
-                        className="flex-1 rounded-md bg-green-100 px-3 py-1.5 text-sm font-medium text-green-800 hover:bg-green-200 disabled:opacity-50"
                       >
                         Approve
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        className="flex-1 bg-red-100 hover:bg-red-200 text-red-800"
                         disabled={!!updating}
                         onClick={() => {
                           setUpdating(
@@ -195,14 +272,17 @@ export default function RequestedAreas() {
                             status: "rejected",
                           });
                         }}
-                        className="flex-1 rounded-md bg-red-100 px-3 py-1.5 text-sm font-medium text-red-800 hover:bg-red-200 disabled:opacity-50"
                       >
                         Reject
-                      </button>
+                      </Button>
                     </div>
                   ) : (
                     <Badge
-                      className={`w-full justify-center ${statusColors[request.request.status as keyof typeof statusColors]}`}
+                      className={`w-full justify-center ${
+                        statusColors[
+                          request.request.status as keyof typeof statusColors
+                        ]
+                      }`}
                     >
                       {request?.request?.status
                         ? request.request.status.charAt(0).toUpperCase() +
@@ -213,6 +293,56 @@ export default function RequestedAreas() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {requests?.data.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
+            <span className="text-muted-foreground text-center">
+              Showing {Math.min((page + 1) * 10, requests.pagination.total)} of{" "}
+              {requests.pagination.total} requests
+            </span>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(Math.max(0, page - 1))}
+                disabled={page === 0}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="min-w-[100px] text-center font-medium">
+                Page {page + 1} of{" "}
+                {Math.ceil(
+                  requests.pagination.total / requests.pagination.pageSize,
+                )}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setPage(
+                    Math.min(
+                      Math.ceil(
+                        requests.pagination.total /
+                          requests.pagination.pageSize,
+                      ) - 1,
+                      page + 1,
+                    ),
+                  )
+                }
+                disabled={
+                  page >=
+                  Math.ceil(
+                    requests.pagination.total / requests.pagination.pageSize,
+                  ) -
+                    1
+                }
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         )}
       </div>
