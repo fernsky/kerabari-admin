@@ -99,6 +99,8 @@ export const surveyForms = pgTable("odk_survey_forms", {
     }
   */
   attachmentPaths: json("attachment_paths").array(),
+  updateInterval: integer("update_interval").default(7200),
+  lastFetched: timestamp("last_fetched").defaultNow(),
 });
 
 export const surveyData = pgTable("odk_survey_data", {
@@ -112,10 +114,12 @@ export const surveyData = pgTable("odk_survey_data", {
 
 export const attachmentTypesEnum = pgEnum("attachment", [
   "audio_monitoring",
-  "house_image",
-  "house_image_selfie",
+  "building_image",
+  "building_selfie",
+  "family_head_image",
+  "family_head_selfie",
   "business_image",
-  "business_image_selfie",
+  "business_selfie",
 ]);
 
 export const surveyAttachments = pgTable(
@@ -124,7 +128,7 @@ export const surveyAttachments = pgTable(
     dataId: varchar("data_id", { length: 55 })
       .notNull()
       .references(() => surveyData.id),
-    type: attachmentTypesEnum("type").default("house_image").notNull(),
+    type: attachmentTypesEnum("type").default("building_image").notNull(),
     name: varchar("name", { length: 255 }).notNull(),
     created_at: timestamp("created_at").defaultNow().notNull(),
   },

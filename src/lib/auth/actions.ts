@@ -15,7 +15,7 @@ import {
   type SignupInput,
   resetPasswordSchema,
 } from "@/lib/validators/auth";
-import { users } from "@/server/db/schema";
+import { users } from "@/server/db/schema/basic";
 import { validateRequest } from "@/lib/auth/validate-request";
 import { Paths } from "../constants";
 

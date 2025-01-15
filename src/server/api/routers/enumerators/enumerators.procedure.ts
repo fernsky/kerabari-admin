@@ -8,7 +8,7 @@ import {
   resetEnumeratorPasswordSchema,
   updateEnumeratorSchema,
 } from "./enumerators.schema";
-import { users } from "@/server/db/schema";
+import { users } from "@/server/db/schema/basic";
 import * as z from "zod";
 
 export const enumeratorRouter = createTRPCRouter({

@@ -47,10 +47,12 @@ const formSchema = z.object({
         path: z.string().optional(),
         type: z.enum([
           "audio_monitoring",
-          "house_image",
-          "house_image_selfie",
+          "building_image",
+          "building_selfie",
+          "family_image",
+          "family_selfie",
           "business_image",
-          "business_image_selfie",
+          "business_selfie",
         ]),
       }),
     )
@@ -91,6 +93,7 @@ export const FormsEdit = ({ formId }: { formId: string }) => {
         };
         //@ts-ignore
         setInitialData(initialData);
+        //@ts-ignore
         form.reset(initialData);
       }
     }
@@ -101,6 +104,7 @@ export const FormsEdit = ({ formId }: { formId: string }) => {
     setIsLoading(true);
     console.log("Sending");
     try {
+      //@ts-ignore
       await updateForm.mutateAsync(values);
       toast.success("Form updated successfully");
       router.push("/forms");
@@ -211,7 +215,7 @@ export const FormsEdit = ({ formId }: { formId: string }) => {
               <div className="grid gap-2">
                 <Button
                   type="button"
-                  onClick={() => append({ path: "", type: "house_image" })}
+                  onClick={() => append({ path: "", type: "building_image" })}
                   variant="secondary"
                   className="mt-2"
                 >

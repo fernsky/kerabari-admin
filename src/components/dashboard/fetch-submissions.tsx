@@ -31,7 +31,7 @@ export const FetchSubmissions = ({ formId }: { formId: string }) => {
   };
 
   return (
-    <Card className="max-w-md">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle className="text-lg">Fetch Form Submissions</CardTitle>
       </CardHeader>

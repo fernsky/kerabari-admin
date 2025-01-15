@@ -1,5 +1,5 @@
 import { db } from "@/server/db";
-import { users } from "@/server/db/schema";
+import { users } from "@/server/db/schema/basic";
 import { test, expect } from "@playwright/test";
 import { eq } from "drizzle-orm";
 import { extractLastCode, testUser } from "./utils";

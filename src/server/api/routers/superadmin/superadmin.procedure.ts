@@ -1,12 +1,17 @@
 import { fetchSubmissionsSchema, surveyFormSchema } from "./superadmin.schema";
 import { eq, and } from "drizzle-orm";
-import { surveyAttachments, surveyData, surveyForms } from "@/server/db/schema";
+import {
+  attachmentTypesEnum,
+  surveyAttachments,
+  surveyData,
+  surveyForms,
+} from "@/server/db/schema";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 import axios from "axios";
 import dotenv from "dotenv";
 import { FormAttachment } from "@/types";
-import { v4 as uuidv4 } from "uuid";
 import * as z from "zod";
+import { fetchSurveySubmissions } from "@/server/utils";
 
 dotenv.config();
 
@@ -79,53 +84,43 @@ export const superadminRouter = createTRPCRouter({
       return updatedSurveyForm;
     }),
 
+  /**
+   * Creates or updates a survey form based on whether the ID exists.
+   *
+   * @param {Object} input - The input data for creating/updating the survey form.
+   * @returns {Promise<Object>} A promise that resolves to the created/updated survey form.
+   */
+  createOrUpdateResourceForm: protectedProcedure
+    .input(surveyFormSchema)
+    .mutation(async ({ ctx, input }) => {
+      // Check if form exists
+      const existingForm = await ctx.db
+        .select()
+        .from(surveyForms)
+        .where(eq(surveyForms.id, input.id))
+        .limit(1);
+
+      if (existingForm.length === 0) {
+        // Form doesn't exist, create new
+        const newForm = await ctx.db
+          .insert(surveyForms)
+          .values(input)
+          .returning();
+        return newForm[0];
+      } else {
+        // Form exists, update it
+        const updatedForm = await ctx.db
+          .update(surveyForms)
+          .set(input)
+          .where(eq(surveyForms.id, input.id))
+          .returning();
+        return updatedForm[0];
+      }
+    }),
+
   fetchSurveySubmissions: protectedProcedure
     .input(fetchSubmissionsSchema)
     .mutation(async ({ ctx, input }) => {
-      const getODKToken = async (
-        siteUrl: string,
-        username: string,
-        password: string,
-      ) => {
-        try {
-          const response = await axios.post(`${siteUrl}/v1/sessions`, {
-            email: username,
-            password: password,
-          });
-          return response.data.token;
-        } catch (error) {
-          console.error("Error fetching ODK token:", error);
-          throw new Error("Failed to fetch ODK token");
-        }
-      };
-
-      // For some field like 'id.name.first_name', get the value from the initial object
-      /*
-        {
-            id : {
-                name: {
-                    first_name: 
-                }
-            }
-        }
-        Get the value at first_name by passing this object.
-    */
-      const getValueFromNestedField = (data: any, fieldPath: string): any => {
-        return fieldPath.split(".").reduce((acc, part) => {
-          if (acc === undefined || acc === null) return undefined;
-
-          // Check if the part includes an array index
-          const arrayIndexMatch = part.match(/(\w+)\[(\d+)\]/);
-
-          if (arrayIndexMatch) {
-            const [, property, index] = arrayIndexMatch;
-            return acc[property][parseInt(index, 10)];
-          }
-          return acc[part];
-        }, data);
-      };
-
-      // Fetch the username, password, form url, site url based on input
       const surveyForm = await ctx.db
         .select()
         .from(surveyForms)
@@ -144,120 +139,21 @@ export const superadminRouter = createTRPCRouter({
         siteEndpoint,
         attachmentPaths,
       } = surveyForm[0];
-      const { startDate, endDate, count } = input;
 
-      // First get the token
-      const token = await getODKToken(
-        siteEndpoint as string,
-        userName as string,
-        password as string,
+      await fetchSurveySubmissions(
+        {
+          siteEndpoint: siteEndpoint as string,
+          userName: userName as string,
+          password: password as string,
+          odkFormId: odkFormId as string,
+          odkProjectId: odkProjectId as number,
+          attachmentPaths: attachmentPaths as FormAttachment[],
+          formId: input.id,
+          startDate: input.startDate,
+          endDate: input.endDate,
+          count: input.count,
+        },
+        ctx,
       );
-
-      // Set up the default start and end dates, one day apart from today's date
-      const today = new Date();
-      const defaultStartDate = new Date(today);
-      defaultStartDate.setDate(today.getDate() - 1);
-      const defaultEndDate = new Date(today);
-
-      // Set up the query params
-      const queryParams = {
-        $top: count ?? 100,
-        $skip: 0,
-        $expand: "*",
-        $count: true,
-        $wkt: true,
-        //$filter: `__system/submissionDate ge ${startDate ?? defaultStartDate.toISOString()} and __system/submissionDate le ${endDate ?? defaultEndDate.toISOString()}`,
-      };
-
-      console.log(queryParams);
-      try {
-        const queryString = Object.entries(queryParams)
-          .map(
-            ([key, value]) =>
-              `${encodeURIComponent(key)}=${encodeURIComponent(value)}`,
-          )
-          .join("&");
-        const response = await axios.get(
-          `${siteEndpoint}/v1/projects/${odkProjectId}/forms/${odkFormId}.svc/Submissions?${queryString}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-        const submissions = response.data.value;
-        for (let submission of submissions) {
-          await ctx.db
-            .insert(surveyData)
-            .values({
-              id: submission.__id,
-              formId: input.id,
-              data: submission,
-            })
-            .onConflictDoNothing();
-
-          if (attachmentPaths) {
-            console.log(attachmentPaths);
-            for (let attachmentPath of attachmentPaths as FormAttachment[]) {
-              const attachmentName = getValueFromNestedField(
-                submission,
-                attachmentPath.path,
-              );
-
-              if (attachmentName) {
-                // Check if the attachment already exists in the database
-                const existingAttachment = await ctx.db
-                  .select()
-                  .from(surveyAttachments)
-                  .where(
-                    and(
-                      eq(surveyAttachments.dataId, submission.__id),
-                      eq(surveyAttachments.name, attachmentName),
-                    ),
-                  )
-                  .limit(1);
-
-                if (existingAttachment.length > 0) {
-                  console.log(
-                    `Attachment ${attachmentName} for submission ${submission.__id} already exists in the database.`,
-                  );
-                  continue;
-                }
-
-                const attachmentUrl = `${siteEndpoint}/v1/projects/${odkProjectId}/forms/${odkFormId}/submissions/${submission.__id}/attachments/${attachmentName}`;
-                const attachment = await axios.get(attachmentUrl, {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                  },
-                  responseType: "arraybuffer",
-                });
-
-                if (!process.env.BUCKET_NAME)
-                  throw new Error("Bucket name not found");
-
-                console.log("Sending object to minio", attachmentName);
-                console.log(process.env.BUCKET_NAME, attachmentName);
-                await ctx.minio.putObject(
-                  process.env.BUCKET_NAME,
-                  attachmentName,
-                  attachment.data,
-                );
-
-                await ctx.db
-                  .insert(surveyAttachments)
-                  .values({
-                    dataId: submission.__id,
-                    type: attachmentPath.type,
-                    name: attachmentName,
-                  })
-                  .onConflictDoNothing();
-              }
-            }
-          }
-        }
-      } catch (error) {
-        console.log(error);
-        throw new Error(`Failed to get submissions: ${(error as any).message}`);
-      }
     }),
 });

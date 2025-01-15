@@ -14,14 +14,17 @@ export const surveyFormSchema = z.object({
         path: z.string().optional(),
         type: z.enum([
           "audio_monitoring",
-          "house_image",
-          "house_image_selfie",
+          "building_image",
+          "building_selfie",
+          "family_head_image",
+          "family_head_selfie",
           "business_image",
-          "business_image_selfie",
+          "business_selfie",
         ]),
       }),
     )
     .optional(),
+  updateInterval: z.number().int().optional(),
 });
 
 export const fetchSubmissionsSchema = z
