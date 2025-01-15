@@ -1,4 +1,5 @@
 "use client";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -8,12 +9,42 @@ import { toast } from "sonner";
 import { updateAreaSchema } from "@/server/api/routers/areas/area.schema";
 import type { z } from "zod";
 import { Form, FormLabel } from "@/components/ui/form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/loading-button";
 import { CreateAreaMap } from "./create-area";
 import { useMapContext } from "@/lib/map-state";
+import { MapPin, Hash, Home } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const FormCard = ({
+  title,
+  icon: Icon,
+  description,
+  children,
+}: {
+  title: string;
+  icon: React.ElementType;
+  description: string;
+  children: React.ReactNode;
+}) => (
+  <Card className="shadow-sm">
+    <CardHeader>
+      <CardTitle className="flex items-center gap-2 text-lg font-medium">
+        <Icon className="h-5 w-5 text-primary" />
+        {title}
+      </CardTitle>
+      <CardDescription>{description}</CardDescription>
+    </CardHeader>
+    <CardContent>{children}</CardContent>
+  </Card>
+);
 
 export const AreaEdit = ({ id }: { id: string }) => {
   const router = useRouter();
@@ -38,17 +69,9 @@ export const AreaEdit = ({ id }: { id: string }) => {
         wardNumber: areaData.wardNumber,
         geometry: areaData.geometry,
       });
-      setGeometry(
-        // @ts-ignore
-        areaData.geometry as string,
-      );
+      setGeometry(areaData.geometry);
     }
   }, [areaData, form]);
-
-  const handleGeometryChange = (newGeometry: any) => {
-    console.log(newGeometry, typeof newGeometry);
-    setGeometry(newGeometry);
-  };
 
   async function onSubmit(values: z.infer<typeof updateAreaSchema>) {
     setIsLoading(true);
@@ -57,68 +80,75 @@ export const AreaEdit = ({ id }: { id: string }) => {
         ...values,
         geometry: geometry,
       });
-      toast.success("Area geometry updated successfully");
+      toast.success("Area updated successfully");
       router.push("/area");
     } catch (error) {
-      toast.error("Failed to update area geometry");
+      toast.error("Failed to update area");
     } finally {
       setIsLoading(false);
     }
   }
 
   if (isLoadingArea) {
-    return <div>Loading...</div>;
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-[100px]" />
+        <Skeleton className="h-[400px]" />
+      </div>
+    );
   }
 
   return (
-    <Card className="shadow-lg">
-      <CardHeader className="border-b bg-muted/40 pb-4">
-        <CardTitle className="text-2xl font-semibold text-primary">
-          Edit Geometry
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-6">
-        <div className="grid grid-cols-2 gap-6 p-4 mb-6 bg-muted/20 rounded-lg border">
-          <div className="space-y-1">
-            <h3 className="text-sm font-medium text-muted-foreground">
-              Ward Number
-            </h3>
-            <p className="text-2xl font-bold text-primary">
-              {areaData?.wardNumber}
-            </p>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormCard
+          icon={Home}
+          title="Area Details"
+          description="Basic information about the area"
+        >
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="space-y-2">
+              <FormLabel className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                Ward Number
+              </FormLabel>
+              <div className="text-2xl font-semibold text-primary">
+                {areaData?.wardNumber}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <FormLabel className="flex items-center gap-2">
+                <Hash className="h-4 w-4" />
+                Area Code
+              </FormLabel>
+              <div className="text-2xl font-semibold text-primary">
+                {areaData?.code}
+              </div>
+            </div>
           </div>
-          <div className="space-y-1">
-            <h3 className="text-sm font-medium text-muted-foreground">
-              Area Code
-            </h3>
-            <p className="text-2xl font-bold text-primary">{areaData?.code}</p>
-          </div>
-        </div>
+        </FormCard>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <FormLabel>Area Geometry</FormLabel>
-              <CreateAreaMap
-                id={areaData?.id!}
-                onGeometryChange={handleGeometryChange}
-              />
-            </div>
-            <div className="flex justify-end gap-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.back()}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? <LoadingButton /> : "Update Geometry"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+        <FormCard
+          icon={MapPin}
+          title="Area Boundary"
+          description="Update the geographical boundary for this area"
+        >
+          <CreateAreaMap id={id} onGeometryChange={setGeometry} />
+        </FormCard>
+
+        <div className="flex justify-end gap-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push("/area")}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? <LoadingButton /> : "Update Area"}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 };

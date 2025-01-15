@@ -5,7 +5,13 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/loading-button";
 import { api } from "@/trpc/react";
@@ -31,6 +37,7 @@ import {
   CreateAreaMap,
   MapStateProvider,
 } from "@/components/dashboard/create-area";
+import { MapPin, ArrowLeft, Save, Home, Hash } from "lucide-react";
 
 const wards = [
   { value: "1", label: "1" },
@@ -84,103 +91,161 @@ const CreateAreaPage = () => {
   }
 
   return (
-    <ContentLayout title="Create Area">
-      <MapStateProvider>
-        <Card className="pt-10">
-          <CardContent>
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="wardNumber">Ward Number</Label>
-                    <Controller
-                      name="wardNumber"
-                      control={form.control}
-                      render={({ field }) => (
-                        <Select
-                          value={field.value?.toString()}
-                          onValueChange={(value) => {
-                            const wardNum = parseInt(value);
-                            setSelectedWard(wardNum);
-                            field.onChange(wardNum);
-                            form.setValue("code", 0); // Reset area code when ward changes
-                          }}
-                          required
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select ward first" />
-                          </SelectTrigger>
-                          <SelectContent className="z-[10000]">
-                            <SelectGroup>
-                              {wards.map((ward) => (
-                                <SelectItem key={ward.value} value={ward.value}>
-                                  {ward.label}
-                                </SelectItem>
-                              ))}
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    name="code"
-                    control={form.control}
-                    render={({ field }) => (
-                      <FormControl>
-                        <div>
-                          <FormLabel>Area Code</FormLabel>
+    <ContentLayout
+      title="Create New Area"
+      subtitle="Add a new area with its ward number and geographical boundaries"
+      actions={
+        <Button variant="outline" onClick={() => router.push("/area")}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Areas
+        </Button>
+      }
+    >
+      <div className="space-y-6">
+        <MapStateProvider>
+          {/* Basic Information Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Home className="h-5 w-5" />
+                Basic Information
+              </CardTitle>
+              <CardDescription>
+                Enter the ward number and area code for the new area
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
+                >
+                  <div className="grid gap-6 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        Ward Number
+                      </Label>
+                      <Controller
+                        name="wardNumber"
+                        control={form.control}
+                        render={({ field }) => (
                           <Select
-                            disabled={!selectedWard}
                             value={field.value?.toString()}
-                            onValueChange={(value) =>
-                              field.onChange(parseInt(value))
-                            }
+                            onValueChange={(value) => {
+                              const wardNum = parseInt(value);
+                              setSelectedWard(wardNum);
+                              field.onChange(wardNum);
+                              form.setValue("code", 0);
+                            }}
+                            required
                           >
                             <SelectTrigger>
-                              <SelectValue placeholder="Select area code" />
+                              <SelectValue placeholder="Select ward number" />
                             </SelectTrigger>
-                            <SelectContent className="max-h-[200px] z-[10000]">
+                            <SelectContent className="z-[10000]">
                               <SelectGroup>
-                                {availableAreaCodes?.map((code) => (
+                                {wards.map((ward) => (
                                   <SelectItem
-                                    key={code}
-                                    value={code.toString()}
+                                    key={ward.value}
+                                    value={ward.value}
                                   >
-                                    {code}
+                                    Ward {ward.label}
                                   </SelectItem>
                                 ))}
                               </SelectGroup>
                             </SelectContent>
                           </Select>
-                          <FormMessage />
-                        </div>
-                      </FormControl>
-                    )}
-                  />
-                </div>
+                        )}
+                      />
+                    </div>
 
-                <CreateAreaMap
-                  id="new-area"
-                  onGeometryChange={(geometry) =>
-                    form.setValue("geometry", geometry)
-                  }
-                />
+                    <FormField
+                      name="code"
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormControl>
+                          <div className="space-y-2">
+                            <Label className="flex items-center gap-2">
+                              <Hash className="h-4 w-4" />
+                              Area Code
+                            </Label>
+                            <Select
+                              disabled={!selectedWard}
+                              value={field.value?.toString()}
+                              onValueChange={(value) =>
+                                field.onChange(parseInt(value))
+                              }
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select area code" />
+                              </SelectTrigger>
+                              <SelectContent className="max-h-[200px] z-[10000]">
+                                <SelectGroup>
+                                  {availableAreaCodes?.map((code) => (
+                                    <SelectItem
+                                      key={code}
+                                      value={code.toString()}
+                                    >
+                                      {code}
+                                    </SelectItem>
+                                  ))}
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </div>
+                        </FormControl>
+                      )}
+                    />
+                  </div>
 
-                <div className="flex justify-end">
-                  <Button type="submit" disabled={isLoading}>
-                    {isLoading ? <LoadingButton /> : "Save Changes"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-      </MapStateProvider>
+                  {/* Map Card */}
+                  <Card className="mt-6">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <MapPin className="h-5 w-5" />
+                        Area Boundary
+                      </CardTitle>
+                      <CardDescription>
+                        Draw the geographical boundary for this area on the map
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <CreateAreaMap
+                        id="new-area"
+                        onGeometryChange={(geometry) =>
+                          form.setValue("geometry", geometry)
+                        }
+                      />
+                    </CardContent>
+                  </Card>
+
+                  <div className="flex justify-end gap-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => router.push("/area")}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={isLoading}>
+                      {isLoading ? (
+                        <LoadingButton />
+                      ) : (
+                        <>
+                          <Save className="mr-2 h-4 w-4" />
+                          Save Area
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </MapStateProvider>
+      </div>
     </ContentLayout>
   );
 };

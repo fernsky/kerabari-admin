@@ -88,6 +88,10 @@ export const MapDrawer = ({ zIndex = 1000 }: { zIndex?: number }) => {
             },
           },
         }}
+        edit={{
+          remove: false,
+          edit: true,
+        }}
       />
     </FeatureGroup>
   );

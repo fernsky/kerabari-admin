@@ -2,10 +2,27 @@
 
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { api } from "@/trpc/react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import {
+  Phone,
+  Mail,
+  MapPin,
+  User2,
+  UserCheck,
+  Building,
+  Calendar,
+} from "lucide-react";
+import { format } from "date-fns";
 
 export default function EnumeratorDetailsPage({
   params,
@@ -30,69 +47,134 @@ export default function EnumeratorDetailsPage({
   }
 
   if (!enumerator) {
-    return <div>Enumerator not found</div>;
+    return (
+      <ContentLayout title="Enumerator Not Found">
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-10">
+            <User2 className="h-12 w-12 text-muted-foreground/50" />
+            <p className="mt-4 text-lg font-medium text-muted-foreground">
+              The requested enumerator could not be found
+            </p>
+          </CardContent>
+        </Card>
+      </ContentLayout>
+    );
   }
+
+  const FormCard = ({
+    title,
+    description,
+    children,
+  }: {
+    title: string;
+    description: string;
+    children: React.ReactNode;
+  }) => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg font-medium">{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
+  );
+
+  const InfoItem = ({
+    icon: Icon,
+    label,
+    value,
+  }: {
+    icon: any;
+    label: string;
+    value: string | number | null;
+  }) => (
+    <div className="flex items-start space-x-3">
+      <div className="mt-0.5">
+        <Icon className="h-4 w-4 text-muted-foreground" />
+      </div>
+      <div>
+        <p className="text-sm font-medium text-muted-foreground">{label}</p>
+        <p className="mt-1 font-medium">{value || "-"}</p>
+      </div>
+    </div>
+  );
 
   return (
     <ContentLayout
       title="Enumerator Details"
       subtitle={`ID: ${params.id}`}
       actions={
-        <Button onClick={() => router.push(`/enumerators/${params.id}/edit`)}>
-          Edit Enumerator
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => router.push("/enumerators")}>
+            Back to List
+          </Button>
+          <Button onClick={() => router.push(`/enumerators/${params.id}/edit`)}>
+            Edit Enumerator
+          </Button>
+        </div>
       }
     >
       <div className="space-y-6 px-2 lg:px-10">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-medium">
-              Basic Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <div className="text-sm font-medium text-gray-500">Name</div>
-              <div className="mt-1">{enumerator.name}</div>
-            </div>
-            <div>
-              <div className="text-sm font-medium text-gray-500">
-                Phone Number
-              </div>
-              <div className="mt-1">{enumerator.phoneNumber}</div>
-            </div>
-            <div>
-              <div className="text-sm font-medium text-gray-500">Email</div>
-              <div className="mt-1">{enumerator.email || "-"}</div>
-            </div>
-            <div>
-              <div className="text-sm font-medium text-gray-500">
-                Ward Number
-              </div>
-              <div className="mt-1">{enumerator.wardNumber}</div>
-            </div>
-          </CardContent>
-        </Card>
+        <FormCard
+          title="Basic Information"
+          description="Personal and contact details of the enumerator"
+        >
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <InfoItem icon={User2} label="Full Name" value={enumerator.name} />
+            <InfoItem
+              icon={Phone}
+              label="Phone Number"
+              value={enumerator.phoneNumber}
+            />
+            <InfoItem
+              icon={Mail}
+              label="Email Address"
+              value={enumerator.email}
+            />
+          </div>
+        </FormCard>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg font-medium">
-              Account Details
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <div className="text-sm font-medium text-gray-500">Username</div>
-              <div className="mt-1">{enumerator.userName}</div>
-            </div>
-            <div>
-              <div className="text-sm font-medium text-gray-500">Status</div>
-              <div className="mt-1">
-                {enumerator.isActive ? "Active" : "Inactive"}
+        <FormCard
+          title="Account Information"
+          description="Account credentials and work assignment details"
+        >
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <InfoItem
+              icon={UserCheck}
+              label="Username"
+              value={enumerator.userName}
+            />
+            <InfoItem
+              icon={MapPin}
+              label="Assigned Ward"
+              value={`Ward ${enumerator.wardNumber}`}
+            />
+            <div className="flex items-start space-x-3">
+              <div className="mt-0.5">
+                <User2 className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Status
+                </p>
+                <div className="mt-1">
+                  <Badge
+                    variant={enumerator.isActive ? "default" : "secondary"}
+                    className={
+                      enumerator.isActive
+                        ? "bg-green-600 hover:bg-green-700"
+                        : ""
+                    }
+                  >
+                    {enumerator.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </FormCard>
+
+        {/* Add more sections as needed */}
       </div>
     </ContentLayout>
   );

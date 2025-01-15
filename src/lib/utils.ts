@@ -125,3 +125,26 @@ export const jsonToPostgres = (table: string, data: TableData): string => {
         DO UPDATE SET ${conflictUpdateClause}
     `;
 };
+
+export const isValidGeoJSON = (geojson: any): boolean => {
+  if (!geojson || typeof geojson !== "object") return false;
+
+  // Check if it's a proper GeoJSON object
+  if (!geojson.type || !geojson.coordinates) return false;
+
+  // Basic coordinate validation
+  const validateCoords = (coords: any[]): boolean => {
+    if (!Array.isArray(coords)) return false;
+
+    for (const coord of coords) {
+      if (Array.isArray(coord)) {
+        if (!validateCoords(coord)) return false;
+      } else {
+        if (typeof coord !== "number" || isNaN(coord)) return false;
+      }
+    }
+    return true;
+  };
+
+  return validateCoords(geojson.coordinates);
+};

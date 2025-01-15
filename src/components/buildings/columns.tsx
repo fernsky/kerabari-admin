@@ -1,7 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { BuildingSchema } from "@/server/db/schema";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight } from "lucide-react";
+import { Eye } from "lucide-react";
 import Link from "next/link";
 
 export const buildingColumns: ColumnDef<BuildingSchema>[] = [
@@ -29,7 +29,7 @@ export const buildingColumns: ColumnDef<BuildingSchema>[] = [
     cell: ({ row }) => (
       <Link href={`/buildings/${row.original.id}`}>
         <Button variant="ghost" size="sm">
-          <ArrowUpRight className="h-4 w-4" />
+          <Eye className="h-4 w-4" />
         </Button>
       </Link>
     ),

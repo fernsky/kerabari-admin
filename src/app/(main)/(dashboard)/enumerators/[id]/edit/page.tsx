@@ -31,6 +31,13 @@ import { z } from "zod";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const FormCard = ({
   title,
@@ -249,18 +256,26 @@ export default function EditEnumeratorPage({
                 <FormField
                   control={form.control}
                   name="wardNumber"
-                  render={({ field: { value, onChange, ...field } }) => (
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel>Ward Number</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          value={value}
-                          onChange={(e) => onChange(parseInt(e.target.value))}
-                          min={1}
-                        />
-                      </FormControl>
+                      <Select
+                        onValueChange={(value) =>
+                          field.onChange(parseInt(value))
+                        }
+                        value={(field.value ?? 1).toString()}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select ward" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[...Array(7)].map((_, i) => (
+                            <SelectItem key={i + 1} value={(i + 1).toString()}>
+                              Ward {i + 1}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

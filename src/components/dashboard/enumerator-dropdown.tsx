@@ -22,14 +22,7 @@ export function EnumeratorDropdown({ enumeratorId }: { enumeratorId: string }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem
-          onClick={() =>
-            router.push(`/enumerators/reset-password/${enumeratorId}`)
-          }
-        >
-          Reset Password
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => router.push(`/enumerators/edit/${enumeratorId}`)}
+          onClick={() => router.push(`/enumerators/${enumeratorId}/edit`)}
         >
           Edit Details
         </DropdownMenuItem>

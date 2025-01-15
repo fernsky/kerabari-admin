@@ -11,7 +11,7 @@ import { FilterDrawer } from "@/components/shared/filters/filter-drawer";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/lib/hooks/use-debounce";
-import { ChevronLeft, ChevronRight, Loader2, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Plus, Eye } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useMediaQuery } from "react-responsive";
 import { BuildingCard } from "@/components/buildings/building-card";

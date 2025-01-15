@@ -34,6 +34,11 @@ interface CreateAreaMapProps {
   onGeometryChange: (geometry: any) => void;
 }
 
+const isValidGeoJSON = (geometry: any) => {
+  // Add your validation logic here
+  return true;
+};
+
 const CreateAreaMap = ({ onGeometryChange }: CreateAreaMapProps) => {
   const { geometry } = useMapContext();
   const { wards, areas, wardLayers } = useLayerStore();
@@ -59,7 +64,10 @@ const CreateAreaMap = ({ onGeometryChange }: CreateAreaMapProps) => {
         {wards.map((ward) => {
           if (!wardLayers[ward.wardNumber]?.visible || !ward.geometry)
             return null;
-          console.log(ward.geometry);
+          if (!isValidGeoJSON(ward.geometry)) {
+            console.warn(`Invalid geometry for ward ${ward.wardNumber}`);
+            return null;
+          }
           return (
             <GeoJSON
               key={`ward-${ward.wardNumber}`}
@@ -78,7 +86,10 @@ const CreateAreaMap = ({ onGeometryChange }: CreateAreaMapProps) => {
         {areas.map((area) => {
           if (!wardLayers[area.wardNumber]?.areas[area.id] || !area.geometry)
             return null;
-          console.log(area.geometry);
+          if (!isValidGeoJSON(area.geometry)) {
+            console.warn(`Invalid geometry for area ${area.id}`);
+            return null;
+          }
           return (
             <GeoJSON
               key={`area-${area.id}`}
@@ -95,7 +106,7 @@ const CreateAreaMap = ({ onGeometryChange }: CreateAreaMapProps) => {
         })}
 
         {/* Drawing Layer - Always on top */}
-        <MapDrawer zIndex={1000} />
+        <MapDrawer zIndex={10000} />
         <LayerControl />
       </Map>
     </Card>
