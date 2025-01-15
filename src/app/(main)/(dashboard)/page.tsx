@@ -1,19 +1,12 @@
-import React from "react";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { EnumeratorArea } from "@/components/dashboard/enumerator-area";
 
-const DashboardPage: React.FC = () => {
+const DashboardPage = () => {
   return (
-    <ContentLayout title="Account">
-      <div className="flex">
-        <div className="flex justify-end w-full">
-          <Link href="/area/request">
-            <Button>Request an Area</Button>
-          </Link>
-        </div>
-      </div>
+    <ContentLayout title="Dashboard">
+      <EnumeratorArea />
     </ContentLayout>
   );
 };
+
 export default DashboardPage;

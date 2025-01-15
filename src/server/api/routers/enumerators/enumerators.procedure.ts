@@ -1,14 +1,14 @@
 import { TRPCError } from "@trpc/server";
 import { Scrypt } from "lucia";
 import { generateId } from "lucia";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import {
   createEnumeratorSchema,
   resetEnumeratorPasswordSchema,
   updateEnumeratorSchema,
 } from "./enumerators.schema";
-import { users } from "@/server/db/schema/basic";
+import { Area, areas, users } from "@/server/db/schema/basic";
 import * as z from "zod";
 
 export const enumeratorRouter = createTRPCRouter({
@@ -125,4 +125,31 @@ export const enumeratorRouter = createTRPCRouter({
 
       return enumerator;
     }),
+
+  getAssignedArea: protectedProcedure.query(async ({ ctx }) => {
+    const assignedArea = await ctx.db.execute(
+      sql`SELECT 
+          ${areas.id} as "id",
+          ${areas.code} as "code",
+          ${areas.wardNumber} as "wardNumber",
+          ${areas.assignedTo} as "assignedTo",
+          ST_AsGeoJSON(${areas.geometry}) as "geometry",
+          ST_AsGeoJSON(ST_Centroid(${areas.geometry})) as "centroid"
+        FROM ${areas}
+        WHERE ${areas.assignedTo} = ${ctx.user.id}
+        LIMIT 1`,
+    );
+
+    if (assignedArea.length === 0) return null;
+
+    return {
+      ...assignedArea[0],
+      geometry: assignedArea[0].geometry
+        ? JSON.parse(assignedArea[0].geometry as string)
+        : null,
+      centroid: assignedArea[0].centroid
+        ? JSON.parse(assignedArea[0].centroid as string)
+        : null,
+    } as unknown as Area;
+  }),
 });

@@ -315,6 +315,11 @@ export const areaRouter = createTRPCRouter({
           await tx
             .delete(areaRequests)
             .where(sql`${areaRequests.areaId} = ${areaId}`);
+
+          // Also delete all other requests for the user
+          await tx
+            .delete(areaRequests)
+            .where(sql`${areaRequests.userId} = ${userId}`);
         } else if (status === "rejected") {
           await tx
             .delete(areaRequests)

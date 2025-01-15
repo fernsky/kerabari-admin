@@ -73,6 +73,16 @@ export const wards = pgTable(
   }),
 );
 
+export const areaStatusEnum = pgEnum("attachment", [
+  "audio_monitoring",
+  "building_image",
+  "building_selfie",
+  "family_head_image",
+  "family_head_selfie",
+  "business_image",
+  "business_selfie",
+]);
+
 export const areas = pgTable("areas", {
   id: varchar("id", { length: 36 }).primaryKey(),
   code: integer("code").notNull(),
@@ -82,6 +92,8 @@ export const areas = pgTable("areas", {
   geometry: geometry("geometry", { type: "Polygon" }),
   assignedTo: varchar("assigned_to", { length: 21 }).references(() => users.id),
 });
+
+export type Area = typeof areas.$inferSelect;
 
 export const surveyForms = pgTable("odk_survey_forms", {
   id: varchar("id", { length: 255 }).primaryKey(),
