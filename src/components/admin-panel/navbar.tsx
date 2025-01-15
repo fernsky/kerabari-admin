@@ -4,21 +4,39 @@ import { SheetMenu } from "@/components/admin-panel/sheet-menu";
 
 interface NavbarProps {
   title: string;
+  subtitle?: string;
+  actions?: React.ReactNode;
 }
 
-export function Navbar({ title }: NavbarProps) {
+export function Navbar({ title, subtitle, actions }: NavbarProps) {
   return (
-    <header className="sticky top-0 z-10 w-full bg-background/95 shadow backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:shadow-secondary">
-      <div className="mx-4 sm:mx-8 flex h-14 items-center">
-        <div className="flex items-center space-x-4 lg:space-x-0">
+    <div className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="mx-4 flex h-14 items-center justify-between sm:mx-8">
+        <div className="flex items-center space-x-4">
           <SheetMenu />
-          <h1 className="font-bold">{title}</h1>
+          <div>
+            <h1 className="font-semibold">{title}</h1>
+            {subtitle && (
+              <p className="text-xs text-muted-foreground">{subtitle}</p>
+            )}
+          </div>
         </div>
-        <div className="flex flex-1 items-center justify-end">
+
+        <div className="flex items-center gap-2">
+          {actions && (
+            <div className="hidden sm:flex items-center gap-2">{actions}</div>
+          )}
           <ModeToggle />
           <UserNav />
         </div>
       </div>
-    </header>
+
+      {/* Mobile Actions Bar */}
+      {actions && (
+        <div className="sm:hidden border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 py-2">
+          <div className="flex items-center gap-2 justify-end">{actions}</div>
+        </div>
+      )}
+    </div>
   );
 }

@@ -1,36 +1,37 @@
-import { Building } from "@/server/api/routers/building/building.schema";
-import { createColumns } from "../shared/data-table/columns";
-import { Badge } from "../ui/badge";
+import { ColumnDef } from "@tanstack/react-table";
+import { BuildingSchema } from "@/server/db/schema";
+import { Button } from "@/components/ui/button";
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
-import { Button } from "../ui/button";
 
-export const buildingColumns = createColumns<Building>([
+export const buildingColumns: ColumnDef<BuildingSchema>[] = [
   {
-    header: "Ward",
     accessorKey: "wardNumber",
-    sortable: true,
+    header: "Ward",
   },
   {
-    header: "Locality",
-    accessorKey: "locality",
-    sortable: true,
+    accessorKey: "areaCode",
+    header: "Area Code",
   },
   {
-    header: "Status",
-    accessorKey: "mapStatus",
-    cell: ({ row }) => <Badge>{row.original.mapStatus}</Badge>,
+    accessorKey: "enumeratorName",
+    header: "Collected By",
   },
   {
-    header: "Actions",
-    accessorKey: "id",
+    accessorKey: "base",
+    header: "Building Base",
     cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <Link href={`/buildings/${row.original.id}`}>
-          <Button variant="ghost" size="sm">
-            View
-          </Button>
-        </Link>
-      </div>
+      <span className="capitalize">{row.getValue("base") || "—"}</span>
     ),
   },
-]);
+  {
+    id: "actions",
+    cell: ({ row }) => (
+      <Link href={`/buildings/${row.original.id}`}>
+        <Button variant="ghost" size="sm">
+          <ArrowUpRight className="h-4 w-4" />
+        </Button>
+      </Link>
+    ),
+  },
+];

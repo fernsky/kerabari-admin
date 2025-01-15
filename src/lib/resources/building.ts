@@ -37,7 +37,7 @@ const decodeMultipleChoices = <T extends Record<string, string>>(
   }
 };
 
-const buildingChoices = {
+export const buildingChoices = {
   house_base: {
     concrete_pillar: "ढलान पिल्लरसहितको",
     cement_joined: "सिमेन्टको जोडाइ भएको इँटा/ढुङ्गा",

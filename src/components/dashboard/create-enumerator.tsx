@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/loading-button";
@@ -15,13 +14,46 @@ import {
   Form,
   FormControl,
   FormField,
+  FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
   createEnumeratorSchema,
   type CreateEnumeratorInput,
 } from "@/server/api/routers/enumerators/enumerators.schema";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+
+const FormCard = ({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) => (
+  <Card>
+    <CardHeader>
+      <CardTitle className="text-lg font-medium">{title}</CardTitle>
+      <CardDescription>{description}</CardDescription>
+    </CardHeader>
+    <CardContent className="grid gap-4">{children}</CardContent>
+  </Card>
+);
 
 export function CreateEnumerator() {
   const router = useRouter();
@@ -57,21 +89,27 @@ export function CreateEnumerator() {
   }
 
   return (
-    <Card className="max-w-[600px] pt-10">
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-6 px-2 lg:px-10"
+      >
+        <FormCard
+          title="Personal Information"
+          description="Basic details about the enumerator"
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
-                <FormControl>
-                  <div>
-                    <FormLabel>Full Name</FormLabel>
+                <FormItem>
+                  <FormLabel>Full Name</FormLabel>
+                  <FormControl>
                     <Input {...field} placeholder="John Doe" />
-                    <FormMessage />
-                  </div>
-                </FormControl>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
             />
 
@@ -79,13 +117,13 @@ export function CreateEnumerator() {
               control={form.control}
               name="phoneNumber"
               render={({ field }) => (
-                <FormControl>
-                  <div>
-                    <FormLabel>Phone Number</FormLabel>
+                <FormItem>
+                  <FormLabel>Phone Number</FormLabel>
+                  <FormControl>
                     <Input {...field} placeholder="9800000000" />
-                    <FormMessage />
-                  </div>
-                </FormControl>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
             />
 
@@ -93,51 +131,66 @@ export function CreateEnumerator() {
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormControl>
-                  <div>
-                    <FormLabel>Email (Optional)</FormLabel>
+                <FormItem>
+                  <FormLabel>Email (Optional)</FormLabel>
+                  <FormControl>
                     <Input
                       {...field}
                       type="email"
                       placeholder="john@example.com"
                     />
-                    <FormMessage />
-                  </div>
-                </FormControl>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="userName"
-              render={({ field }) => (
-                <FormControl>
-                  <div>
-                    <FormLabel>Username</FormLabel>
-                    <Input {...field} placeholder="johndoe" />
-                    <FormMessage />
-                  </div>
-                </FormControl>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
             />
 
             <FormField
               control={form.control}
               name="wardNumber"
-              render={({ field: { value, onChange, ...field } }) => (
-                <FormControl>
-                  <div>
-                    <FormLabel>Ward Number</FormLabel>
-                    <Input
-                      {...field}
-                      type="number"
-                      value={value}
-                      onChange={(e) => onChange(parseInt(e.target.value))}
-                      min={1}
-                    />
-                    <FormMessage />
-                  </div>
-                </FormControl>
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Ward Number</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(parseInt(value))}
+                    value={field.value?.toString()}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select ward" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {[1, 2, 3, 4, 5, 6, 7].map((ward) => (
+                        <SelectItem key={ward} value={ward.toString()}>
+                          Ward {ward}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </FormCard>
+
+        <FormCard
+          title="Account Details"
+          description="Login credentials and account status"
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="userName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="johndoe" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
             />
 
@@ -145,13 +198,13 @@ export function CreateEnumerator() {
               control={form.control}
               name="password"
               render={({ field }) => (
-                <FormControl>
-                  <div>
-                    <FormLabel>Password</FormLabel>
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
                     <Input {...field} type="password" />
-                    <FormMessage />
-                  </div>
-                </FormControl>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
             />
 
@@ -159,33 +212,29 @@ export function CreateEnumerator() {
               control={form.control}
               name="isActive"
               render={({ field }) => (
-                <FormControl>
-                  <div className="flex items-center space-x-2 justify-between">
-                    <FormLabel>Active</FormLabel>
+                <FormItem className="flex items-center justify-between space-y-0">
+                  <FormLabel>Active Status</FormLabel>
+                  <FormControl>
                     <Switch
                       checked={field.value}
                       onCheckedChange={field.onChange}
                     />
-                  </div>
-                </FormControl>
+                  </FormControl>
+                </FormItem>
               )}
             />
+          </div>
+        </FormCard>
 
-            <div className="flex justify-end space-x-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.back()}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? <LoadingButton /> : "Create Enumerator"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+        <div className="flex justify-end space-x-4">
+          <Button type="button" variant="outline" onClick={() => router.back()}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? <LoadingButton /> : "Create Enumerator"}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }
