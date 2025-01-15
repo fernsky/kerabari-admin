@@ -23,6 +23,8 @@ export const env = createEnv({
     MINIO_CLIENT_SECRET_KEY: z.string().trim().min(1),
     MINIO_USE_SSL: z.boolean().default(false),
     BUCKET_NAME: z.string().trim().min(1),
+    REDIS_URL: z.string().url(),
+    REDIS_PASSWORD: z.string().trim().min(1),
   },
 
   /**
@@ -53,6 +55,8 @@ export const env = createEnv({
     BUCKET_NAME: process.env.BUCKET_NAME,
     // Client-side env vars
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    REDIS_URL: process.env.REDIS_URL,
+    REDIS_PASSWORD: process.env.REDIS_PASSWORD,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

@@ -110,6 +110,7 @@ export const surveyData = pgTable("odk_survey_data", {
     .references(() => surveyForms.id),
   data: json("data").notNull(),
   created_at: timestamp("created_at").defaultNow().notNull(),
+  updated_at: timestamp("updated_at").$onUpdate(() => new Date()),
 });
 
 export const attachmentTypesEnum = pgEnum("attachment", [
@@ -162,5 +163,18 @@ export const areaRequests = pgTable(
   },
   (t) => ({
     pk: primaryKey(t.areaId, t.userId),
+  }),
+);
+
+export const stagingToProduction = pgTable(
+  "staging_to_production",
+  {
+    staging_table: varchar("staging_table", { length: 255 }).notNull(),
+    production_table: varchar("production_table", { length: 255 }).notNull(),
+    recordId: varchar("record_id", { length: 255 }).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => ({
+    pk: primaryKey(t.staging_table, t.production_table, t.recordId),
   }),
 );

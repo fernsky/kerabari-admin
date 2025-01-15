@@ -26,10 +26,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FetchSubmissions } from "./fetch-submissions";
-import { FormAttachmentType } from "@/types";
 
 const formSchema = z.object({
-  id: z.string().min(1, "Form ID is required"),
   name: z.string().min(1, "Form name is required"),
   siteEndpoint: z.string().url().optional(),
   odkFormId: z.string().max(255),
@@ -90,15 +88,15 @@ export const ODKResourcesForm = ({ formId }: { formId: string }) => {
           type: ap.type ?? "building_image",
         })),
       };
-      setInitialData(initialData);
-      form.reset(initialData);
+      setInitialData({ ...initialData });
+      form.reset({ ...initialData });
     }
   }, [formData.data]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      await createOrUpdateForm.mutateAsync(values);
+      await createOrUpdateForm.mutateAsync({ ...values, id: formId });
       toast.success("Form saved successfully");
       router.push("/forms");
     } catch (error) {
@@ -117,19 +115,6 @@ export const ODKResourcesForm = ({ formId }: { formId: string }) => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-4">
                 {/* Form Fields */}
-                <FormField
-                  name="id"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormControl>
-                      <div>
-                        <FormLabel>Form Id</FormLabel>
-                        <Input {...field} value={formId} disabled />
-                        <FormMessage />
-                      </div>
-                    </FormControl>
-                  )}
-                />
                 <FormField
                   name="name"
                   control={form.control}
