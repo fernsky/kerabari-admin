@@ -1,5 +1,7 @@
 import { jsonToPostgres } from "@/lib/utils";
 import { DATABASE_PREFIX } from "@/lib/constants";
+import { map } from "leaflet";
+import { mapBuildingChoices } from "@/lib/resources/building";
 
 const data = {
   intro: null,
@@ -125,7 +127,7 @@ interface GeoPointLocation {
 /**
  * Raw building survey data structure from ODK
  */
-interface RawBuildingData {
+export interface RawBuildingData {
   // Enumerator Information
   enumerator_id: string;
   enumerator_name: string;
@@ -204,7 +206,9 @@ interface RawBuildingData {
  * @param r - Raw building data from ODK
  * @returns Normalized building data matching database schema
  */
-export function parseBuilding(r: RawBuildingData) {
+export function parseBuilding(data: RawBuildingData) {
+  const r = mapBuildingChoices(data);
+  console.log(r);
   // Initialize location-related variables
   let gps = null;
   let altitude = null;
@@ -270,6 +274,7 @@ export function parseBuilding(r: RawBuildingData) {
     time_to_financial_organization: r.time_to_financial_org,
     road_status: r.road_status, // e.g., Graveled, Paved
   };
+
   return jsonToPostgres("staging_buddhashanti_buildings", payload);
 }
 

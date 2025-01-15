@@ -25,7 +25,7 @@ export const buildingColumns = createColumns<Building>([
     accessorKey: "id",
     cell: ({ row }) => (
       <div className="flex space-x-2">
-        <Link href={`/resources/buildings/${row.original.id}`}>
+        <Link href={`/buildings/${row.original.id}`}>
           <Button variant="ghost" size="sm">
             View
           </Button>

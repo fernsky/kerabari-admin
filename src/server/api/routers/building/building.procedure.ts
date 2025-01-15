@@ -9,6 +9,7 @@ import {
   updateBuildingSchema,
   buildingQuerySchema,
 } from "./building.schema";
+import { mapBuildingChoices } from "@/lib/resources/building";
 
 export const buildingRouter = createTRPCRouter({
   // Create new building

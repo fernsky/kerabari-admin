@@ -8,6 +8,7 @@ import {
   GitPullRequest,
   Diamond,
   Building,
+  Building2,
 } from "lucide-react";
 
 type Submenu = {
@@ -35,9 +36,20 @@ export function getMenuList(pathname: string): Group[] {
       groupLabel: "",
       menus: [
         {
-          href: "/",
-          label: "My Areas",
-          icon: LayoutGrid,
+          href: "/buildings",
+          label: "Buildings",
+          icon: Building2,
+        },
+        {
+          href: "/area/requested-areas",
+          label: "Requested Areas",
+          icon: GitPullRequest,
+          submenus: [],
+        },
+        {
+          href: "/enumerators",
+          label: "Enumerators",
+          icon: UsersRound,
           submenus: [],
         },
         {
@@ -50,29 +62,6 @@ export function getMenuList(pathname: string): Group[] {
           href: "/area",
           label: "Areas",
           icon: LandPlot,
-          submenus: [],
-        },
-        {
-          href: "/resources",
-          label: "Resources",
-          icon: Diamond,
-          submenus: [
-            {
-              href: "/resources/buildings",
-              label: "Buildings",
-            },
-          ],
-        },
-        {
-          href: "/area/requested-areas",
-          label: "Requested Areas",
-          icon: GitPullRequest,
-          submenus: [],
-        },
-        {
-          href: "/enumerators",
-          label: "Enumerators",
-          icon: UsersRound,
           submenus: [],
         },
         {

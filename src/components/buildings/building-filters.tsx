@@ -22,9 +22,9 @@ export function BuildingFilters({
   onFilterChange,
 }: BuildingFiltersProps) {
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label>Ward Number</Label>
+    <div className="grid gap-4 lg:grid-cols-3 lg:gap-6">
+      <div className="flex flex-col space-y-1.5">
+        <Label className="text-xs font-medium">Ward Number</Label>
         <Input
           type="number"
           value={wardNumber || ""}
@@ -32,25 +32,27 @@ export function BuildingFilters({
             onFilterChange("wardNumber", parseInt(e.target.value))
           }
           placeholder="Filter by ward number"
+          className="h-9"
         />
       </div>
 
-      <div className="space-y-2">
-        <Label>Locality</Label>
+      <div className="flex flex-col space-y-1.5">
+        <Label className="text-xs font-medium">Locality</Label>
         <Input
           value={locality || ""}
           onChange={(e) => onFilterChange("locality", e.target.value)}
           placeholder="Filter by locality"
+          className="h-9"
         />
       </div>
 
-      <div className="space-y-2">
-        <Label>Map Status</Label>
+      <div className="flex flex-col space-y-1.5">
+        <Label className="text-xs font-medium">Map Status</Label>
         <Select
           value={mapStatus}
           onValueChange={(value) => onFilterChange("mapStatus", value)}
         >
-          <SelectTrigger>
+          <SelectTrigger className="h-9">
             <SelectValue placeholder="Select status" />
           </SelectTrigger>
           <SelectContent>

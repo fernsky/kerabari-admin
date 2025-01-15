@@ -10,9 +10,6 @@ import {
   Users,
   MapPin,
   Store,
-  Phone,
-  Mail,
-  Camera,
   Edit,
   Trash2,
   Home,
@@ -101,6 +98,41 @@ export default function BuildingDetails({
     </div>
   );
 
+  const MultipleDetailRow = ({
+    icon: Icon,
+    label,
+    values,
+  }: {
+    icon: any;
+    label: string;
+    values: string[] | null | undefined;
+  }) => (
+    <div className="group relative rounded-lg border bg-card/50 p-3 transition-all hover:bg-accent/50">
+      <div className="flex items-center gap-3">
+        <div className="rounded-md bg-primary/10 p-2">
+          <Icon className="h-4 w-4 text-primary" />
+        </div>
+        <div className="flex-1">
+          <p className="text-xs font-medium text-muted-foreground">{label}</p>
+          <div className="mt-1 flex flex-wrap gap-1">
+            {values && values.length > 0 ? (
+              values.map((value, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary"
+                >
+                  {value}
+                </span>
+              ))
+            ) : (
+              <span className="text-muted-foreground">—</span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const Card = ({
     title,
     icon: Icon,
@@ -129,7 +161,7 @@ export default function BuildingDetails({
       title="Building Details"
       actions={
         <div className="flex gap-2">
-          <Link href={`/resources/buildings/edit/${params.id}`}>
+          <Link href={`/buildings/edit/${params.id}`}>
             <Button size="sm" variant="outline">
               <Edit className="mr-2 h-4 w-4" /> Edit
             </Button>
@@ -245,10 +277,10 @@ export default function BuildingDetails({
                 label="Map Status"
                 value={building?.mapStatus}
               />
-              <DetailRow
+              <MultipleDetailRow
                 icon={AlertTriangle}
                 label="Natural Disasters"
-                value={building?.naturalDisasters}
+                values={building?.naturalDisasters}
               />
             </Card>
 

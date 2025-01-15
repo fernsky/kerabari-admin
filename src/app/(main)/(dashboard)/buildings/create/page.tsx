@@ -7,7 +7,7 @@ const CreateBuilding: React.FC = () => {
   return (
     <ContentLayout title="Create Building">
       <div className="flex justify-start mb-4">
-        <Link href="/resources/buildings">
+        <Link href="/buildings">
           <Button variant="outline" type="button">
             Back to Buildings
           </Button>

@@ -89,21 +89,27 @@ interface TableData {
  * ```
  */
 export const jsonToPostgres = (table: string, data: TableData): string => {
-  // Extract all column names from the data object
   const keys = Object.keys(data);
 
-  // Transform values into PostgreSQL compatible format
   const values = Object.values(data).map((val) => {
+    if (val === null) return "NULL";
+
+    if (Array.isArray(val)) {
+      // Handle array values by converting to Postgres array syntax with single quotes
+      const escapedValues = val.map((item) =>
+        typeof item === "string" ? `'${item.replace(/'/g, "''")}'` : item,
+      );
+      return `ARRAY[${escapedValues.join(",")}]`;
+    }
+
     if (typeof val === "string") {
-      // Special handling for PostGIS POINT geometry data
       if (val.startsWith("POINT")) {
         return `ST_GeomFromText('${val}', 4326)`;
       }
-      // Escape single quotes in string values
       return `'${val.replace(/'/g, "''")}'`;
     }
-    // Convert null values to 'NULL', otherwise use value as-is
-    return val === null ? "NULL" : val;
+
+    return val;
   });
 
   // Create the UPDATE clause for UPSERT operation
