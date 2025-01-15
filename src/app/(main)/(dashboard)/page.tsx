@@ -1,9 +1,13 @@
+"use server";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { EnumeratorArea } from "@/components/dashboard/enumerator-area";
+import { validateRequest } from "@/lib/auth/validate-request";
 
-const DashboardPage = () => {
+const DashboardPage = async () => {
+  const { user } = await validateRequest();
+  if (!user) return null;
   return (
-    <ContentLayout title="Dashboard">
+    <ContentLayout title="Dashboard" user={user}>
       <EnumeratorArea />
     </ContentLayout>
   );

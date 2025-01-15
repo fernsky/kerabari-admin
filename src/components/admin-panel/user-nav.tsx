@@ -36,7 +36,7 @@ export function UserNav({ user }: { user: User }) {
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="#" alt="Avatar" />
                   <AvatarFallback className="bg-transparent">
-                    {user.name.at(0)}
+                    {user?.name?.at(0)}
                   </AvatarFallback>
                 </Avatar>
               </Button>

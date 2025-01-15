@@ -5,10 +5,13 @@ import { Sidebar } from "@/components/admin-panel/sidebar";
 import { useSidebar } from "@/hooks/use-sidebar";
 import { useStore } from "@/hooks/use-store";
 import { cn } from "@/lib/utils";
+import { type User } from "lucia";
 
 export default function AdminPanelLayout({
+  user,
   children,
 }: {
+  user: User;
   children: React.ReactNode;
 }) {
   const sidebar = useStore(useSidebar, (x) => x);
