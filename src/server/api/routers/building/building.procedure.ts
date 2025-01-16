@@ -4,12 +4,10 @@ import { buildings } from "@/server/db/schema/building";
 import { and, eq, ilike, sql } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import {
-  buildingSchema,
   createBuildingSchema,
   updateBuildingSchema,
   buildingQuerySchema,
 } from "./building.schema";
-import { mapBuildingChoices } from "@/lib/resources/building";
 
 export const buildingRouter = createTRPCRouter({
   // Create new building
@@ -17,12 +15,16 @@ export const buildingRouter = createTRPCRouter({
     .input(createBuildingSchema)
     .mutation(async ({ ctx, input }) => {
       const id = uuidv4();
-      const { gps, altitude, gpsAccuracy, ...restInput } = input;
+      const { gps, altitude, gpsAccuracy, naturalDisasters, ...restInput } =
+        input;
       await ctx.db.insert(buildings).values({
         ...restInput,
         id,
         surveyDate: new Date(input.surveyDate),
         gps: sql`ST_GeomFromText(${gps})`,
+        naturalDisasters: Array.isArray(naturalDisasters)
+          ? naturalDisasters
+          : [naturalDisasters],
       });
       return { id };
     }),
@@ -113,6 +115,11 @@ export const buildingRouter = createTRPCRouter({
           ? new Date(restData.surveyDate)
           : undefined,
         gps: gps ? sql`ST_GeomFromText(${gps})` : undefined,
+        naturalDisasters: restData.naturalDisasters
+          ? Array.isArray(restData.naturalDisasters)
+            ? restData.naturalDisasters
+            : [restData.naturalDisasters]
+          : undefined,
       };
 
       await ctx.db

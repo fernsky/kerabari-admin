@@ -12,8 +12,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Building2, Home } from "lucide-react";
+import { MapPin, Building2, Home, Key } from "lucide-react";
 import dynamic from "next/dynamic";
+import TokenStats from "@/components/token-stats";
+import { TokenList } from "@/components/tokens/token-list";
 
 const Map = dynamic(() => import("@/components/map/view-area-map"), {
   ssr: false,
@@ -51,6 +53,10 @@ export default function AreaDetailsPage({
   const { data: area, isLoading } = api.area.getAreaById.useQuery({
     id: params.id,
   });
+  const { data: tokenStats, isLoading: isTokenStatsLoading } =
+    api.area.getTokenStatsByAreaId.useQuery({
+      areaId: params.id,
+    });
 
   if (isLoading) {
     return (
@@ -122,6 +128,30 @@ export default function AreaDetailsPage({
 
         <Card>
           <CardHeader>
+            <CardTitle>Token Statistics</CardTitle>
+            <CardDescription>
+              Overview of building tokens in this area
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isTokenStatsLoading ? (
+              <Skeleton className="h-[200px] rounded-lg" />
+            ) : (
+              <TokenStats
+                stats={
+                  tokenStats || {
+                    totalTokens: 0,
+                    allocatedTokens: 0,
+                    unallocatedTokens: 0,
+                  }
+                }
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
             <CardTitle>Area Map</CardTitle>
             <CardDescription>
               Geographical boundaries of the area
@@ -131,6 +161,18 @@ export default function AreaDetailsPage({
             <div className="h-[400px] w-full rounded-lg overflow-hidden">
               <Map area={area} />
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Building Tokens</CardTitle>
+            <CardDescription>
+              List of all building tokens for this area
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TokenList areaId={params.id} />
           </CardContent>
         </Card>
       </div>

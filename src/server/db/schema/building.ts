@@ -4,12 +4,10 @@ import {
   integer,
   timestamp,
   decimal,
-  boolean,
   doublePrecision,
   pgEnum,
 } from "drizzle-orm/pg-core";
 import { geometry } from "../geographical";
-import { InferModel } from "drizzle-orm";
 import { areas } from "./basic";
 
 /*
@@ -116,6 +114,9 @@ export const buildings = pgTable("buddhashanti_buildings", {
   roadStatus: varchar("road_status", { length: 255 }), // e.g., Graveled, Paved
 });
 
+export type StagingBuilding = typeof stagingBuildings.$inferSelect;
+export type BuildingSchema = typeof buildings.$inferSelect;
+
 export const buildingTokenStatusEnum = pgEnum("building_token_status_enum", [
   "allocated",
   "unallocated",
@@ -128,5 +129,4 @@ export const buildingTokens = pgTable("buddhashanti_building_tokens", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export type StagingBuilding = typeof stagingBuildings.$inferSelect;
-export type BuildingSchema = typeof buildings.$inferSelect;
+export type BuildingToken = typeof buildingTokens.$inferSelect;

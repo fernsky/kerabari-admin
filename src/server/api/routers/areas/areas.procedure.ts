@@ -10,6 +10,7 @@ import {
   updateAreaRequestStatusSchema,
 } from "./area.schema";
 import { nanoid } from "nanoid";
+import { BuildingToken, buildingTokens } from "@/server/db/schema/building";
 
 export const areaRouter = createTRPCRouter({
   createArea: protectedProcedure
@@ -22,11 +23,20 @@ export const areaRouter = createTRPCRouter({
       } catch (error) {
         throw new Error("Invalid GeoJSON representation");
       }
+      const id = nanoid();
       const newArea = await ctx.db.insert(areas).values({
-        id: nanoid(),
+        id,
         ...input,
         geometry: sql`ST_GeomFromGeoJSON(${geoJson})`,
       });
+      // Create 200 tokens for the newly created area
+      const tokens = Array.from({ length: 200 }, () => ({
+        token: nanoid(),
+        areaId: id as string,
+        status: "unallocated",
+      })) as BuildingToken[];
+
+      await ctx.db.insert(buildingTokens).values(tokens);
       return newArea;
     }),
 
@@ -354,5 +364,75 @@ export const areaRouter = createTRPCRouter({
       ).filter((code) => !usedCodesSet.has(code));
 
       return availableCodes;
+    }),
+
+  getTokenStatsByAreaId: protectedProcedure
+    .input(z.object({ areaId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const totalTokens = await ctx.db
+        .select({ count: sql<number>`count(*)` })
+        .from(buildingTokens)
+        .where(eq(buildingTokens.areaId, input.areaId))
+        .then((result) => result[0].count);
+
+      const allocatedTokens = await ctx.db
+        .select({ count: sql<number>`count(*)` })
+        .from(buildingTokens)
+        .where(
+          and(
+            eq(buildingTokens.areaId, input.areaId),
+            eq(buildingTokens.status, "allocated"),
+          ),
+        )
+        .then((result) => result[0].count);
+
+      const unallocatedTokens = totalTokens - allocatedTokens;
+
+      return {
+        totalTokens,
+        allocatedTokens,
+        unallocatedTokens,
+      };
+    }),
+
+  getAreaTokens: protectedProcedure
+    .input(
+      z.object({
+        areaId: z.string(),
+        status: z.enum(["allocated", "unallocated"]).optional(),
+        limit: z.number().min(1).max(100).default(50),
+        offset: z.number().min(0).default(0),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const conditions = [eq(buildingTokens.areaId, input.areaId)];
+      if (input.status) {
+        conditions.push(eq(buildingTokens.status, input.status));
+      }
+
+      const [tokens, totalCount] = await Promise.all([
+        ctx.db
+          .select()
+          .from(buildingTokens)
+          .where(and(...conditions))
+          .limit(input.limit)
+          .offset(input.offset)
+          .orderBy(buildingTokens.token),
+
+        ctx.db
+          .select({ count: sql<number>`count(*)` })
+          .from(buildingTokens)
+          .where(and(...conditions))
+          .then((result) => result[0].count),
+      ]);
+
+      return {
+        tokens,
+        pagination: {
+          total: totalCount,
+          pageSize: input.limit,
+          offset: input.offset,
+        },
+      };
     }),
 });
