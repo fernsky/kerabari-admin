@@ -257,6 +257,7 @@ export const areaRouter = createTRPCRouter({
             user: {
               name: users.name,
               phoneNumber: users.phoneNumber,
+              wardNumber: users.wardNumber,
             },
             area: {
               id: areas.id,

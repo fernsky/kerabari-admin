@@ -35,30 +35,11 @@ type Group = {
 const menuConfig: Menu[] = [
   {
     href: "/",
-    label: "Dashboard",
+    label: "Home",
     icon: LayoutGrid,
     roles: ["admin", "superadmin", "enumerator"],
   },
-  {
-    href: "/buildings",
-    label: "Buildings",
-    icon: Building2,
-    roles: ["admin", "superadmin"],
-  },
-  {
-    href: "/area/requested-areas",
-    label: "Requested Areas",
-    icon: GitPullRequest,
-    roles: ["admin", "superadmin"],
-    submenus: [],
-  },
-  {
-    href: "/enumerators",
-    label: "Enumerators",
-    icon: UsersRound,
-    roles: ["admin", "superadmin"],
-    submenus: [],
-  },
+
   {
     href: "/ward",
     label: "Wards",
@@ -74,10 +55,24 @@ const menuConfig: Menu[] = [
     submenus: [],
   },
   {
-    href: "/forms",
-    label: "Forms",
-    icon: FormInput,
+    href: "/buildings",
+    label: "Buildings",
+    icon: Building2,
     roles: ["admin", "superadmin"],
+  },
+  {
+    href: "/enumerators",
+    label: "Enumerators",
+    icon: UsersRound,
+    roles: ["admin", "superadmin"],
+    submenus: [],
+  },
+  {
+    href: "/area/requested-areas",
+    label: "Requested Areas",
+    icon: GitPullRequest,
+    roles: ["admin", "superadmin"],
+    submenus: [],
   },
 ];
 

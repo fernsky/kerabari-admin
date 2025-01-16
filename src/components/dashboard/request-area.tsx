@@ -25,6 +25,8 @@ import {
   CheckSquare,
   AlertTriangle,
   Map,
+  Link,
+  Plus,
 } from "lucide-react";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import {
@@ -37,6 +39,7 @@ import {
 import "leaflet/dist/leaflet.css";
 import type { GeoJsonObject } from "geojson";
 import type { Session, User } from "lucia";
+import { useRouter } from "next/navigation";
 
 export default function RequestArea({ user }: { user: User }) {
   const [selectedArea, setSelectedArea] = useState<string | null>(null);
@@ -46,7 +49,7 @@ export default function RequestArea({ user }: { user: User }) {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  console.log(user);
+  const router = useRouter();
 
   const areas = api.area.getAreasByWardforRequest.useQuery(
     { wardNumber: selectedWard! },
@@ -124,7 +127,16 @@ export default function RequestArea({ user }: { user: User }) {
   );
 
   return (
-    <ContentLayout title="Request Area">
+    <ContentLayout
+      title="Request Area"
+      actions={
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => router.push("/")}>
+            Back to Dashboard
+          </Button>
+        </div>
+      }
+    >
       <div className="space-y-6 lg:px-10 px-2">
         {/* Stats Grid */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

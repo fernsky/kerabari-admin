@@ -1,13 +1,7 @@
 "use client";
 
 import { api } from "@/trpc/react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -227,6 +221,10 @@ export default function RequestedAreas() {
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Phone className="h-4 w-4" />
                         <span>{request.user?.phoneNumber}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <MapPin className="h-4 w-4" />
+                        <span>Ward {request.user?.wardNumber}</span>
                       </div>
                       {request.request.message && (
                         <div className="flex items-start gap-2 text-muted-foreground">
