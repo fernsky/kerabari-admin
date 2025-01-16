@@ -435,4 +435,31 @@ export const areaRouter = createTRPCRouter({
         },
       };
     }),
+
+  getAreaDetails: protectedProcedure
+    .input(z.object({ areaId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const areaWithEnumerator = await ctx.db
+        .select({
+          id: areas.id,
+          code: areas.code,
+          wardNumber: areas.wardNumber,
+          enumerator: {
+            id: users.id,
+            name: users.name,
+            phoneNumber: users.phoneNumber,
+            wardNumber: users.wardNumber,
+          },
+        })
+        .from(areas)
+        .leftJoin(users, eq(areas.assignedTo, users.id))
+        .where(eq(areas.id, input.areaId))
+        .limit(1);
+
+      if (!areaWithEnumerator[0]) {
+        throw new Error("Area not found");
+      }
+
+      return areaWithEnumerator[0];
+    }),
 });

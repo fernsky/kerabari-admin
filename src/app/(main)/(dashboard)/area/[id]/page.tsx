@@ -20,7 +20,7 @@ import { TokenList } from "@/components/tokens/token-list";
 const Map = dynamic(() => import("@/components/map/view-area-map"), {
   ssr: false,
   loading: () => (
-    <div className="h-[400px] w-full animate-pulse rounded-lg bg-muted" />
+    <div className="h-[400px] w-full animate-pulse rounded-lg bg-muted z-20" />
   ),
 });
 

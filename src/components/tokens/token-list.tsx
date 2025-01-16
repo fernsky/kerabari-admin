@@ -21,6 +21,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, Copy, Filter, Key } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import BuildingForm from "@/components/forms/BuildingForm";
+import FamilyForm from "@/components/forms/FamilyForm";
 
 interface TokenListProps {
   areaId: string;
@@ -34,19 +36,27 @@ const TokenCard = ({
   token: any;
   onCopy: (token: string) => void;
 }) => (
-  <div className="rounded-lg border p-4 space-y-3">
-    <div className="flex justify-between items-start">
-      <div className="font-mono text-sm break-all">
-        {token.token.slice(0, 8)}
+  <div className="bg-white rounded-lg shadow-sm p-4 space-y-2 hover:shadow-md transition-shadow">
+    <div className="flex justify-between items-center">
+      <div className="space-y-1">
+        <div className="font-mono text-sm font-medium">
+          {token.token.slice(0, 8)}
+        </div>
+        <Badge
+          variant={token.status === "allocated" ? "default" : "secondary"}
+          className="mt-1"
+        >
+          {token.status}
+        </Badge>
       </div>
-      <Button variant="ghost" size="sm" onClick={() => onCopy(token.token)}>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => onCopy(token.token)}
+        className="hover:bg-primary/10"
+      >
         <Copy className="h-4 w-4" />
       </Button>
-    </div>
-    <div className="flex items-center justify-between">
-      <Badge variant={token.status === "allocated" ? "default" : "secondary"}>
-        {token.status}
-      </Badge>
     </div>
   </div>
 );
@@ -156,11 +166,12 @@ const Pagination = ({
 };
 
 export const TokenList = ({ areaId }: TokenListProps) => {
+  const isDesktop = useMediaQuery({ minWidth: 768 });
   const [status, setStatus] = useState<"allocated" | "unallocated" | undefined>(
     undefined,
   );
   const [page, setPage] = useState(0);
-  const pageSize = 50;
+  const pageSize = 5;
 
   const { data, isLoading } = api.area.getAreaTokens.useQuery({
     areaId,
@@ -174,32 +185,8 @@ export const TokenList = ({ areaId }: TokenListProps) => {
   };
 
   return (
-    <Card>
-      <CardHeader className="border-b">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Filter Tokens</span>
-          </div>
-          <Select
-            value={status}
-            onValueChange={(value) => {
-              setStatus(value as "allocated" | "unallocated" | undefined);
-              setPage(0); // Reset page when filter changes
-            }}
-          >
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="All tokens" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All tokens</SelectItem>
-              <SelectItem value="allocated">Allocated only</SelectItem>
-              <SelectItem value="unallocated">Unallocated only</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </CardHeader>
-      <CardContent className="pt-6">
+    <Card className="bg-gray-50/50">
+      <CardContent className="p-3 sm:p-6">
         {isLoading ? (
           <Skeleton className="h-[300px] w-full" />
         ) : !data || !data.tokens.length ? (
@@ -215,15 +202,38 @@ export const TokenList = ({ areaId }: TokenListProps) => {
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
-            <TokenTable data={data} onCopy={copyToClipboard} />
-            <Pagination
-              page={page}
-              pageSize={pageSize}
-              total={data.pagination.total}
-              onPageChange={setPage}
-            />
-          </div>
+          <>
+            <div className="sticky top-0 z-10 bg-gray-50/80 backdrop-blur-sm p-3 -mx-3 sm:mx-0 sm:p-0 sm:static sm:bg-transparent">
+              <div className="inline-flex gap-2">
+                <BuildingForm areaId={areaId} />
+                <FamilyForm
+                  buildingTokens={data.tokens
+                    .filter((t) => t.status === "allocated")
+                    .map((t) => t.token)}
+                  areaId={areaId}
+                />
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-4">
+              <div
+                className={`
+                ${!isDesktop ? "grid grid-cols-1 gap-2" : "rounded-lg bg-white"}
+              `}
+              >
+                <TokenTable data={data} onCopy={copyToClipboard} />
+              </div>
+
+              <div className="sticky bottom-0 bg-gray-50/80 backdrop-blur-sm p-3 -mx-3 sm:mx-0 sm:p-0 sm:static sm:bg-transparent">
+                <Pagination
+                  page={page}
+                  pageSize={pageSize}
+                  total={data.pagination.total}
+                  onPageChange={setPage}
+                />
+              </div>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>
