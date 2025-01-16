@@ -2,16 +2,13 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { UserNav } from "@/components/admin-panel/user-nav";
 import { SheetMenu } from "@/components/admin-panel/sheet-menu";
 
-import { type User } from "lucia";
-
 interface NavbarProps {
-  user: User;
   title: string;
   subtitle?: string;
   actions?: React.ReactNode;
 }
 
-export function Navbar({ user, title, subtitle, actions }: NavbarProps) {
+export function Navbar({ title, subtitle, actions }: NavbarProps) {
   return (
     <div className="sticky top-0  w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-4 flex h-14 items-center justify-between sm:mx-8">
@@ -30,7 +27,7 @@ export function Navbar({ user, title, subtitle, actions }: NavbarProps) {
             <div className="hidden sm:flex items-center gap-2">{actions}</div>
           )}
           <ModeToggle />
-          <UserNav user={user} />
+          <UserNav />
         </div>
       </div>
 

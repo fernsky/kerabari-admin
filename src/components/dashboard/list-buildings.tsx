@@ -79,7 +79,7 @@ export default function ListBuildings({ user }: { user: User }) {
   );
 
   return (
-    <ContentLayout title="Buildings" user={user}>
+    <ContentLayout title="Buildings">
       <div className="mx-auto max-w-7xl space-y-6 p-4">
         <div className="rounded-lg border bg-card shadow-sm">
           <div className="border-b p-4">

@@ -7,7 +7,7 @@ const DashboardPage = async () => {
   const { user } = await validateRequest();
   if (!user) return null;
   return (
-    <ContentLayout title="Dashboard" user={user}>
+    <ContentLayout title="Dashboard">
       <EnumeratorArea />
     </ContentLayout>
   );
