@@ -1,7 +1,7 @@
 import { fetchSubmissionsSchema, surveyFormSchema } from "./superadmin.schema";
 import { eq, and } from "drizzle-orm";
 import { surveyForms } from "@/server/db/schema";
-import { createTRPCRouter, protectedProcedure } from "../../trpc";
+import { createTRPCRouter, superAdminProcedure } from "../../trpc";
 import axios from "axios";
 import dotenv from "dotenv";
 import { FormAttachment } from "@/types";
@@ -20,7 +20,7 @@ export const superadminRouter = createTRPCRouter({
    *
    * @returns {Promise<Array>} A promise that resolves to an array of all survey forms.
    */
-  getSurveyForms: protectedProcedure.query(async ({ ctx }) => {
+  getSurveyForms: superAdminProcedure.query(async ({ ctx }) => {
     const allSurveyForms = await ctx.db.select().from(surveyForms);
     return allSurveyForms;
   }),
@@ -31,7 +31,7 @@ export const superadminRouter = createTRPCRouter({
    * @param {string} id - The ID of the survey form.
    * @returns {Promise<Object>} A promise that resolves to the survey form.
    */
-  getForm: protectedProcedure
+  getForm: superAdminProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const form = await ctx.db
@@ -53,7 +53,7 @@ export const superadminRouter = createTRPCRouter({
    * @param {Object} input - The input data for the new survey form.
    * @returns {Promise<Object>} A promise that resolves to the newly created survey form.
    */
-  createSurveyForm: protectedProcedure
+  createSurveyForm: superAdminProcedure
     .input(surveyFormSchema)
     .mutation(async ({ ctx, input }) => {
       const newSurveyForm = await ctx.db
@@ -69,7 +69,7 @@ export const superadminRouter = createTRPCRouter({
    * @param {Object} input - The input data for updating the survey form.
    * @returns {Promise<Object>} A promise that resolves to the updated survey form.
    */
-  updateSurveyForm: protectedProcedure
+  updateSurveyForm: superAdminProcedure
     .input(surveyFormSchema)
     .mutation(async ({ ctx, input }) => {
       const updatedSurveyForm = await ctx.db
@@ -92,7 +92,7 @@ export const superadminRouter = createTRPCRouter({
    * @param {Object} input - The input data for creating/updating the survey form.
    * @returns {Promise<Object>} A promise that resolves to the created/updated survey form.
    */
-  createOrUpdateResourceForm: protectedProcedure
+  createOrUpdateResourceForm: superAdminProcedure
     .input(surveyFormSchema)
     .mutation(async ({ ctx, input }) => {
       // Check if form exists
@@ -132,7 +132,7 @@ export const superadminRouter = createTRPCRouter({
       }
     }),
 
-  fetchSurveySubmissions: protectedProcedure
+  fetchSurveySubmissions: superAdminProcedure
     .input(fetchSubmissionsSchema)
     .mutation(async ({ ctx, input }) => {
       const surveyForm = await ctx.db

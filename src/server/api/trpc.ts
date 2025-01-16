@@ -13,6 +13,7 @@ import { minio } from "@/server/minio";
 import { initTRPC, TRPCError, type inferAsyncReturnType } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { Role } from "@/lib/menu-list";
 
 /**
  * 1. CONTEXT
@@ -101,6 +102,32 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
     },
   });
 });
+
+const enforceUserIsAuthorized = t.middleware(({ ctx, next }) => {
+  if (!ctx.user?.role) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  return next({
+    ctx: {
+      user: ctx.user,
+    },
+  });
+});
+
+export const createRoleProtectedProcedure = (roles: Role[]) => {
+  return protectedProcedure.use(({ ctx, next }) => {
+    if (!roles.includes(ctx.user?.role as Role)) {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+    return next();
+  });
+};
+
+export const adminProcedure = createRoleProtectedProcedure([
+  "admin",
+  "superadmin",
+]);
+export const superAdminProcedure = createRoleProtectedProcedure(["superadmin"]);
 
 export type TRPCContext = inferAsyncReturnType<typeof createTRPCContext>;
 export type ProtectedTRPCContext = TRPCContext & {

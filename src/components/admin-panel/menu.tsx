@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { Ellipsis, LogOut } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useUserStore } from "@/store/user";
 
 import { cn } from "@/lib/utils";
-import { getMenuList } from "@/lib/menu-list";
+import { getMenuList, Role } from "@/lib/menu-list";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CollapseMenuButton } from "@/components/admin-panel/collapse-menu-button";
@@ -23,7 +24,16 @@ interface MenuProps {
 
 export function Menu({ isOpen }: MenuProps) {
   const pathname = usePathname();
-  const menuList = getMenuList(pathname);
+  const user = useUserStore((state) => state.user);
+  const isLoading = useUserStore((state) => state.isLoading);
+
+  // Default to enumerator if still loading or no user
+  const userRole = (user?.role ?? "enumerator") as Role;
+  const menuList = getMenuList(pathname, userRole);
+
+  if (isLoading) {
+    return null; // Or a loading spinner
+  }
 
   return (
     <ScrollArea className="[&>div>div[style]]:!block">

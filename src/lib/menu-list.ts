@@ -6,15 +6,16 @@ import {
   AreaChart,
   FormInput,
   GitPullRequest,
-  Diamond,
-  Building,
   Building2,
 } from "lucide-react";
+
+export type Role = "admin" | "superadmin" | "enumerator";
 
 type Submenu = {
   href: string;
   label: string;
   active?: boolean;
+  roles?: Role[];
 };
 
 type Menu = {
@@ -22,6 +23,7 @@ type Menu = {
   label: string;
   active?: boolean;
   icon: LucideIcon;
+  roles?: Role[];
   submenus?: Submenu[];
 };
 
@@ -30,51 +32,64 @@ type Group = {
   menus: Menu[];
 };
 
-export function getMenuList(pathname: string): Group[] {
+const menuConfig: Menu[] = [
+  {
+    href: "/",
+    label: "Dashboard",
+    icon: LayoutGrid,
+    roles: ["admin", "superadmin", "enumerator"],
+  },
+  {
+    href: "/buildings",
+    label: "Buildings",
+    icon: Building2,
+    roles: ["admin", "superadmin"],
+  },
+  {
+    href: "/area/requested-areas",
+    label: "Requested Areas",
+    icon: GitPullRequest,
+    roles: ["admin", "superadmin"],
+    submenus: [],
+  },
+  {
+    href: "/enumerators",
+    label: "Enumerators",
+    icon: UsersRound,
+    roles: ["admin", "superadmin"],
+    submenus: [],
+  },
+  {
+    href: "/ward",
+    label: "Wards",
+    icon: AreaChart,
+    roles: ["admin", "superadmin"],
+    submenus: [],
+  },
+  {
+    href: "/area",
+    label: "Areas",
+    icon: LandPlot,
+    roles: ["admin", "superadmin"],
+    submenus: [],
+  },
+  {
+    href: "/forms",
+    label: "Forms",
+    icon: FormInput,
+    roles: ["admin", "superadmin"],
+  },
+];
+
+export function getMenuList(pathname: string, userRole: Role): Group[] {
+  const filteredMenus = menuConfig.filter(
+    (menu) => !menu.roles || menu.roles.includes(userRole),
+  );
+
   return [
     {
       groupLabel: "",
-      menus: [
-        {
-          href: "/",
-          label: "Dashboard",
-          icon: LayoutGrid,
-        },
-        {
-          href: "/buildings",
-          label: "Buildings",
-          icon: Building2,
-        },
-        {
-          href: "/area/requested-areas",
-          label: "Requested Areas",
-          icon: GitPullRequest,
-          submenus: [],
-        },
-        {
-          href: "/enumerators",
-          label: "Enumerators",
-          icon: UsersRound,
-          submenus: [],
-        },
-        {
-          href: "/ward",
-          label: "Wards",
-          icon: AreaChart,
-          submenus: [],
-        },
-        {
-          href: "/area",
-          label: "Areas",
-          icon: LandPlot,
-          submenus: [],
-        },
-        {
-          href: "/forms",
-          label: "Forms",
-          icon: FormInput,
-        },
-      ],
+      menus: filteredMenus,
     },
   ];
 }
