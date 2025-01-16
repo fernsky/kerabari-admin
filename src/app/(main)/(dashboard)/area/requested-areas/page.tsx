@@ -27,6 +27,7 @@ import { FilterDrawer } from "@/components/shared/filters/filter-drawer";
 import { AreaRequestFilters } from "@/components/area-requests/area-request-filters";
 import { useMediaQuery } from "react-responsive";
 import { Button } from "@/components/ui/button";
+import L from "leaflet";
 
 const statusColors = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -169,10 +170,16 @@ export default function RequestedAreas() {
                 {request.area?.geometry! && (
                   <div className="h-[140px] w-full">
                     <MapContainer
-                      className="h-full w-full z-[1000]"
-                      zoom={13}
+                      className="h-full w-full z-[20]"
+                      zoom={15}
                       scrollWheelZoom={false}
-                      center={[26.72069444681497, 88.04840072844279]}
+                      center={(() => {
+                        const geojson = JSON.parse(
+                          request.area.geometry as string,
+                        );
+                        const bounds = L.geoJSON(geojson).getBounds();
+                        return bounds.getCenter();
+                      })()}
                     >
                       <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

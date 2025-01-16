@@ -8,8 +8,12 @@ import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import Link from "next/link";
 import { Loader2, MapPin, Puzzle, ClipboardList } from "lucide-react";
+import L from "leaflet";
+import { useUserStore } from "@/store/user";
+import { UserInfoCard } from "@/components/shared/user-info-card";
 
 export function EnumeratorArea() {
+  const user = useUserStore((state) => state.user);
   const { data: area, isLoading } = api.enumerator.getAssignedArea.useQuery();
 
   if (isLoading) {
@@ -71,6 +75,13 @@ export function EnumeratorArea() {
 
   return (
     <div className="space-y-6 px-4 lg:px-10">
+      {/* User Info Card */}
+      <UserInfoCard
+        name={user?.name ?? "Anonymous"}
+        userId={user?.id ?? ""}
+        role={user?.role ?? "enumerator"}
+      />
+
       {/* Area Stats Cards */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Ward Info Card */}
@@ -149,7 +160,11 @@ export function EnumeratorArea() {
           className="h-full w-full"
           zoom={15}
           scrollWheelZoom={false}
-          center={[26.72069444681497, 88.04840072844279]}
+          center={(() => {
+            if (!area.geometry) return [26.72069444681497, 88.04840072844279];
+            const bounds = L.geoJSON(area.geometry).getBounds();
+            return bounds.getCenter();
+          })()}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

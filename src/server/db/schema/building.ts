@@ -6,9 +6,11 @@ import {
   decimal,
   boolean,
   doublePrecision,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 import { geometry } from "../geographical";
 import { InferModel } from "drizzle-orm";
+import { areas } from "./basic";
 
 /*
 We need to create two tables.
@@ -112,6 +114,18 @@ export const buildings = pgTable("buddhashanti_buildings", {
     length: 255,
   }),
   roadStatus: varchar("road_status", { length: 255 }), // e.g., Graveled, Paved
+});
+
+export const buildingTokenStatusEnum = pgEnum("building_token_status_enum", [
+  "allocated",
+  "unallocated",
+]);
+
+export const buildingTokens = pgTable("buddhashanti_building_tokens", {
+  token: varchar("token", { length: 255 }).primaryKey(),
+  areaId: varchar("area_id", { length: 255 }).references(() => areas.id),
+  status: buildingTokenStatusEnum("status").default("unallocated"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export type StagingBuilding = typeof stagingBuildings.$inferSelect;
