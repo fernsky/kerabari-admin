@@ -23,6 +23,7 @@ import { useUserStore } from "@/store/user";
 import { UserInfoCard } from "@/components/shared/user-info-card";
 import TokenStats from "@/components/token-stats";
 import { TokenList } from "../tokens/token-list";
+import { AreaStatusActions } from "@/components/area/area-status-actions";
 
 export function EnumeratorArea() {
   const user = useUserStore((state) => state.user);
@@ -188,6 +189,9 @@ export function EnumeratorArea() {
         </Card>
       </div>
 
+      {/* Add the AreaStatusActions component here */}
+      {area && <AreaStatusActions area={area} />}
+
       {/* Map and Token List Section */}
       <Card className="overflow-hidden">
         <CardHeader className="border-b bg-muted/50">
@@ -201,9 +205,9 @@ export function EnumeratorArea() {
         </CardHeader>
         <CardContent className="p-0">
           <div className="border-b">
-            <div className="h-[400px] w-full">
+            <div className="h-[400px] w-full z-0">
               <MapContainer
-                className="h-full w-full"
+                className="h-full w-full z-0"
                 zoom={15}
                 scrollWheelZoom={false}
                 center={(() => {
@@ -216,6 +220,7 @@ export function EnumeratorArea() {
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  className="z-0"
                 />
                 {area.geometry && (
                   <GeoJSON

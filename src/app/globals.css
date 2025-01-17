@@ -107,3 +107,7 @@
     animation: float-slower 8s ease-in-out infinite;
   }
 }
+
+.leaflet-pane {
+    z-index: 0 !important;
+}

@@ -8,17 +8,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useState } from "react";
 import { api } from "@/trpc/react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, Copy, Filter, Key } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import BuildingForm from "@/components/forms/BuildingForm";
@@ -203,10 +196,11 @@ export const TokenList = ({ areaId }: TokenListProps) => {
           </div>
         ) : (
           <>
-            <div className="sticky top-0 z-10 bg-gray-50/80 backdrop-blur-sm p-3 -mx-3 sm:mx-0 sm:p-0 sm:static sm:bg-transparent">
-              <div className="inline-flex gap-2">
+            <div className="sticky top-0 z-0 bg-gray-50/80 backdrop-blur-sm p-3 -mx-3 sm:mx-0 sm:p-0 sm:static sm:bg-transparent">
+              <div className="inline-flex gap-2 flex-wrap">
                 <BuildingForm areaId={areaId} />
                 <FamilyForm
+                  //@ts-ignore
                   buildingTokens={data.tokens
                     .filter((t) => t.status === "allocated")
                     .map((t) => t.token)}

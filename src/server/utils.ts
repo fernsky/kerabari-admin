@@ -7,6 +7,7 @@ import {
   attachmentTypesEnum,
   stagingToProduction,
   areas,
+  buildingTokens,
 } from "./db/schema";
 import {
   getBuildingStagingToProdStatement,
@@ -69,7 +70,7 @@ const performPostProcessing = async (formId: string, data: any, ctx: any) => {
       const areaCode = getValueFromNestedField(data, "area_code");
       const buildingToken = getValueFromNestedField(data, "building_token");
 
-    /*
+      /*
       First check if the enumerator is assigned to that particular areaCode
       If he/she is assigned to that particular area code, and if the status
       of that area is newly_assigned convert it to ongoing_survey else do nothing
@@ -77,15 +78,31 @@ const performPostProcessing = async (formId: string, data: any, ctx: any) => {
       const area = await ctx.db
         .select()
         .from(areas)
-        .where(and(eq(areas.assignedTo, enumeratorId), eq("isAct, true)))
+        .where(and(eq(areas.assignedTo, enumeratorId)))
         .limit(1);
 
-      if (enumerator.length === 0) {
-        throw new Error("Enumerator not found");
+      if (area.length > 0) {
+        if (area[0].code === areaCode && area[0].status === "newly_assigned") {
+          await ctx.db
+            .update(areas)
+            .set({ status: "ongoing_survey" })
+            .where(eq(areas.code, areaCode));
+        }
       }
 
-      const enumeratorWard = enumerator[0].wardNumber;
-
+      /* 
+      Now mark the building token as allocated if the uppercased first 8 
+      letters match.
+       */
+      await ctx.db
+        .update(buildingTokens)
+        .set({ status: "allocated" })
+        .where(
+          eq(
+            sql`UPPER(SUBSTRING(${buildingTokens.token}, 1, 8))`,
+            buildingToken.substring(0, 8).toUpperCase(),
+          ),
+        );
   }
 };
 
@@ -274,6 +291,7 @@ export const fetchSurveySubmissions = async (
           }
         }
       }
+      performPostProcessing(formId, submission, ctx);
     }
   } catch (error) {
     console.log(error);

@@ -6,7 +6,7 @@ import {
   areaRequests,
   enumeratorAssignments,
 } from "@/server/db/schema/basic";
-import { and, eq, ilike, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { Area, createAreaSchema } from "./area.schema";
 import { assignAreaToEnumeratorSchema } from "./area.schema";
 import {

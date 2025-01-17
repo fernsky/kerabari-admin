@@ -132,6 +132,7 @@ export const enumeratorRouter = createTRPCRouter({
           ${areas.id} as "id",
           ${areas.code} as "code",
           ${areas.wardNumber} as "wardNumber",
+          ${areas.areaStatus} as "areaStatus",
           ${areas.assignedTo} as "assignedTo",
           ST_AsGeoJSON(${areas.geometry}) as "geometry",
           ST_AsGeoJSON(ST_Centroid(${areas.geometry})) as "centroid"
@@ -151,5 +152,97 @@ export const enumeratorRouter = createTRPCRouter({
         ? JSON.parse(assignedArea[0].centroid as string)
         : null,
     } as unknown as Area;
+  }),
+
+  requestCompletion: protectedProcedure.mutation(async ({ ctx }) => {
+    if (ctx.user.role !== "enumerator") {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Only enumerators can request completion",
+      });
+    }
+
+    const area = await ctx.db.query.areas.findFirst({
+      columns: {
+        id: true,
+        areaStatus: true,
+      },
+      where: (areas, { eq }) => eq(areas.assignedTo, ctx.user.id),
+    });
+
+    if (!area) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "No assigned area found",
+      });
+    }
+
+    await ctx.db
+      .update(areas)
+      .set({ areaStatus: "asked_for_completion" })
+      .where(eq(areas.id, area.id));
+
+    return { success: true };
+  }),
+
+  requestRevisionCompletion: protectedProcedure.mutation(async ({ ctx }) => {
+    if (ctx.user.role !== "enumerator") {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Only enumerators can request revision completion",
+      });
+    }
+
+    const area = await ctx.db.query.areas.findFirst({
+      columns: {
+        id: true,
+        areaStatus: true,
+      },
+      where: (areas, { eq }) => eq(areas.assignedTo, ctx.user.id),
+    });
+
+    if (!area || area.areaStatus !== "revision") {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Area must be in revision status",
+      });
+    }
+
+    await ctx.db
+      .update(areas)
+      .set({ areaStatus: "asked_for_revision_completion" })
+      .where(eq(areas.id, area.id));
+
+    return { success: true };
+  }),
+
+  requestWithdrawal: protectedProcedure.mutation(async ({ ctx }) => {
+    if (ctx.user.role !== "enumerator") {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Only enumerators can request withdrawal",
+      });
+    }
+    const area = await ctx.db.query.areas.findFirst({
+      columns: {
+        id: true,
+        areaStatus: true,
+      },
+      where: (areas, { eq }) => eq(areas.assignedTo, ctx.user.id),
+    });
+
+    if (!area) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "No assigned area found",
+      });
+    }
+
+    await ctx.db
+      .update(areas)
+      .set({ areaStatus: "asked_for_withdrawl" })
+      .where(eq(areas.id, area.id));
+
+    return { success: true };
   }),
 });
