@@ -61,6 +61,19 @@ const getPostgresStagingProductionSyncStatement = (
   }
 };
 
+const performPostProcessing = async (formId: string, data: any, ctx: any) => {
+  switch (formId) {
+    case "buddhashanti_building_survey":
+      const enumeratorId = getValueFromNestedField(data, "enumerator_id");
+      const areaCode = getValueFromNestedField(data, "area_code");
+      const buildingToken = getValueFromNestedField(data, "building_token");
+
+    /*
+      First check if the enumerator is assigned to that particular areaCode
+      */
+  }
+};
+
 /**
  * Fetches survey submissions from ODK.
  *

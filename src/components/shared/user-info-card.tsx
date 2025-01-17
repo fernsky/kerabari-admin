@@ -20,7 +20,7 @@ export function UserInfoCard({
   className,
   showId = true,
 }: UserInfoCardProps) {
-  const truncatedId = userId.slice(-8).toUpperCase();
+  const truncatedId = userId.slice(0, 8).toUpperCase();
 
   return (
     <Card className={cn("overflow-hidden", className)}>

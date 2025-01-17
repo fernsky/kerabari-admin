@@ -1,6 +1,11 @@
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 import { z } from "zod";
-import { areas, users, areaRequests } from "@/server/db/schema/basic";
+import {
+  areas,
+  users,
+  areaRequests,
+  enumeratorAssignments,
+} from "@/server/db/schema/basic";
 import { and, eq, ilike, sql } from "drizzle-orm";
 import { Area, createAreaSchema } from "./area.schema";
 import { assignAreaToEnumeratorSchema } from "./area.schema";
@@ -321,6 +326,14 @@ export const areaRouter = createTRPCRouter({
             .update(areas)
             .set({ assignedTo: userId, areaStatus: "newly_assigned" })
             .where(eq(areas.id, areaId));
+
+          // Also add to enumerator assignments
+          await tx.insert(enumeratorAssignments).values({
+            id: nanoid(),
+            areaId,
+            assignedTo: userId,
+            status: "newly_assigned",
+          });
 
           // Once approved delete all requests for that area
           await tx

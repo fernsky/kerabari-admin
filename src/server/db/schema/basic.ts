@@ -11,6 +11,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { DATABASE_PREFIX as prefix } from "@/lib/constants";
 import { geometry } from "../geographical";
+import { v4 as uuidv4 } from "uuid";
 
 export const pgTable = pgTableCreator((name) => `${prefix}_${name}`);
 
@@ -111,6 +112,27 @@ export const areas = pgTable("areas", {
 });
 
 export type Area = typeof areas.$inferSelect;
+
+/*
+I need a table that stores the following things:
+1. List of all the assignments that have ever occurred for all enumerators.
+2. The status of the assignment.
+
+This is needed because the area code may have been assigned for another enumerator
+but the last enumerator is still sending submission in that area code.
+*/
+
+export const enumeratorAssignments = pgTable("enumerator_assignments", {
+  id: varchar("id", { length: 36 }).default(uuidv4()).primaryKey(),
+  areaId: varchar("area_id", { length: 36 })
+    .notNull()
+    .references(() => areas.id),
+  assignedTo: varchar("assigned_to", { length: 21 })
+    .notNull()
+    .references(() => users.id),
+  assignedAt: timestamp("assigned_at").defaultNow().notNull(),
+  status: areaStatusEnum("status").default("unassigned"),
+});
 
 export const surveyForms = pgTable("odk_survey_forms", {
   id: varchar("id", { length: 255 }).primaryKey(),
