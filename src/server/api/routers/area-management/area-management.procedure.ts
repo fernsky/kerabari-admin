@@ -198,7 +198,12 @@ export const areaManagementRouter = createTRPCRouter({
       }
 
       const area = await ctx.db.query.areas.findFirst({
-        where: eq(areas.id, input.areaId),
+        columns: {
+          id: true,
+          assignedTo: true,
+          areaStatus: true,
+        },
+        where: (areas, { eq }) => eq(areas.id, input.areaId),
       });
 
       if (!area) {
@@ -218,11 +223,12 @@ export const areaManagementRouter = createTRPCRouter({
           })
           .where(eq(areas.id, input.areaId));
 
-        await tx.insert(enumeratorAssignments).values({
-          areaId: input.areaId,
-          assignedTo: ctx.user.id,
-          status: input.newStatus,
-        });
+        await tx
+          .update(enumeratorAssignments)
+          .set({
+            status: input.newStatus,
+          })
+          .where(eq(enumeratorAssignments.areaId, input.areaId));
       });
 
       return { success: true };

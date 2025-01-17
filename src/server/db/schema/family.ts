@@ -16,7 +16,7 @@ const buddhashantiHousehold = pgTable("buddhashanti_household", {
   houseSymbolNo: text("house_symbol_no"),
   familySymbolNo: text("family_symbol_no"),
   dateOfInterview: timestamp("date_of_interview"),
-  householdLocation: doublePrecision("household_location").array(),
+
   locality: text("locality"),
   developmentOrganization: text("development_organization"),
   familyHeadName: text("family_head_name"),
