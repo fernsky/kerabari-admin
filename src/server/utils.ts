@@ -6,6 +6,7 @@ import {
   surveyAttachments,
   attachmentTypesEnum,
   stagingToProduction,
+  areas,
 } from "./db/schema";
 import {
   getBuildingStagingToProdStatement,
@@ -70,7 +71,21 @@ const performPostProcessing = async (formId: string, data: any, ctx: any) => {
 
     /*
       First check if the enumerator is assigned to that particular areaCode
+      If he/she is assigned to that particular area code, and if the status
+      of that area is newly_assigned convert it to ongoing_survey else do nothing
       */
+      const area = await ctx.db
+        .select()
+        .from(areas)
+        .where(and(eq(areas.assignedTo, enumeratorId), eq("isAct, true)))
+        .limit(1);
+
+      if (enumerator.length === 0) {
+        throw new Error("Enumerator not found");
+      }
+
+      const enumeratorWard = enumerator[0].wardNumber;
+
   }
 };
 
