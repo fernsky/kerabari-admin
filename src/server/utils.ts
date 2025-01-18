@@ -203,7 +203,7 @@ const syncStagingToProduction = async (
           await ctx.db
             .update(buildings)
             .set({ userId: enumerator[0].id })
-            .where(eq(buildings.id, recordId));
+            .where(eq(buildings.id, recordId.replace("uuid:", "")));
 
           console.log("User updated successfully.");
         } catch (error) {

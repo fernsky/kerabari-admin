@@ -69,6 +69,13 @@ export const stagingBuildings = pgTable("staging_buddhashanti_buildings", {
   roadStatus: varchar("road_status", { length: 255 }), // e.g., Graveled, Paved
 });
 
+export const buildingStatusEnum = pgEnum("building_status_enum", [
+  "approved",
+  "pending",
+  "requested_for_edit",
+  "rejected",
+]);
+
 export const buildings = pgTable("buddhashanti_buildings", {
   id: uuid("id").primaryKey(), // Unique identifier for the record
   surveyDate: timestamp("survey_date"),
@@ -115,7 +122,21 @@ export const buildings = pgTable("buddhashanti_buildings", {
     length: 255,
   }),
   roadStatus: varchar("road_status", { length: 255 }), // e.g., Graveled, Paved
+  status: buildingStatusEnum("status").default("pending"),
 });
+
+// Table for building edit requests
+export const buildingEditRequests = pgTable(
+  "buddhashanti_building_edit_requests",
+  {
+    id: uuid("id").primaryKey(),
+    buildingId: uuid("building_id").references(() => buildings.id),
+    message: text("message").notNull(), // Description of what needs to be edited
+    requestedAt: timestamp("requested_at").defaultNow(),
+  },
+);
+
+export type BuildingEditRequest = typeof buildingEditRequests.$inferSelect;
 
 export type StagingBuilding = typeof stagingBuildings.$inferSelect;
 export type BuildingSchema = typeof buildings.$inferSelect;
