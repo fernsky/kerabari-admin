@@ -1,14 +1,5 @@
 import { jsonToPostgres } from "@/lib/utils";
-import { DATABASE_PREFIX } from "@/lib/constants";
-import { map } from "leaflet";
 import { mapBuildingChoices } from "@/lib/resources/building";
-import { sql } from "drizzle-orm";
-import {
-  buildings,
-  stagingBuildings,
-  stagingToProduction,
-} from "@/server/db/schema";
-import { eq } from "drizzle-orm";
 
 const data = {
   intro: null,
@@ -252,6 +243,7 @@ export function parseBuilding(data: RawBuildingData) {
     area_code: r.area_code,
     ward_number: r.ward_no,
     locality: r.locality,
+    building_token: r.building_token,
 
     // Family and business details
     total_families: r.total_families,

@@ -89,9 +89,35 @@ const syncStagingToProduction = async (
   try {
     switch (formId) {
       case "buddhashanti_building_survey":
-        const enumeratorId = getValueFromNestedField(data, "enumerator_id");
         const areaCode = getValueFromNestedField(data, "area_code");
         const buildingToken = getValueFromNestedField(data, "building_token");
+
+        // Update user statement
+        const enumeratorId = getValueFromNestedField(data, "enumerator_id");
+        if (!enumeratorId) {
+          throw new Error(`No enumerator_id found for record ${recordId}`);
+        }
+
+        const enumerator = await ctx.db
+          .select()
+          .from(users)
+          .where(
+            eq(
+              sql`UPPER(SUBSTRING(${users.id}::text, 1, 8))`,
+              enumeratorId.substring(0, 8).toUpperCase(),
+            ),
+          )
+          .limit(1);
+
+        // If enumerator ID is not valid, user_id is NULL
+        // and hence those records where user_id is NULL
+        // are known as invalid records.
+        // Such invalid records must be assigned to a particular
+        // enumerator manually by the admin.
+
+        // if (!enumerator || enumerator.length === 0) {
+        //   throw new Error(`No valid enumerator ID ${enumeratorId}`);
+        // }
 
         /*
       First check if the enumerator is assigned to that particular areaCode
@@ -99,9 +125,14 @@ const syncStagingToProduction = async (
       of that area is newly_assigned convert it to ongoing_survey else do nothing
       */
         const area = await ctx.db
-          .select()
+          .select({
+            id: areas.id,
+            code: areas.code,
+            status: areas.areaStatus,
+            assignedTo: areas.assignedTo,
+          })
           .from(areas)
-          .where(and(eq(areas.assignedTo, enumeratorId)))
+          .where(and(eq(areas.assignedTo, enumerator[0].id)))
           .limit(1);
 
         if (area.length > 0) {
@@ -132,6 +163,7 @@ const syncStagingToProduction = async (
           .limit(1);
 
         if (matchedToken.length > 0) {
+          console.log("Token matched: ", matchedToken[0].token);
           await ctx.db
             .update(buildingTokens)
             .set({
@@ -208,22 +240,7 @@ const syncStagingToProduction = async (
             ON CONFLICT (id) DO NOTHING`);
           await ctx.db.execute(insertStatement);
 
-          if (matchedToken.length > 0) {
-            await ctx.db
-              .update(buildings)
-              .set({
-                buildingToken: matchedToken[0].token,
-              })
-              .where(eq(buildings.id, recordId.replace("uuid:", "")));
-          } else {
-            await ctx.db
-              .update(buildings)
-              .set({
-                buildingToken: null,
-              })
-              .where(eq(buildings.id, recordId.replace("uuid:", "")));
-          }
-
+          console.log("Length of area: ", area.length);
           if (area.length > 0) {
             await ctx.db
               .update(buildings)
@@ -234,6 +251,44 @@ const syncStagingToProduction = async (
               .update(buildings)
               .set({ areaId: null })
               .where(eq(buildings.id, recordId.replace("uuid:", "")));
+          }
+
+          // First check if the token belongs to the area
+          const validToken = await ctx.db
+            .select()
+            .from(buildingTokens)
+            .where(
+              and(
+                eq(buildingTokens.areaId, area[0]?.id),
+                eq(
+                  sql`UPPER(SUBSTRING(${buildingTokens.token}, 1, 8))`,
+                  buildingToken.substring(0, 8).toUpperCase(),
+                ),
+              ),
+            )
+            .limit(1);
+
+          console.log(buildingToken);
+
+          // Validate building token
+          if (validToken.length > 0) {
+            console.log(validToken[0].token);
+            await ctx.db
+              .update(buildings)
+              .set({
+                buildingToken: validToken[0].token,
+              })
+              .where(eq(buildings.id, recordId.replace("uuid:", "")));
+          } else {
+            await ctx.db
+              .update(buildings)
+              .set({
+                buildingToken: "none",
+              })
+              .where(eq(buildings.id, recordId.replace("uuid:", "")));
+            throw new Error(
+              `Building token ${buildingToken} does not belong to area ${area[0]?.id}`,
+            );
           }
         } catch (error) {
           console.error(
@@ -258,33 +313,6 @@ const syncStagingToProduction = async (
         }
 
         try {
-          // Update user statement
-          const enumeratorId = getValueFromNestedField(data, "enumerator_id");
-          if (!enumeratorId) {
-            throw new Error(`No enumerator_id found for record ${recordId}`);
-          }
-
-          const enumerator = await ctx.db
-            .select()
-            .from(users)
-            .where(
-              eq(
-                sql`UPPER(SUBSTRING(${users.id}::text, 1, 8))`,
-                enumeratorId.substring(0, 8).toUpperCase(),
-              ),
-            )
-            .limit(1);
-
-          // If enumerator ID is not valid, user_id is NULL
-          // and hence those records where user_id is NULL
-          // are known as invalid records.
-          // Such invalid records must be assigned to a particular
-          // enumerator manually by the admin.
-
-          // if (!enumerator || enumerator.length === 0) {
-          //   throw new Error(`No valid enumerator ID ${enumeratorId}`);
-          // }
-
           await ctx.db
             .update(buildings)
             .set({ userId: enumerator[0].id })

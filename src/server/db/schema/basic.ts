@@ -11,7 +11,6 @@ import {
 } from "drizzle-orm/pg-core";
 import { DATABASE_PREFIX as prefix } from "@/lib/constants";
 import { geometry } from "../geographical";
-import { v4 as uuidv4 } from "uuid";
 
 export const pgTable = pgTableCreator((name) => `${prefix}_${name}`);
 

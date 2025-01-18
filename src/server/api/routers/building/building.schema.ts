@@ -29,6 +29,8 @@ export const buildingSchema = z.object({
   timeToHealthOrganization: z.string(),
   timeToFinancialOrganization: z.string(),
   roadStatus: z.string(),
+  areaId: z.string().nullable(),
+  buildingToken: z.string().nullable(),
 });
 
 export const createBuildingSchema = buildingSchema.omit({ id: true });

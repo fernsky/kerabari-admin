@@ -29,6 +29,15 @@ export const updateAreaRequestStatusSchema = z.object({
   status: z.enum(["pending", "approved", "rejected"]),
 });
 
+export const getAreasSchema = z.object({
+  filters: z
+    .object({
+      status: z.enum(["unassigned", "assigned", "completed"]).optional(),
+      wardNumber: z.number().optional(),
+    })
+    .optional(),
+});
+
 export interface Area {
   id: string;
   code: number;

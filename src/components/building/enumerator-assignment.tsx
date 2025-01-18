@@ -20,15 +20,18 @@ import { toast } from "sonner";
 export function EnumeratorAssignment({
   buildingId,
   currentEnumeratorId,
+  refetchBuilding,
 }: {
   buildingId: string;
   currentEnumeratorId?: string;
+  refetchBuilding: () => void;
 }) {
   const { data: enumerators, isLoading } = api.admin.getEnumerators.useQuery();
 
   const assignMutation = api.building.assignToEnumerator.useMutation({
     onSuccess: () => {
       toast.success("Successfully assigned enumerator");
+      refetchBuilding();
     },
     onError: (error) => {
       toast.error(error.message);

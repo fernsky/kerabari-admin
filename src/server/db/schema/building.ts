@@ -32,6 +32,7 @@ export const stagingBuildings = pgTable("staging_buddhashanti_buildings", {
   areaCode: varchar("area_code", { length: 255 }),
   wardNumber: integer("ward_number"),
   locality: varchar("locality", { length: 255 }),
+  buildingToken: varchar("building_token", { length: 255 }),
 
   // Family and business details
   totalFamilies: integer("total_families"),
@@ -94,6 +95,9 @@ export const buildings = pgTable("buddhashanti_buildings", {
   areaCode: varchar("area_code", { length: 255 }),
   wardNumber: integer("ward_number"),
   locality: varchar("locality", { length: 255 }),
+  buildingToken: varchar("building_token", { length: 255 }).references(
+    () => buildingTokens.token,
+  ),
 
   // Family and business details
   totalFamilies: integer("total_families"),

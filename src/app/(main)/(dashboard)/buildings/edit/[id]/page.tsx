@@ -35,6 +35,7 @@ import { updateBuildingSchema } from "@/server/api/routers/building/building.sch
 import { buildingChoices } from "@/lib/resources/building";
 import { useEffect } from "react";
 import { EnumeratorAssignment } from "@/components/building/enumerator-assignment";
+import { ComboboxSearchable } from "@/components/ui/combobox-searchable";
 
 export default function EditBuilding({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -63,10 +64,24 @@ export default function EditBuilding({ params }: { params: { id: string } }) {
       timeToPublicBus: "",
       timeToHealthOrganization: "",
       timeToFinancialOrganization: "",
+      areaId: "",
+      buildingToken: "",
     },
   });
 
-  const { data: building, isLoading } = api.building.getById.useQuery({
+  const { data: areas } = api.area.getAreas.useQuery();
+
+  const selectedAreaId = form.watch("areaId");
+  const { data: areaTokens } = api.area.getAreaTokens.useQuery(
+    { areaId: selectedAreaId },
+    { enabled: !!selectedAreaId },
+  );
+
+  const {
+    data: building,
+    isLoading,
+    refetch: refetchBuilding,
+  } = api.building.getById.useQuery({
     id: decodedId,
   });
 
@@ -105,6 +120,8 @@ export default function EditBuilding({ params }: { params: { id: string } }) {
         timeToPublicBus: building.timeToPublicBus ?? "",
         timeToHealthOrganization: building.timeToHealthOrganization ?? "",
         timeToFinancialOrganization: building.timeToFinancialOrganization ?? "",
+        areaId: building.areaId ?? "",
+        buildingToken: building.buildingToken ?? "",
       });
     }
   }, [building, form]);
@@ -177,6 +194,7 @@ export default function EditBuilding({ params }: { params: { id: string } }) {
     >
       <div className="space-y-6 px-2 lg:px-10">
         <EnumeratorAssignment
+          refetchBuilding={refetchBuilding}
           buildingId={decodedId}
           currentEnumeratorId={building?.userId ?? undefined}
         />
@@ -187,6 +205,80 @@ export default function EditBuilding({ params }: { params: { id: string } }) {
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-6"
           >
+            <FormCard
+              title="Area Assignment"
+              description="Assign building to an area and token"
+            >
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="areaId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Area</FormLabel>
+                      <FormControl>
+                        <ComboboxSearchable
+                          options={[
+                            { value: "none", label: "None" },
+                            ...(areas?.map((area) => ({
+                              value: area.id,
+                              label: `Area ${area.code} (Ward ${area.wardNumber})`,
+                              searchTerms: [
+                                `${area.code}`,
+                                `${area.wardNumber}`,
+                              ],
+                            })) ?? []),
+                          ]}
+                          value={field.value || "none"}
+                          onChange={(value) => {
+                            field.onChange(value === "none" ? "" : value);
+                            // Reset building token when area changes
+                            form.setValue("buildingToken", "");
+                          }}
+                          placeholder="Search area..."
+                          className="w-[300px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="buildingToken"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Building Token</FormLabel>
+                      <FormControl>
+                        <ComboboxSearchable
+                          options={[
+                            { value: "none", label: "None" },
+                            ...(areaTokens?.tokens
+                              ?.filter(
+                                (token) => token.status === "unallocated",
+                              )
+                              .map((token) => ({
+                                value: token.token,
+                                label: `Token ${token.token}`,
+                                searchTerms: [token.token],
+                              })) ?? []),
+                          ]}
+                          value={field.value || "none"}
+                          onChange={(value) =>
+                            field.onChange(value === "none" ? "" : value)
+                          }
+                          placeholder="Search token..."
+                          className="w-[300px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </FormCard>
+
             <FormCard
               title="Basic Information"
               description="General information about the building"
