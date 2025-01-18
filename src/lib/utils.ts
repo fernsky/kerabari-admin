@@ -95,7 +95,6 @@ export const jsonToPostgres = (table: string, data: TableData): string => {
     if (val === null) return "NULL";
 
     if (Array.isArray(val)) {
-      // Handle array values by converting to Postgres array syntax with single quotes
       const escapedValues = val.map((item) =>
         typeof item === "string" ? `'${item.replace(/'/g, "''")}'` : item,
       );
@@ -106,18 +105,19 @@ export const jsonToPostgres = (table: string, data: TableData): string => {
       if (val.startsWith("POINT")) {
         return `ST_GeomFromText('${val}', 4326)`;
       }
+      if (val.startsWith("uuid:")) {
+        return `'${val.substring(5)}'::UUID`;
+      }
       return `'${val.replace(/'/g, "''")}'`;
     }
 
     return val;
   });
 
-  // Create the UPDATE clause for UPSERT operation
   const conflictUpdateClause = keys
     .map((key) => `${key} = EXCLUDED.${key}`)
     .join(", ");
 
-  // Construct and return the complete INSERT statement with UPSERT handling
   return `
         INSERT INTO ${table} (${keys.join(",")}) 
         VALUES (${values.join(",")})

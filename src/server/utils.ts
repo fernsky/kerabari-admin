@@ -1,6 +1,6 @@
 import { FormAttachment } from "@/types";
 import axios from "axios";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, like, sql } from "drizzle-orm";
 import {
   surveyData,
   surveyAttachments,
@@ -10,11 +10,9 @@ import {
   buildingTokens,
   buildings,
   users,
+  stagingBuildings,
 } from "./db/schema";
-import {
-  getBuildingStagingToProdStatement,
-  parseBuilding,
-} from "@/lib/parser/buddhashanti/parse-buildings";
+import { parseBuilding } from "@/lib/parser/buddhashanti/parse-buildings";
 
 const getODKToken = async (
   siteUrl: string,
@@ -89,23 +87,139 @@ const syncStagingToProduction = async (
   data: any,
   ctx: any,
 ) => {
-  switch (formId) {
-    case "buddhashanti_building_survey":
-      const statement = getBuildingStagingToProdStatement(recordId);
-      if (statement) {
-        await ctx.db.execute(statement);
-      }
-      const enumeratorId = getValueFromNestedField(data, "enumerator_id");
-      const userUpdateStatement = sql`
-        UPDATE ${buildings} 
-        SET ${buildings.userId} = (
-          SELECT ${users.id} 
-          FROM ${users} 
-          WHERE UPPER(SUBSTRING(${users.id}::text, 1, 8)) = UPPER(SUBSTRING(${enumeratorId}, 1, 8))
-          LIMIT 1
-        )
-        WHERE UPPER(SUBSTRING(${buildings.userId}::text, 1, 8)) = UPPER(SUBSTRING(${enumeratorId}, 1, 8))`;
-      await ctx.db.execute(userUpdateStatement);
+  try {
+    switch (formId) {
+      case "buddhashanti_building_survey":
+        try {
+          // First statement: Insert into buildings
+          const insertStatement = sql.raw(`
+            INSERT INTO buddhashanti_buildings (
+              id,
+              survey_date,
+              enumerator_name,
+              enumerator_id,
+              area_code,
+              ward_number,
+              locality,
+              total_families, 
+              total_businesses,
+              survey_audio_recording,
+              gps,
+              altitude,
+              gps_accuracy,
+              building_image,
+              enumerator_selfie,
+              land_ownership,
+              base,
+              outer_wall,
+              roof,
+              floor,
+              map_status,
+              natural_disasters,
+              time_to_market,
+              time_to_active_road,
+              time_to_public_bus,
+              time_to_health_organization,
+              time_to_financial_organization,
+              road_status
+            )
+            SELECT 
+              id::UUID,
+              survey_date,
+              enumerator_name,
+              enumerator_id,
+              area_code,
+              ward_number,
+              locality,
+              total_families,
+              total_businesses,
+              survey_audio_recording,
+              gps,
+              altitude,
+              gps_accuracy,
+              building_image,
+              enumerator_selfie,
+              land_ownership,
+              base,
+              outer_wall,
+              roof,
+              floor,
+              map_status,
+              natural_disasters,
+              time_to_market,
+              time_to_active_road,
+              time_to_public_bus,
+              time_to_health_organization,
+              time_to_financial_organization,
+              road_status
+            FROM staging_buddhashanti_buildings 
+            WHERE id = '${recordId.replace("uuid:", "")}'
+            ON CONFLICT (id) DO NOTHING`);
+          await ctx.db.execute(insertStatement);
+        } catch (error) {
+          console.error(
+            `Error in buildings insert for record ${recordId}:`,
+            error,
+          );
+          throw error;
+        }
+
+        try {
+          // Second statement: Insert into staging_to_production
+          const trackingStatement = sql`
+            INSERT INTO ${stagingToProduction} (staging_table, production_table, record_id)
+            VALUES ('staging_buddhashanti_buildings', 'buddhashanti_buildings', ${recordId})`;
+          await ctx.db.execute(trackingStatement);
+        } catch (error) {
+          console.error(
+            `Error in staging_to_production insert for record ${recordId}:`,
+            error,
+          );
+          throw error;
+        }
+
+        try {
+          // Update user statement
+          const enumeratorId = getValueFromNestedField(data, "enumerator_id");
+          if (!enumeratorId) {
+            throw new Error(`No enumerator_id found for record ${recordId}`);
+          }
+
+          const enumerator = await ctx.db
+            .select()
+            .from(users)
+            .where(
+              eq(
+                sql`UPPER(SUBSTRING(${users.id}::text, 1, 8))`,
+                enumeratorId.substring(0, 8).toUpperCase(),
+              ),
+            )
+            .limit(1);
+
+          if (!enumerator || enumerator.length === 0) {
+            throw new Error(`No valid enumerator ID ${enumeratorId}`);
+          }
+
+          await ctx.db
+            .update(buildings)
+            .set({ userId: enumerator[0].id })
+            .where(eq(buildings.id, recordId));
+
+          console.log("User updated successfully.");
+        } catch (error) {
+          console.error(`Error in user update for record ${recordId}:`, error);
+          throw error;
+        }
+        break;
+      default:
+        throw new Error(`Unknown form type: ${formId}`);
+    }
+  } catch (error) {
+    console.error(
+      `Failed to sync record ${recordId} from staging to production:`,
+      error,
+    );
+    throw error;
   }
 };
 
@@ -211,6 +325,7 @@ export const fetchSurveySubmissions = async (
     $expand: "*", // Expand all relationships
     $count: true, // Include total count
     $wkt: false, // Don't use WKT format for geometries
+    $filter: `__system/submissionDate ge ${startDate ?? defaultStartDate.toISOString()} and __system/submissionDate le ${endDate ?? defaultEndDate.toISOString()}`,
   };
 
   try {

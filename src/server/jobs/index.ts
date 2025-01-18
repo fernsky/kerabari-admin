@@ -42,7 +42,7 @@ const worker = new Worker<SyncJobData>(
   "submission-sync",
   async (job: Job<SyncJobData>) => {
     const { formId } = job.data;
-
+    /*
     try {
       // Get form details
       const forms = await db
@@ -87,6 +87,7 @@ const worker = new Worker<SyncJobData>(
       }
       throw new Error("Job failed with unknown error");
     }
+      */
   },
   { connection },
 );

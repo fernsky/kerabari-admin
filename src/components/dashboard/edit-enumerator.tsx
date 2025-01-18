@@ -52,6 +52,10 @@ const FormCard = ({
 export function EditEnumerator({ enumeratorId }: { enumeratorId: string }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
   const updateEnumerator = api.enumerator.update.useMutation();
   const resetPassword = api.enumerator.resetPassword.useMutation();
   const { data: enumerator, isLoading: isLoadingEnumerator } =
@@ -68,25 +72,6 @@ export function EditEnumerator({ enumeratorId }: { enumeratorId: string }) {
       wardNumber: 1,
       isActive: true,
     },
-  });
-
-  type PasswordFormValues = {
-    password: string;
-    confirmPassword: string;
-  };
-
-  const passwordForm = useForm<PasswordFormValues>({
-    resolver: zodResolver(
-      z
-        .object({
-          password: z.string().min(6),
-          confirmPassword: z.string(),
-        })
-        .refine((data) => data.password === data.confirmPassword, {
-          message: "Passwords don't match",
-          path: ["confirmPassword"],
-        }),
-    ),
   });
 
   useEffect(() => {
@@ -118,17 +103,30 @@ export function EditEnumerator({ enumeratorId }: { enumeratorId: string }) {
     }
   }
 
-  const onPasswordSubmit = async (data: PasswordFormValues) => {
+  const handlePasswordReset = async () => {
+    if (password.length < 6) {
+      setPasswordError("Password must be at least 6 characters");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setPasswordError("Passwords do not match");
+      return;
+    }
+
     try {
       await resetPassword.mutateAsync({
         enumeratorId,
-        password: data.password,
-        confirmPassword: data.confirmPassword,
+        password,
+        confirmPassword,
       });
       toast.success("Password reset successfully");
-      passwordForm.reset();
+      setPassword("");
+      setConfirmPassword("");
+      setPasswordError("");
     } catch (error) {
-      toast.error("Failed to reset password");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to reset password",
+      );
     }
   };
 
@@ -256,56 +254,47 @@ export function EditEnumerator({ enumeratorId }: { enumeratorId: string }) {
               />
             </div>
           </FormCard>
-
-          <FormCard
-            title="Security"
-            description="Reset password for this enumerator"
-          >
-            <Form {...passwordForm}>
-              <form
-                onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
-                className="space-y-4"
-              >
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <FormField
-                    control={passwordForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>New Password</FormLabel>
-                        <FormControl>
-                          <Input type="password" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={passwordForm.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Confirm Password</FormLabel>
-                        <FormControl>
-                          <Input type="password" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="flex justify-end">
-                  <Button type="submit" disabled={resetPassword.isLoading}>
-                    Reset Password
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </FormCard>
         </form>
       </Form>
+      <div>
+        <div className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <FormLabel>New Password</FormLabel>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter new password"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <FormLabel>Confirm Password</FormLabel>
+              <Input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+              />
+            </div>
+          </div>
+
+          {passwordError && (
+            <p className="text-sm text-red-500">{passwordError}</p>
+          )}
+
+          <div className="flex justify-end">
+            <LoadingButton
+              type="button"
+              onClick={handlePasswordReset}
+              loading={resetPassword.isLoading}
+            >
+              Reset Password
+            </LoadingButton>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

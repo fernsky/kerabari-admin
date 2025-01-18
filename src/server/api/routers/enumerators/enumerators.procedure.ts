@@ -57,7 +57,7 @@ export const enumeratorRouter = createTRPCRouter({
       }
 
       const hashedPassword = await new Scrypt().hash(input.password);
-
+      console.log("Ressting password", input.enumeratorId, hashedPassword);
       await ctx.db
         .update(users)
         .set({ hashedPassword })

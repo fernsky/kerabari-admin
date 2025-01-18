@@ -7,6 +7,7 @@ import {
   doublePrecision,
   pgEnum,
   text,
+  uuid,
 } from "drizzle-orm/pg-core";
 import { geometry } from "../geographical";
 import { areas, users } from "./basic";
@@ -22,7 +23,7 @@ There must be an option to Restore Survey Data while modifying in the actual bui
 */
 
 export const stagingBuildings = pgTable("staging_buddhashanti_buildings", {
-  id: varchar("id", { length: 255 }).primaryKey(), // Unique identifier for the record
+  id: uuid("id").primaryKey(), // Unique identifier for the record
   surveyDate: timestamp("survey_date"),
   enumeratorName: varchar("enumerator_name", { length: 255 }),
   enumeratorId: varchar("enumerator_id", { length: 255 }),
@@ -69,7 +70,7 @@ export const stagingBuildings = pgTable("staging_buddhashanti_buildings", {
 });
 
 export const buildings = pgTable("buddhashanti_buildings", {
-  id: varchar("id", { length: 255 }).primaryKey(), // Unique identifier for the record
+  id: uuid("id").primaryKey(), // Unique identifier for the record
   surveyDate: timestamp("survey_date"),
   enumeratorName: varchar("enumerator_name", { length: 255 }),
   enumeratorId: varchar("enumerator_id", { length: 255 }),
