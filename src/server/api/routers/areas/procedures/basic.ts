@@ -114,3 +114,26 @@ export const updateArea = protectedProcedure
       .where(eq(areas.id, input.id));
     return { success: true };
   });
+
+export const getAvailableAreaCodes = protectedProcedure
+  .input(z.object({ wardNumber: z.number() }))
+  .query(async ({ ctx, input }) => {
+    const startCode = input.wardNumber * 1000 + 1;
+    const endCode = input.wardNumber * 1000 + 999;
+
+    // Get all used codes for this ward
+    const usedCodes = await ctx.db
+      .select({ code: areas.code })
+      .from(areas)
+      .where(eq(areas.wardNumber, input.wardNumber));
+
+    const usedCodesSet = new Set(usedCodes.map((a) => a.code));
+
+    // Generate available codes
+    const availableCodes = Array.from(
+      { length: endCode - startCode + 1 },
+      (_, i) => startCode + i,
+    ).filter((code) => !usedCodesSet.has(code));
+
+    return availableCodes;
+  });

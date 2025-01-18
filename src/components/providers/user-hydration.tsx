@@ -10,7 +10,7 @@ interface UserHydrationProps {
 export function UserHydration({ user }: UserHydrationProps) {
   const setUser = useUserStore((state) => state.setUser);
   const setIsLoading = useUserStore((state) => state.setIsLoading);
-  console.log(user);
+
   useEffect(() => {
     setUser(user);
     setIsLoading(false);

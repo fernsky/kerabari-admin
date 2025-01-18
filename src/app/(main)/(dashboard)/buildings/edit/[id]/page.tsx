@@ -169,6 +169,9 @@ export default function EditBuilding({ params }: { params: { id: string } }) {
     </Card>
   );
 
+  // Add this to get the current building token for comparison
+  const currentBuildingToken = form.watch("buildingToken");
+
   return (
     <ContentLayout
       title="Edit Building"
@@ -256,7 +259,10 @@ export default function EditBuilding({ params }: { params: { id: string } }) {
                             { value: "none", label: "None" },
                             ...(areaTokens?.tokens
                               ?.filter(
-                                (token) => token.status === "unallocated",
+                                (token) =>
+                                  // Include tokens that are either unallocated or match the current token
+                                  token.status === "unallocated" ||
+                                  token.token === currentBuildingToken,
                               )
                               .map((token) => ({
                                 value: token.token,

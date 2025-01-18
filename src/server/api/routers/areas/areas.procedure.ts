@@ -4,12 +4,14 @@ import {
   assignAreaToEnumerator,
   getUnassignedWardAreasofEnumerator,
   getAreaDetails,
+  getAreasByWardforRequest,
 } from "./procedures/assignment";
 import {
   createArea,
   getAreas,
   getAreaById,
   updateArea,
+  getAvailableAreaCodes,
 } from "./procedures/basic";
 import {
   requestArea,
@@ -30,6 +32,8 @@ export const areaRouter = createTRPCRouter({
   getTokenStatsByAreaId,
   getAreaTokens,
   assignAreaToEnumerator,
+  getAvailableAreaCodes,
   getUnassignedWardAreasofEnumerator,
   getAreaDetails,
+  getAreasByWardforRequest,
 });

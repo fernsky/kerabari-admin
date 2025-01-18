@@ -31,7 +31,6 @@ import {
 } from "lucide-react";
 import { AreaTableView } from "./area-table-view";
 import { AreaCardView } from "./area-card-view";
-import { ContentLayout } from "../admin-panel/content-layout";
 
 export default function AreaActionHandler() {
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
@@ -45,7 +44,11 @@ export default function AreaActionHandler() {
   } | null>(null);
   const [message, setMessage] = useState("");
 
-  const { data, isLoading } = api.areaManagement.getPendingActions.useQuery({
+  const {
+    data,
+    isLoading,
+    refetch: refetchPendingActions,
+  } = api.areaManagement.getPendingActions.useQuery({
     status: selectedStatus as any,
     wardNumber: selectedWard ? parseInt(selectedWard) : undefined,
     page,
@@ -57,10 +60,11 @@ export default function AreaActionHandler() {
       onSuccess: () => {
         setDialogOpen(false);
         setMessage("");
+        refetchPendingActions();
       },
     });
 
-  const handleActionClick = (
+  const handleActionClick = async (
     areaId: string,
     type: string,
     action: "approve" | "reject",
@@ -192,6 +196,7 @@ export default function AreaActionHandler() {
                     code: String(action.code),
                   }))}
                   onAction={handleActionClick}
+                  refetchPendingActions={refetchPendingActions}
                 />
               </div>
               <div className="block md:hidden">

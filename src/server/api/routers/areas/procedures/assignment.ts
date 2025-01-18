@@ -1,5 +1,5 @@
 import { protectedProcedure } from "../../../trpc";
-import { areas, users, Area } from "@/server/db/schema/basic";
+import { areas, users, Area, areaRequests } from "@/server/db/schema/basic";
 import { eq, sql } from "drizzle-orm";
 import { assignAreaToEnumeratorSchema } from "../area.schema";
 import * as z from "zod";
@@ -66,4 +66,40 @@ export const getAreaDetails = protectedProcedure
     }
 
     return areaWithEnumerator[0];
+  });
+
+export const getAreasByWardforRequest = protectedProcedure
+  .input(z.object({ wardNumber: z.number() }))
+  .query(async ({ ctx, input }) => {
+    const wardAreas = await ctx.db.execute(
+      sql`SELECT 
+        a.id as "id",
+        a.code as "code",
+        a.ward as "wardNumber",
+        a.assigned_to as "assignedTo",
+        ST_AsGeoJSON(a.geometry) as "geometry"
+      FROM ${areas} a
+      LEFT JOIN ${areaRequests} ar 
+        ON a.id = ar.area_id 
+        AND ar.user_id = ${ctx.user!.id}
+        AND ar.status = 'pending'
+      WHERE a.ward = ${input.wardNumber}
+      AND ar.area_id IS NULL
+      ORDER BY a.code`,
+    );
+
+    return wardAreas.map((area) => {
+      try {
+        return {
+          ...area,
+          geometry: area.geometry ? JSON.parse(area.geometry as string) : null,
+        };
+      } catch (e) {
+        console.error(`Error parsing geometry for area ${area.id}:`, e);
+        return {
+          ...area,
+          geometry: null,
+        };
+      }
+    }) as Area[];
   });
