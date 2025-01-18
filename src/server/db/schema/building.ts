@@ -6,9 +6,10 @@ import {
   decimal,
   doublePrecision,
   pgEnum,
+  text,
 } from "drizzle-orm/pg-core";
 import { geometry } from "../geographical";
-import { areas } from "./basic";
+import { areas, users } from "./basic";
 
 /*
 We need to create two tables.
@@ -52,7 +53,7 @@ export const stagingBuildings = pgTable("staging_buddhashanti_buildings", {
 
   // Map and disaster-related info
   mapStatus: varchar("map_status", { length: 255 }), // e.g., Passed, Pending
-  naturalDisasters: varchar("natural_disasters", { length: 255 }).array(), // e.g., Flood, Landslide
+  naturalDisasters: text("natural_disasters").array(), // e.g., Flood, Landslide
 
   // Accessibility
   timeToMarket: varchar("time_to_market", { length: 255 }), // e.g., Under 15 minutes
@@ -72,6 +73,7 @@ export const buildings = pgTable("buddhashanti_buildings", {
   surveyDate: timestamp("survey_date"),
   enumeratorName: varchar("enumerator_name", { length: 255 }),
   enumeratorId: varchar("enumerator_id", { length: 255 }),
+  userId: varchar("user_id", { length: 255 }).references(() => users.id),
 
   // Location & general information
   areaCode: varchar("area_code", { length: 255 }),
@@ -99,7 +101,7 @@ export const buildings = pgTable("buddhashanti_buildings", {
 
   // Map and disaster-related info
   mapStatus: varchar("map_status", { length: 255 }), // e.g., Passed, Pending
-  naturalDisasters: varchar("natural_disasters", { length: 255 }).array(), // e.g., Flood, Landslide
+  naturalDisasters: text("natural_disasters").array(), // e.g., Flood, Landslide
 
   // Accessibility
   timeToMarket: varchar("time_to_market", { length: 255 }), // e.g., Under 15 minutes

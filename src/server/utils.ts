@@ -8,6 +8,8 @@ import {
   stagingToProduction,
   areas,
   buildingTokens,
+  buildings,
+  users,
 } from "./db/schema";
 import {
   getBuildingStagingToProdStatement,
@@ -53,13 +55,57 @@ const getPostgresInsertStatement = (formId: string, data: any) => {
   return null;
 };
 
-const getPostgresStagingProductionSyncStatement = (
+/**
+ * Synchronizes data from staging to production tables based on the form type.
+ * Currently supports the 'buddhashanti_building_survey' form type.
+ *
+ * @param formId - The identifier of the form type being synchronized
+ * @param recordId - The unique identifier of the record being synchronized
+ * @param data - The form data object containing survey information
+ * @param ctx - The context object containing database connection and execution methods
+ *
+ * For buddhashanti_building_survey:
+ * - Executes building-specific staging to production SQL statements
+ * - Updates the user ID in buildings table by matching enumerator ID patterns
+ * - Uses first 8 characters of IDs for matching users
+ *
+ * @remarks
+ * The function expects the context object to have a db property with an execute method
+ * for running SQL statements.
+ *
+ * @throws May throw database errors if SQL execution fails
+ *
+ * @example
+ * await syncStagingToProduction(
+ *   "buddhashanti_building_survey",
+ *   "record123",
+ *   { enumerator_id: "USER123" },
+ *   context
+ * );
+ */
+const syncStagingToProduction = async (
   formId: string,
   recordId: string,
+  data: any,
+  ctx: any,
 ) => {
   switch (formId) {
     case "buddhashanti_building_survey":
-      return getBuildingStagingToProdStatement(recordId);
+      const statement = getBuildingStagingToProdStatement(recordId);
+      if (statement) {
+        await ctx.db.execute(statement);
+      }
+      const enumeratorId = getValueFromNestedField(data, "enumerator_id");
+      const userUpdateStatement = sql`
+        UPDATE ${buildings} 
+        SET ${buildings.userId} = (
+          SELECT ${users.id} 
+          FROM ${users} 
+          WHERE UPPER(SUBSTRING(${users.id}::text, 1, 8)) = UPPER(SUBSTRING(${enumeratorId}, 1, 8))
+          LIMIT 1
+        )
+        WHERE UPPER(SUBSTRING(${buildings.userId}::text, 1, 8)) = UPPER(SUBSTRING(${enumeratorId}, 1, 8))`;
+      await ctx.db.execute(userUpdateStatement);
   }
 };
 
@@ -238,13 +284,12 @@ export const fetchSurveySubmissions = async (
               .limit(1);
 
             if (productionInsert.length === 0) {
-              const syncStatement = getPostgresStagingProductionSyncStatement(
+              await syncStagingToProduction(
                 formId,
                 submission.__id,
+                submission,
+                ctx,
               );
-              if (syncStatement) {
-                await ctx.db.execute(sql.raw(syncStatement));
-              }
             }
 
             // Skip if attachment already exists

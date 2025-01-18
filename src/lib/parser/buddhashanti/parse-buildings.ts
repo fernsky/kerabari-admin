@@ -2,6 +2,13 @@ import { jsonToPostgres } from "@/lib/utils";
 import { DATABASE_PREFIX } from "@/lib/constants";
 import { map } from "leaflet";
 import { mapBuildingChoices } from "@/lib/resources/building";
+import { sql } from "drizzle-orm";
+import {
+  buildings,
+  stagingBuildings,
+  stagingToProduction,
+} from "@/server/db/schema";
+import { eq } from "drizzle-orm";
 
 const data = {
   intro: null,
@@ -279,14 +286,76 @@ export function parseBuilding(data: RawBuildingData) {
 }
 
 export function getBuildingStagingToProdStatement(recordId: string) {
-  return `
-  INSERT INTO buddhashanti_buildings (SELECT * FROM staging_buddhashanti_buildings WHERE id = '${recordId}')
-  ON CONFLICT (id) DO NOTHING;
+  // First insert statement
+  const buildingInsert = sql`
+    INSERT INTO ${buildings} (
+      ${buildings.id},
+      ${buildings.surveyDate},
+      ${buildings.enumeratorName},
+      ${buildings.enumeratorId},
+      ${buildings.areaCode}, 
+      ${buildings.wardNumber},
+      ${buildings.locality},
+      ${buildings.totalFamilies},
+      ${buildings.totalBusinesses},
+      ${buildings.surveyAudioRecording},
+      ${buildings.gps},
+      ${buildings.altitude}, 
+      ${buildings.gpsAccuracy},
+      ${buildings.buildingImage},
+      ${buildings.enumeratorSelfie},
+      ${buildings.landOwnership},
+      ${buildings.base},
+      ${buildings.outerWall},
+      ${buildings.roof},
+      ${buildings.floor},
+      ${buildings.mapStatus},
+      ${buildings.naturalDisasters},
+      ${buildings.timeToMarket},
+      ${buildings.timeToActiveRoad},
+      ${buildings.timeToPublicBus},
+      ${buildings.timeToHealthOrganization},
+      ${buildings.timeToFinancialOrganization},
+      ${buildings.roadStatus}
+    )
+    SELECT 
+      ${stagingBuildings.id},
+      ${stagingBuildings.surveyDate},
+      ${stagingBuildings.enumeratorName},
+      ${stagingBuildings.enumeratorId},
+      ${stagingBuildings.areaCode},
+      ${stagingBuildings.wardNumber},
+      ${stagingBuildings.locality},
+      ${stagingBuildings.totalFamilies},
+      ${stagingBuildings.totalBusinesses},
+      ${stagingBuildings.surveyAudioRecording},
+      ${stagingBuildings.gps},
+      ${stagingBuildings.altitude},
+      ${stagingBuildings.gpsAccuracy},
+      ${stagingBuildings.buildingImage},
+      ${stagingBuildings.enumeratorSelfie},
+      ${stagingBuildings.landOwnership},
+      ${stagingBuildings.base},
+      ${stagingBuildings.outerWall},
+      ${stagingBuildings.roof},
+      ${stagingBuildings.floor},
+      ${stagingBuildings.mapStatus},
+      ${stagingBuildings.naturalDisasters},
+      ${stagingBuildings.timeToMarket},
+      ${stagingBuildings.timeToActiveRoad},
+      ${stagingBuildings.timeToPublicBus},
+      ${stagingBuildings.timeToHealthOrganization},
+      ${stagingBuildings.timeToFinancialOrganization},
+      ${stagingBuildings.roadStatus}
+    FROM ${stagingBuildings}
+    WHERE ${stagingBuildings.id} = ${recordId}
+    ON CONFLICT (id) DO NOTHING`;
 
-  -- Insert into staging_to_production table for tracking so that the data is not inserted again later
+  // Second insert statement
+  const stagingToProdInsert = sql`
+    INSERT INTO ${stagingToProduction} (staging_table, production_table, record_id)
+    VALUES ('staging_buddhashanti_buildings', 'buddhashanti_buildings', ${recordId})`;
 
-  INSERT INTO ${DATABASE_PREFIX}_staging_to_production (staging_table, production_table, record_id)
-  VALUES
-  ('staging_buddhashanti_buildings', 'buddhashanti_buildings', '${recordId}');
-  `;
+  // Combine both statements
+  return sql`${buildingInsert}; ${stagingToProdInsert};`;
 }

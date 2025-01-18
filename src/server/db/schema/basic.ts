@@ -123,7 +123,7 @@ but the last enumerator is still sending submission in that area code.
 */
 
 export const enumeratorAssignments = pgTable("enumerator_assignments", {
-  id: varchar("id", { length: 36 }).default(uuidv4()).primaryKey(),
+  id: varchar("id", { length: 36 }).primaryKey(),
   areaId: varchar("area_id", { length: 36 })
     .notNull()
     .references(() => areas.id),

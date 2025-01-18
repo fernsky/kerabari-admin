@@ -10,6 +10,7 @@ import {
   getAreaActionsSchema,
   handleActionSchema,
 } from "./area-management.schema";
+import { v4 } from "uuid";
 
 export const areaManagementRouter = createTRPCRouter({
   updateAreaStatus: protectedProcedure
@@ -33,6 +34,7 @@ export const areaManagementRouter = createTRPCRouter({
 
         // Record in assignments history
         await tx.insert(enumeratorAssignments).values({
+          id: v4(),
           areaId: input.areaId,
           assignedTo: ctx.user.id,
           status: input.status,
@@ -64,6 +66,7 @@ export const areaManagementRouter = createTRPCRouter({
 
         // Record completion in assignment history
         await tx.insert(enumeratorAssignments).values({
+          id: v4(),
           areaId: input.areaId,
           assignedTo: ctx.user.id,
           status: "unassigned",
@@ -90,6 +93,7 @@ export const areaManagementRouter = createTRPCRouter({
           .where(eq(areas.id, input.areaId));
 
         await tx.insert(enumeratorAssignments).values({
+          id: v4(),
           areaId: input.areaId,
           assignedTo: ctx.user.id,
           status: "revision",
@@ -124,6 +128,7 @@ export const areaManagementRouter = createTRPCRouter({
           .where(eq(areas.id, input.areaId));
 
         await tx.insert(enumeratorAssignments).values({
+          id: v4(),
           areaId: input.areaId,
           assignedTo: ctx.user.id,
           status: newStatus,
