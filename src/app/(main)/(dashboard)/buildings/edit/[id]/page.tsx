@@ -69,7 +69,9 @@ export default function EditBuilding({ params }: { params: { id: string } }) {
     },
   });
 
-  const { data: areas } = api.area.getAreas.useQuery();
+  const { data: areas } = api.area.getAreas.useQuery({
+    status: "all",
+  });
 
   const selectedAreaId = form.watch("areaId");
   const { data: areaTokens } = api.area.getAreaTokens.useQuery(
