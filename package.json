@@ -92,6 +92,7 @@
     "react": "^19.0.0",
     "react-day-picker": "8.10.1",
     "react-dom": "^19.0.0",
+    "react-h5-audio-player": "^3.10.0-rc.1",
     "react-hook-form": "^7.52.1",
     "react-hooks-global-state": "^2.1.0",
     "react-leaflet": "3.2.0",

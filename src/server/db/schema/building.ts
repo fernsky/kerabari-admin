@@ -69,6 +69,13 @@ export const stagingBuildings = pgTable("staging_buddhashanti_buildings", {
   roadStatus: varchar("road_status", { length: 255 }), // e.g., Graveled, Paved
 });
 
+/*
+Approved: The data for the building is valid.
+Pending: The data is awaiting approval from the admin.
+Requested For Edit: The collected data has been requested for editing back to enumerator.
+Rejected: The data has been rejected.
+*/
+
 export const buildingStatusEnum = pgEnum("building_status_enum", [
   "approved",
   "pending",

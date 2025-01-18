@@ -47,8 +47,20 @@ export const buildingQuerySchema = z.object({
       wardNumber: z.number().optional(),
       locality: z.string().optional(),
       mapStatus: z.string().optional(),
+      enumeratorId: z.string().optional(),
+      status: z
+        .enum(["pending", "approved", "rejected", "requested_for_edit"])
+        .optional(),
     })
     .optional(),
 });
+
+export const buildingStatusSchema = z.object({
+  buildingId: z.string(),
+  status: z.enum(["approved", "pending", "requested_for_edit", "rejected"]),
+  message: z.string().optional(), // For rejection reason or edit request details
+});
+
+export type BuildingStatusUpdate = z.infer<typeof buildingStatusSchema>;
 
 export type Building = z.infer<typeof buildingSchema>;

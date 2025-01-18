@@ -2,6 +2,10 @@
 
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { api } from "@/trpc/react";
+import { useState } from "react";
+import AudioPlayer, { RHAP_UI } from "react-h5-audio-player";
+import "react-h5-audio-player/lib/styles.css";
+
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,6 +28,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { ShowPoint } from "@/components/shared/maps/show-point";
+import { BuildingActions } from "@/components/building/building-actions";
 
 import { z } from "zod";
 const gpsSchema = z.object({
@@ -33,7 +38,6 @@ const gpsSchema = z.object({
     z.number().min(-90).max(90), // latitude
   ]),
 });
-
 export default function BuildingDetails({
   params,
 }: {
@@ -44,6 +48,7 @@ export default function BuildingDetails({
     data: building,
     isLoading,
     error,
+    refetch: buildingRefetch,
   } = api.building.getById.useQuery({ id: decodedId });
 
   if (error) {
@@ -202,6 +207,16 @@ export default function BuildingDetails({
             />
           </div>
 
+          {/* Add BuildingActions component right after the title */}
+          <BuildingActions
+            buildingId={building.id}
+            currentStatus={building.status ?? "pending"}
+            onStatusChange={() => {
+              // Refetch building data when status changes
+              buildingRefetch();
+            }}
+          />
+
           {/* Image Section (if available) */}
           {building?.buildingImage && (
             <div className="overflow-hidden rounded-xl border bg-card">
@@ -318,35 +333,124 @@ export default function BuildingDetails({
             </Card>
           </div>
 
-          {/* Add location map if GPS coordinates are available */}
-          {building?.gps && gpsSchema.safeParse(building.gps).success && (
-            <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
-              <div className="border-b bg-muted/50 p-4">
-                <h3 className="font-semibold">Location</h3>
-                <p className="text-xs text-muted-foreground">
-                  Building GPS Coordinates
-                </p>
+          {/* New combined media and location section */}
+          {(building?.enumeratorSelfie ||
+            building?.surveyAudioRecording ||
+            (building?.gps && gpsSchema.safeParse(building.gps).success)) && (
+            <div className="grid gap-6 lg:grid-cols-5">
+              {/* Left column: Selfie and Audio */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Enumerator Selfie */}
+                {building.enumeratorSelfie && (
+                  <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+                    <div className="border-b bg-muted/50 p-4">
+                      <h3 className="font-semibold">Enumerator Selfie</h3>
+                      <p className="text-xs text-muted-foreground">
+                        Photo taken during survey
+                      </p>
+                    </div>
+                    <div className="p-4">
+                      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-lg border">
+                        <Image
+                          src={building.enumeratorSelfie}
+                          alt="Enumerator Selfie"
+                          fill
+                          className="object-cover transition-all hover:scale-105"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Audio Recording */}
+                {building.surveyAudioRecording && (
+                  <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+                    <div className="border-b bg-muted/50 p-4">
+                      <h3 className="font-semibold">Survey Audio Recording</h3>
+                      <p className="text-xs text-muted-foreground">
+                        Audio monitoring of survey process
+                      </p>
+                    </div>
+                    <div className="p-4">
+                      <div className="rounded-lg border bg-card/50 p-3">
+                        <AudioPlayer
+                          src={building.surveyAudioRecording}
+                          autoPlayAfterSrcChange={false}
+                          customProgressBarSection={[
+                            RHAP_UI.CURRENT_TIME,
+                            RHAP_UI.PROGRESS_BAR,
+                            RHAP_UI.DURATION,
+                          ]}
+                          customControlsSection={[
+                            RHAP_UI.MAIN_CONTROLS,
+                            RHAP_UI.VOLUME,
+                          ]}
+                          style={{
+                            background: "transparent",
+                            boxShadow: "none",
+                          }}
+                          className="[&_.rhap_progress-section]:!mx-4 [&_.rhap_controls-section]:!mx-4 [&_.rhap_main-controls-button]:!text-primary [&_.rhap_progress-bar]:!bg-primary/20 [&_.rhap_progress-filled]:!bg-primary [&_.rhap_progress-indicator]:!bg-primary"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="aspect-[21/9]">
-                <ShowPoint
-                  coordinates={[
-                    building.gps.coordinates[1],
-                    building.gps.coordinates[0],
-                  ]}
-                />
-              </div>
-              <div className="grid gap-2 p-4">
-                <DetailRow
-                  icon={MapPin}
-                  label="Accuracy"
-                  value={`${building.gpsAccuracy?.toFixed(2) || "—"} meters`}
-                />
-                <DetailRow
-                  icon={Building2}
-                  label="Altitude"
-                  value={`${building.altitude?.toFixed(2) || "—"} meters`}
-                />
-              </div>
+
+              {/* Right column: Map and Details */}
+              {building?.gps && gpsSchema.safeParse(building.gps).success && (
+                <div className="lg:col-span-3 space-y-6">
+                  <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+                    <div className="border-b bg-muted/50 p-4">
+                      <h3 className="font-semibold">Location Details</h3>
+                      <p className="text-xs text-muted-foreground">
+                        Building GPS Coordinates and Elevation
+                      </p>
+                    </div>
+                    <div className="aspect-[16/10]">
+                      <ShowPoint
+                        coordinates={[
+                          building.gps.coordinates[1],
+                          building.gps.coordinates[0],
+                        ]}
+                      />
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-4 p-4">
+                      <div className="rounded-lg border bg-card/50 p-3 hover:bg-accent/50 transition-colors">
+                        <div className="flex items-center gap-2">
+                          <div className="rounded-md bg-primary/10 p-2">
+                            <MapPin className="h-4 w-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground">
+                              GPS Accuracy
+                            </p>
+                            <p className="font-medium">
+                              {building.gpsAccuracy?.toFixed(2) || "—"} meters
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="rounded-lg border bg-card/50 p-3 hover:bg-accent/50 transition-colors">
+                        <div className="flex items-center gap-2">
+                          <div className="rounded-md bg-primary/10 p-2">
+                            <Building2 className="h-4 w-4 text-primary" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground">
+                              Altitude
+                            </p>
+                            <p className="font-medium">
+                              {building.altitude?.toFixed(2) || "—"} meters
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

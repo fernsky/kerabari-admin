@@ -22,9 +22,9 @@ export const ShowPoint = ({ coordinates, zoom = 15 }: ShowPointProps) => {
   }, []);
 
   return (
-    <div className="overflow-hidden rounded-lg border bg-white shadow-sm">
+    <div className="overflow-hidden rounded-lg border bg-white shadow-sm h-full w-full">
       <MapContainer
-        className="w-full aspect-[21/9]"
+        className="w-full h-full"
         zoom={zoom}
         scrollWheelZoom={false}
         center={coordinates}
