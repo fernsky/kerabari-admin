@@ -12,10 +12,11 @@ export interface AreaAction {
 }
 
 export interface ActionHandlerProps {
-  data: AreaAction[];
-  onAction: (
-    areaId: string,
-    type: string,
-    action: "approve" | "reject",
-  ) => void;
+  data: Array<{
+    id: string;
+    wardNumber: number;
+    code: number;
+    assignedTo: { id: string; name: string } | null;
+    areaStatus?: string;
+  }>;
 }

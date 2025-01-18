@@ -2,9 +2,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { type ActionHandlerProps } from "./types";
-import { MapPin, User, CheckCircle, XCircle, Hash } from "lucide-react";
+import { MapPin, User, Hash, Pencil, Eye } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-export function AreaCardView({ data, onAction }: ActionHandlerProps) {
+export function AreaCardView({ data }: ActionHandlerProps) {
+  const router = useRouter();
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {data.map((area) => (
@@ -42,24 +45,24 @@ export function AreaCardView({ data, onAction }: ActionHandlerProps) {
                 </span>
               </div>
 
-              <div className="flex gap-2 pt-2">
+              <div className="mt-4 flex justify-end gap-2">
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  onClick={() => onAction(area.id, area.areaStatus, "approve")}
-                  className="flex-1 text-green-600 hover:text-green-700"
+                  onClick={() => router.push(`/area/update/${area.id}`)}
+                  className="text-blue-600 hover:text-blue-700"
                 >
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Approve
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit
                 </Button>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  onClick={() => onAction(area.id, area.areaStatus!, "reject")}
-                  className="flex-1 text-red-600 hover:text-red-700"
+                  onClick={() => router.push(`/area/show/${area.id}`)}
+                  className="text-gray-600 hover:text-gray-700"
                 >
-                  <XCircle className="h-4 w-4 mr-2" />
-                  Reject
+                  <Eye className="h-4 w-4 mr-2" />
+                  View
                 </Button>
               </div>
             </div>

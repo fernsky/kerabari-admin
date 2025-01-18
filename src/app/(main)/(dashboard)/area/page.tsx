@@ -1,12 +1,12 @@
 "use client";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
-import { AreaSidebar } from "@/components/area/area-sidebar";
+import { AreaNavigation } from "@/components/area/area-navigation";
 
 const AreaPage = () => {
   return (
     <ContentLayout title="Area Management">
       <div className="container mx-auto space-y-8 px-4 lg:px-8">
-        <AreaSidebar />
+        <AreaNavigation />
       </div>
     </ContentLayout>
   );

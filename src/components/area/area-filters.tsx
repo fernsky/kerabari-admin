@@ -8,9 +8,6 @@ import {
 } from "@/components/ui/select";
 import { ComboboxSearchable } from "@/components/ui/combobox-searchable";
 import { api } from "@/trpc/react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
 import { MapPin, Users, CheckCircle2, AlertCircle } from "lucide-react";
 import { Input } from "../ui/input";
 
@@ -31,6 +28,15 @@ export function AreaFilters({
 }: AreaFiltersProps) {
   const { data: enumerators } = api.admin.getEnumerators.useQuery();
 
+  const enumeratorOptions = [
+    { value: "all", label: "All Enumerators" },
+    ...(enumerators?.map((enumerator) => ({
+      value: enumerator.id,
+      label: enumerator.name,
+      searchTerms: [enumerator.name],
+    })) ?? []),
+  ];
+
   const statusOptions = [
     { value: "pending", label: "Pending", icon: AlertCircle },
     { value: "approved", label: "Approved", icon: CheckCircle2 },
@@ -38,106 +44,105 @@ export function AreaFilters({
   ];
 
   return (
-    <Card className="mb-6">
-      <CardContent className="pt-6">
-        <div className="space-y-4">
-          {/* Active Filters */}
-          <div className="flex flex-wrap gap-2">
-            {/* Similar to building-filters, show active filters */}
-          </div>
-
-          {/* Filter Controls */}
-          <div className="grid gap-4 md:grid-cols-4">
-            <div className="space-y-2">
-              <Label className="text-xs font-medium flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                Ward Number
-              </Label>
-              <Select
-                value={wardNumber?.toString() || ""}
-                onValueChange={(value) =>
-                  onFilterChange(
-                    "wardNumber",
-                    value ? parseInt(value) : undefined,
-                  )
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All Wards" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Wards</SelectItem>
-                  {[1, 2, 3, 4, 5, 6, 7].map((ward) => (
-                    <SelectItem key={ward} value={ward.toString()}>
-                      Ward {ward}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+    <div className="space-y-4 rounded-lg border bg-card p-4">
+      {/* Filter Controls */}
+      <div className="flex flex-wrap gap-2">
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium">
+            <div className="flex items-center gap-2">
+              <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+              Ward
             </div>
-
-            <div className="space-y-2">
-              <Label className="text-xs font-medium">Area Code</Label>
-              <Input
-                type="number"
-                placeholder="Search by code..."
-                value={code || ""}
-                onChange={(e) =>
-                  onFilterChange(
-                    "code",
-                    e.target.value ? parseInt(e.target.value) : undefined,
-                  )
-                }
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-xs font-medium flex items-center gap-2">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                Assigned To
-              </Label>
-              <ComboboxSearchable
-                options={[
-                  { value: "", label: "All Enumerators" },
-                  ...(enumerators?.map((e) => ({
-                    value: e.id,
-                    label: e.name,
-                    searchTerms: [e.name],
-                  })) ?? []),
-                ]}
-                value={assignedTo || ""}
-                onChange={(value) =>
-                  onFilterChange("assignedTo", value || undefined)
-                }
-                placeholder="Select enumerator..."
-                className=""
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-xs font-medium">Status</Label>
-              <Select
-                value={status || ""}
-                onValueChange={(value) =>
-                  onFilterChange("status", value || undefined)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  {statusOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          </Label>
+          <Select
+            value={wardNumber?.toString() || ""}
+            onValueChange={(value) =>
+              onFilterChange("wardNumber", value ? parseInt(value) : undefined)
+            }
+          >
+            <SelectTrigger className="h-8">
+              <SelectValue placeholder="All Wards" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Wards</SelectItem>
+              {[1, 2, 3, 4, 5, 6, 7].map((ward) => (
+                <SelectItem key={ward} value={ward.toString()}>
+                  Ward {ward}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      </CardContent>
-    </Card>
+
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium">
+            <div className="flex items-center gap-2">
+              <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+              Area Code
+            </div>
+          </Label>
+          <Input
+            type="number"
+            placeholder="Search by code..."
+            className="h-8"
+            value={code || ""}
+            onChange={(e) =>
+              onFilterChange(
+                "code",
+                e.target.value ? parseInt(e.target.value) : undefined,
+              )
+            }
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium">
+            <div className="flex items-center gap-2">
+              <Users className="h-3.5 w-3.5 text-muted-foreground" />
+              Assigned To
+            </div>
+          </Label>
+          <ComboboxSearchable
+            options={enumeratorOptions}
+            value={assignedTo || "all"}
+            onChange={(value) =>
+              onFilterChange(
+                "enumeratorId",
+                value === "all" ? undefined : value,
+              )
+            }
+            placeholder="Search enumerator..."
+            className="min-w-[180px] z-[10000]"
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />
+              Status
+            </div>
+          </Label>
+          <Select
+            value={status || ""}
+            onValueChange={(value) =>
+              onFilterChange("status", value || undefined)
+            }
+          >
+            <SelectTrigger className="h-8">
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              {statusOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
   );
 }
