@@ -130,8 +130,10 @@ export function AreaList() {
               <Loader2 className="h-6 w-6 animate-spin" />
             </div>
           ) : isDesktop ? (
+            //@ts-ignore
             <AreaTableView data={data || []} onAction={handleAction} />
           ) : (
+            //@ts-ignore
             <AreaCardView data={data || []} onAction={handleAction} />
           )}
 

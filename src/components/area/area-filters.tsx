@@ -38,9 +38,25 @@ export function AreaFilters({
   ];
 
   const statusOptions = [
-    { value: "pending", label: "Pending", icon: AlertCircle },
-    { value: "approved", label: "Approved", icon: CheckCircle2 },
-    { value: "completed", label: "Completed", icon: CheckCircle2 },
+    { value: "unassigned", label: "Unassigned", icon: AlertCircle },
+    { value: "newly_assigned", label: "Newly Assigned", icon: MapPin },
+    { value: "ongoing_survey", label: "Ongoing Survey", icon: Users },
+    { value: "revision", label: "Revisions", icon: AlertCircle },
+    {
+      value: "asked_for_completion",
+      label: "Asked for Completion",
+      icon: CheckCircle2,
+    },
+    {
+      value: "asked_for_revision_completion",
+      label: "Asked for Revision Completion",
+      icon: AlertCircle,
+    },
+    {
+      value: "asked_for_withdrawl",
+      label: "Asked For Withdrawl",
+      icon: AlertCircle,
+    },
   ];
 
   return (
@@ -60,7 +76,7 @@ export function AreaFilters({
               onFilterChange("wardNumber", value ? parseInt(value) : undefined)
             }
           >
-            <SelectTrigger className="h-8">
+            <SelectTrigger className="h-9">
               <SelectValue placeholder="All Wards" />
             </SelectTrigger>
             <SelectContent>
@@ -84,7 +100,7 @@ export function AreaFilters({
           <Input
             type="number"
             placeholder="Search by code..."
-            className="h-8"
+            className="h-9"
             value={code || ""}
             onChange={(e) =>
               onFilterChange(
@@ -109,7 +125,7 @@ export function AreaFilters({
               onFilterChange("assignedTo", value === "all" ? undefined : value)
             }
             placeholder="Search enumerator..."
-            className="min-w-[180px] z-[10000]"
+            className={""}
           />
         </div>
 
@@ -126,7 +142,7 @@ export function AreaFilters({
               onFilterChange("status", value || undefined)
             }
           >
-            <SelectTrigger className="h-8">
+            <SelectTrigger className="h-9">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent>
