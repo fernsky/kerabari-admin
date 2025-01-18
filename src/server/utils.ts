@@ -1,6 +1,6 @@
 import { FormAttachment } from "@/types";
 import axios from "axios";
-import { and, eq, like, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import {
   surveyData,
   surveyAttachments,
@@ -10,7 +10,6 @@ import {
   buildingTokens,
   buildings,
   users,
-  stagingBuildings,
 } from "./db/schema";
 import { parseBuilding } from "@/lib/parser/buddhashanti/parse-buildings";
 
@@ -90,6 +89,58 @@ const syncStagingToProduction = async (
   try {
     switch (formId) {
       case "buddhashanti_building_survey":
+        const enumeratorId = getValueFromNestedField(data, "enumerator_id");
+        const areaCode = getValueFromNestedField(data, "area_code");
+        const buildingToken = getValueFromNestedField(data, "building_token");
+
+        /*
+      First check if the enumerator is assigned to that particular areaCode
+      If he/she is assigned to that particular area code, and if the status
+      of that area is newly_assigned convert it to ongoing_survey else do nothing
+      */
+        const area = await ctx.db
+          .select()
+          .from(areas)
+          .where(and(eq(areas.assignedTo, enumeratorId)))
+          .limit(1);
+
+        if (area.length > 0) {
+          if (
+            area[0].code === areaCode &&
+            area[0].status === "newly_assigned"
+          ) {
+            await ctx.db
+              .update(areas)
+              .set({ status: "ongoing_survey" })
+              .where(eq(areas.code, areaCode));
+          }
+        }
+
+        /* 
+      Now mark the building token as allocated if the uppercased first 8 
+      letters match.
+       */
+        const matchedToken = await ctx.db
+          .select()
+          .from(buildingTokens)
+          .where(
+            eq(
+              sql`UPPER(SUBSTRING(${buildingTokens.token}, 1, 8))`,
+              buildingToken.substring(0, 8).toUpperCase(),
+            ),
+          )
+          .limit(1);
+
+        if (matchedToken.length > 0) {
+          await ctx.db
+            .update(buildingTokens)
+            .set({
+              status: "allocated",
+              token: buildingToken, // Update with actual full token
+            })
+            .where(eq(buildingTokens.token, matchedToken[0].token));
+        }
+
         try {
           // First statement: Insert into buildings
           const insertStatement = sql.raw(`
@@ -156,6 +207,34 @@ const syncStagingToProduction = async (
             WHERE id = '${recordId.replace("uuid:", "")}'
             ON CONFLICT (id) DO NOTHING`);
           await ctx.db.execute(insertStatement);
+
+          if (matchedToken.length > 0) {
+            await ctx.db
+              .update(buildings)
+              .set({
+                buildingToken: matchedToken[0].token,
+              })
+              .where(eq(buildings.id, recordId.replace("uuid:", "")));
+          } else {
+            await ctx.db
+              .update(buildings)
+              .set({
+                buildingToken: null,
+              })
+              .where(eq(buildings.id, recordId.replace("uuid:", "")));
+          }
+
+          if (area.length > 0) {
+            await ctx.db
+              .update(buildings)
+              .set({ areaId: area[0].id })
+              .where(eq(buildings.id, recordId.replace("uuid:", "")));
+          } else {
+            await ctx.db
+              .update(buildings)
+              .set({ areaId: null })
+              .where(eq(buildings.id, recordId.replace("uuid:", "")));
+          }
         } catch (error) {
           console.error(
             `Error in buildings insert for record ${recordId}:`,
@@ -216,6 +295,7 @@ const syncStagingToProduction = async (
           console.error(`Error in user update for record ${recordId}:`, error);
           throw error;
         }
+
         break;
       default:
         throw new Error(`Unknown form type: ${formId}`);
@@ -232,43 +312,6 @@ const syncStagingToProduction = async (
 const performPostProcessing = async (formId: string, data: any, ctx: any) => {
   switch (formId) {
     case "buddhashanti_building_survey":
-      const enumeratorId = getValueFromNestedField(data, "enumerator_id");
-      const areaCode = getValueFromNestedField(data, "area_code");
-      const buildingToken = getValueFromNestedField(data, "building_token");
-
-      /*
-      First check if the enumerator is assigned to that particular areaCode
-      If he/she is assigned to that particular area code, and if the status
-      of that area is newly_assigned convert it to ongoing_survey else do nothing
-      */
-      const area = await ctx.db
-        .select()
-        .from(areas)
-        .where(and(eq(areas.assignedTo, enumeratorId)))
-        .limit(1);
-
-      if (area.length > 0) {
-        if (area[0].code === areaCode && area[0].status === "newly_assigned") {
-          await ctx.db
-            .update(areas)
-            .set({ status: "ongoing_survey" })
-            .where(eq(areas.code, areaCode));
-        }
-      }
-
-      /* 
-      Now mark the building token as allocated if the uppercased first 8 
-      letters match.
-       */
-      await ctx.db
-        .update(buildingTokens)
-        .set({ status: "allocated" })
-        .where(
-          eq(
-            sql`UPPER(SUBSTRING(${buildingTokens.token}, 1, 8))`,
-            buildingToken.substring(0, 8).toUpperCase(),
-          ),
-        );
   }
 };
 

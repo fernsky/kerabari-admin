@@ -178,7 +178,7 @@ export default function EditBuilding({ params }: { params: { id: string } }) {
       <div className="space-y-6 px-2 lg:px-10">
         <EnumeratorAssignment
           buildingId={decodedId}
-          currentEnumeratorId={building?.enumeratorId ?? undefined}
+          currentEnumeratorId={building?.userId ?? undefined}
         />
 
         <Form {...form}>

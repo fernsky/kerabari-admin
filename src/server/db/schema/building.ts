@@ -130,6 +130,7 @@ export const buildings = pgTable("buddhashanti_buildings", {
   }),
   roadStatus: varchar("road_status", { length: 255 }), // e.g., Graveled, Paved
   status: buildingStatusEnum("status").default("pending"),
+  areaId: varchar("area_id", { length: 255 }).references(() => areas.id),
 });
 
 // Table for building edit requests
