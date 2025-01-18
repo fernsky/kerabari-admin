@@ -13,16 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import {
-  Phone,
-  Mail,
-  MapPin,
-  User2,
-  UserCheck,
-  Building,
-  Calendar,
-} from "lucide-react";
-import { format } from "date-fns";
+import { Phone, Mail, MapPin, User2, UserCheck } from "lucide-react";
 
 export default function EnumeratorDetailsPage({
   params,

@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -30,12 +29,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { updateBuildingSchema } from "@/server/api/routers/building/building.schema";
 import { buildingChoices } from "@/lib/resources/building";
 import { useEffect } from "react";
+import { EnumeratorAssignment } from "@/components/building/enumerator-assignment";
 
 export default function EditBuilding({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -176,181 +175,55 @@ export default function EditBuilding({ params }: { params: { id: string } }) {
         </div>
       }
     >
-      <Form {...form}>
-        <form
-          id="building-form"
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-6 px-2 lg:px-10"
-        >
-          <FormCard
-            title="Basic Information"
-            description="General information about the building"
-          >
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <FormField
-                control={form.control}
-                name="enumeratorName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Enumerator Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="wardNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ward Number</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value?.toString()}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select ward" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {[1, 2, 3, 4, 5, 6, 7].map((ward) => (
-                          <SelectItem key={ward} value={ward.toString()}>
-                            Ward {ward}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="locality"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Locality</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </FormCard>
+      <div className="space-y-6 px-2 lg:px-10">
+        <EnumeratorAssignment
+          buildingId={decodedId}
+          currentEnumeratorId={building?.enumeratorId ?? undefined}
+        />
 
-          <FormCard
-            title="Building Details"
-            description="Physical characteristics of the building"
+        <Form {...form}>
+          <form
+            id="building-form"
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6"
           >
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {[
-                {
-                  name: "landOwnership",
-                  label: "Land Ownership",
-                  choices: Object.values(buildingChoices.land_ownership),
-                },
-                {
-                  name: "base",
-                  label: "Base",
-                  choices: Object.values(buildingChoices.house_base),
-                },
-                {
-                  name: "outerWall",
-                  label: "Outer Wall",
-                  choices: Object.values(buildingChoices.house_outer_wall),
-                },
-                {
-                  name: "roof",
-                  label: "Roof",
-                  choices: Object.values(buildingChoices.house_roof),
-                },
-                {
-                  name: "floor",
-                  label: "Floor",
-                  choices: Object.values(buildingChoices.house_floor),
-                },
-                {
-                  name: "mapStatus",
-                  label: "Map Status",
-                  choices: Object.values(buildingChoices.map_status),
-                },
-              ].map((field) => (
+            <FormCard
+              title="Basic Information"
+              description="General information about the building"
+            >
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <FormField
-                  key={field.name}
                   control={form.control}
-                  name={field.name as any}
-                  render={({ field: formField }) => (
-                    <FormItem>
-                      <FormLabel>{field.label}</FormLabel>
-                      <Select
-                        onValueChange={formField.onChange}
-                        value={formField.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue
-                              placeholder={`Select ${field.label}`}
-                            />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {field.choices.map((value) => (
-                            <SelectItem key={value} value={value}>
-                              {value}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              ))}
-            </div>
-          </FormCard>
-
-          <FormCard
-            title="Accessibility"
-            description="Time distances to various facilities"
-          >
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {[
-                "timeToMarket",
-                "timeToActiveRoad",
-                "timeToPublicBus",
-                "timeToHealthOrganization",
-                "timeToFinancialOrganization",
-              ].map((fieldName) => (
-                <FormField
-                  key={fieldName}
-                  control={form.control}
-                  name={fieldName as any}
+                  name="enumeratorName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
-                        {fieldName
-                          .replace("timeTo", "")
-                          .replace(/([A-Z])/g, " $1")
-                          .trim()}
-                      </FormLabel>
+                      <FormLabel>Enumerator Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="wardNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Ward Number</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        value={field.value}
+                        value={field.value?.toString()}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select time" />
+                            <SelectValue placeholder="Select ward" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {Object.values(buildingChoices.time).map((value) => (
-                            <SelectItem key={value} value={value}>
-                              {value}
+                          {[1, 2, 3, 4, 5, 6, 7].map((ward) => (
+                            <SelectItem key={ward} value={ward.toString()}>
+                              Ward {ward}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -359,11 +232,146 @@ export default function EditBuilding({ params }: { params: { id: string } }) {
                     </FormItem>
                   )}
                 />
-              ))}
-            </div>
-          </FormCard>
-        </form>
-      </Form>
+                <FormField
+                  control={form.control}
+                  name="locality"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Locality</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </FormCard>
+
+            <FormCard
+              title="Building Details"
+              description="Physical characteristics of the building"
+            >
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {[
+                  {
+                    name: "landOwnership",
+                    label: "Land Ownership",
+                    choices: Object.values(buildingChoices.land_ownership),
+                  },
+                  {
+                    name: "base",
+                    label: "Base",
+                    choices: Object.values(buildingChoices.house_base),
+                  },
+                  {
+                    name: "outerWall",
+                    label: "Outer Wall",
+                    choices: Object.values(buildingChoices.house_outer_wall),
+                  },
+                  {
+                    name: "roof",
+                    label: "Roof",
+                    choices: Object.values(buildingChoices.house_roof),
+                  },
+                  {
+                    name: "floor",
+                    label: "Floor",
+                    choices: Object.values(buildingChoices.house_floor),
+                  },
+                  {
+                    name: "mapStatus",
+                    label: "Map Status",
+                    choices: Object.values(buildingChoices.map_status),
+                  },
+                ].map((field) => (
+                  <FormField
+                    key={field.name}
+                    control={form.control}
+                    name={field.name as any}
+                    render={({ field: formField }) => (
+                      <FormItem>
+                        <FormLabel>{field.label}</FormLabel>
+                        <Select
+                          onValueChange={formField.onChange}
+                          value={formField.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue
+                                placeholder={`Select ${field.label}`}
+                              />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {field.choices.map((value) => (
+                              <SelectItem key={value} value={value}>
+                                {value}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ))}
+              </div>
+            </FormCard>
+
+            <FormCard
+              title="Accessibility"
+              description="Time distances to various facilities"
+            >
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {[
+                  "timeToMarket",
+                  "timeToActiveRoad",
+                  "timeToPublicBus",
+                  "timeToHealthOrganization",
+                  "timeToFinancialOrganization",
+                ].map((fieldName) => (
+                  <FormField
+                    key={fieldName}
+                    control={form.control}
+                    name={fieldName as any}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {fieldName
+                            .replace("timeTo", "")
+                            .replace(/([A-Z])/g, " $1")
+                            .trim()}
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select time" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Object.values(buildingChoices.time).map(
+                              (value) => (
+                                <SelectItem key={value} value={value}>
+                                  {value}
+                                </SelectItem>
+                              ),
+                            )}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ))}
+              </div>
+            </FormCard>
+          </form>
+        </Form>
+      </div>
     </ContentLayout>
   );
 }

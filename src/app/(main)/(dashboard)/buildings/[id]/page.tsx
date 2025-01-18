@@ -2,42 +2,27 @@
 
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { api } from "@/trpc/react";
-import { useState } from "react";
-import AudioPlayer, { RHAP_UI } from "react-h5-audio-player";
-import "react-h5-audio-player/lib/styles.css";
-
+import { BuildingLoadingState } from "@/components/building/building-loading-state";
+import { BuildingStatsGrid } from "@/components/building/building-stats-grid";
+import { BuildingInfoGrid } from "@/components/building/building-info-grid";
+import { BuildingMediaSection } from "@/components/building/building-media-section";
+import { LocationDetailsSection } from "@/components/building/location-details-section";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Building2,
-  Users,
-  MapPin,
-  Store,
-  Edit,
-  Trash2,
-  Home,
-  Binary,
-  Calendar,
-  Globe,
-  AlertTriangle,
-  Clock,
-  Construction,
-  Eye,
-} from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { ShowPoint } from "@/components/shared/maps/show-point";
 import { BuildingActions } from "@/components/building/building-actions";
-
 import { z } from "zod";
+
 const gpsSchema = z.object({
   type: z.literal("Point"),
   coordinates: z.tuple([
-    z.number().min(-180).max(180), // longitude
-    z.number().min(-90).max(90), // latitude
+    z.number().min(-180).max(180),
+    z.number().min(-90).max(90),
   ]),
 });
+
 export default function BuildingDetails({
   params,
 }: {
@@ -61,106 +46,6 @@ export default function BuildingDetails({
     );
   }
 
-  const StatCard = ({
-    icon: Icon,
-    title,
-    value,
-  }: {
-    icon: any;
-    title: string;
-    value: string | number;
-  }) => (
-    <div className="flex items-center space-x-4 rounded-lg border bg-card p-4">
-      <div className="rounded-full bg-primary/10 p-2">
-        <Icon className="h-5 w-5 text-primary" />
-      </div>
-      <div>
-        <p className="text-sm text-muted-foreground">{title}</p>
-        <p className="text-lg font-semibold">{value}</p>
-      </div>
-    </div>
-  );
-
-  const DetailRow = ({
-    icon: Icon,
-    label,
-    value,
-  }: {
-    icon: any;
-    label: string;
-    value: string | number | null | undefined;
-  }) => (
-    <div className="group relative rounded-lg border bg-card/50 p-3 transition-all hover:bg-accent/50">
-      <div className="flex items-center gap-3">
-        <div className="rounded-md bg-primary/10 p-2">
-          <Icon className="h-4 w-4 text-primary" />
-        </div>
-        <div className="flex-1">
-          <p className="text-xs font-medium text-muted-foreground">{label}</p>
-          <p className="font-medium">{value || "—"}</p>
-        </div>
-      </div>
-    </div>
-  );
-
-  const MultipleDetailRow = ({
-    icon: Icon,
-    label,
-    values,
-  }: {
-    icon: any;
-    label: string;
-    values: string[] | null | undefined;
-  }) => (
-    <div className="group relative rounded-lg border bg-card/50 p-3 transition-all hover:bg-accent/50">
-      <div className="flex items-center gap-3">
-        <div className="rounded-md bg-primary/10 p-2">
-          <Icon className="h-4 w-4 text-primary" />
-        </div>
-        <div className="flex-1">
-          <p className="text-xs font-medium text-muted-foreground">{label}</p>
-          <div className="mt-1 flex flex-wrap gap-1">
-            {values && values.length > 0 ? (
-              values.map((value, index) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary"
-                >
-                  {value}
-                </span>
-              ))
-            ) : (
-              <span className="text-muted-foreground">—</span>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const Card = ({
-    title,
-    icon: Icon,
-    children,
-  }: {
-    title: string;
-    icon: any;
-    children: React.ReactNode;
-  }) => (
-    <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
-      <div className="flex items-center gap-2 border-b bg-muted/50 p-4">
-        <div className="rounded-md bg-primary/10 p-2">
-          <Icon className="h-5 w-5 text-primary" />
-        </div>
-        <div>
-          <h3 className="font-semibold">{title}</h3>
-          <p className="text-xs text-muted-foreground">Building Information</p>
-        </div>
-      </div>
-      <div className="grid gap-2 p-4">{children}</div>
-    </div>
-  );
-
   return (
     <ContentLayout
       title="Building Details"
@@ -178,46 +63,21 @@ export default function BuildingDetails({
       }
     >
       {isLoading ? (
-        <div className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-24 rounded-lg" />
-            ))}
-          </div>
-          <Skeleton className="h-[400px] rounded-lg" />
-        </div>
+        <BuildingLoadingState />
       ) : (
         <div className="space-y-6 lg:px-10 px-2">
-          {/* Stats Grid */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <StatCard
-              icon={Users}
-              title="Total Families"
-              value={building?.totalFamilies || 0}
-            />
-            <StatCard
-              icon={Store}
-              title="Total Businesses"
-              value={building?.totalBusinesses || 0}
-            />
-            <StatCard
-              icon={MapPin}
-              title="Ward Number"
-              value={building?.wardNumber || 0}
-            />
-          </div>
+          <BuildingStatsGrid
+            totalFamilies={building?.totalFamilies ?? 0}
+            totalBusinesses={building?.totalBusinesses ?? 0}
+            wardNumber={building?.wardNumber ?? 0}
+          />
 
-          {/* Add BuildingActions component right after the title */}
           <BuildingActions
             buildingId={building.id}
             currentStatus={building.status ?? "pending"}
-            onStatusChange={() => {
-              // Refetch building data when status changes
-              buildingRefetch();
-            }}
+            onStatusChange={buildingRefetch}
           />
 
-          {/* Image Section (if available) */}
           {building?.buildingImage && (
             <div className="overflow-hidden rounded-xl border bg-card">
               <div className="aspect-video relative">
@@ -231,225 +91,26 @@ export default function BuildingDetails({
             </div>
           )}
 
-          {/* Cards Grid */}
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card title="Survey Information" icon={Users}>
-              <DetailRow
-                icon={Calendar}
-                label="Survey Date"
-                value={building?.surveyDate?.toLocaleDateString()}
-              />
-              <DetailRow
-                icon={Users}
-                label="Enumerator"
-                value={building?.enumeratorName}
-              />
-              <DetailRow
-                icon={Binary}
-                label="Enumerator ID"
-                value={building?.enumeratorId}
-              />
-            </Card>
+          <BuildingInfoGrid building={building} />
 
-            <Card title="Location Details" icon={MapPin}>
-              <DetailRow
-                icon={MapPin}
-                label="Ward Number"
-                value={building?.wardNumber}
-              />
-              <DetailRow
-                icon={Globe}
-                label="Locality"
-                value={building?.locality}
-              />
-              <DetailRow
-                icon={Binary}
-                label="Area Code"
-                value={building?.areaCode}
-              />
-            </Card>
-
-            <Card title="Building Details" icon={Building2}>
-              <DetailRow
-                icon={Home}
-                label="Land Ownership"
-                value={building?.landOwnership}
-              />
-              <DetailRow icon={Building2} label="Base" value={building?.base} />
-              <DetailRow
-                icon={Building2}
-                label="Outer Wall"
-                value={building?.outerWall}
-              />
-              <DetailRow icon={Building2} label="Roof" value={building?.roof} />
-              <DetailRow
-                icon={Building2}
-                label="Floor"
-                value={building?.floor}
-              />
-              <DetailRow
-                icon={AlertTriangle}
-                label="Map Status"
-                value={building?.mapStatus}
-              />
-              <MultipleDetailRow
-                icon={AlertTriangle}
-                label="Natural Disasters"
-                values={building?.naturalDisasters}
-              />
-            </Card>
-
-            <Card title="Accessibility Information" icon={Clock}>
-              <DetailRow
-                icon={Clock}
-                label="Time to Market"
-                value={building?.timeToMarket}
-              />
-              <DetailRow
-                icon={Clock}
-                label="Time to Active Road"
-                value={building?.timeToActiveRoad}
-              />
-              <DetailRow
-                icon={Clock}
-                label="Time to Public Bus"
-                value={building?.timeToPublicBus}
-              />
-              <DetailRow
-                icon={Clock}
-                label="Time to Health Organization"
-                value={building?.timeToHealthOrganization}
-              />
-              <DetailRow
-                icon={Clock}
-                label="Time to Financial Organization"
-                value={building?.timeToFinancialOrganization}
-              />
-              <DetailRow
-                icon={Construction}
-                label="Road Status"
-                value={building?.roadStatus}
-              />
-            </Card>
-          </div>
-
-          {/* New combined media and location section */}
           {(building?.enumeratorSelfie ||
             building?.surveyAudioRecording ||
             (building?.gps && gpsSchema.safeParse(building.gps).success)) && (
             <div className="grid gap-6 lg:grid-cols-5">
-              {/* Left column: Selfie and Audio */}
-              <div className="lg:col-span-2 space-y-6">
-                {/* Enumerator Selfie */}
-                {building.enumeratorSelfie && (
-                  <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
-                    <div className="border-b bg-muted/50 p-4">
-                      <h3 className="font-semibold">Enumerator Selfie</h3>
-                      <p className="text-xs text-muted-foreground">
-                        Photo taken during survey
-                      </p>
-                    </div>
-                    <div className="p-4">
-                      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-lg border">
-                        <Image
-                          src={building.enumeratorSelfie}
-                          alt="Enumerator Selfie"
-                          fill
-                          className="object-cover transition-all hover:scale-105"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
+              <BuildingMediaSection
+                selfieUrl={building.enumeratorSelfie ?? undefined}
+                audioUrl={building.surveyAudioRecording ?? undefined}
+              />
 
-                {/* Audio Recording */}
-                {building.surveyAudioRecording && (
-                  <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
-                    <div className="border-b bg-muted/50 p-4">
-                      <h3 className="font-semibold">Survey Audio Recording</h3>
-                      <p className="text-xs text-muted-foreground">
-                        Audio monitoring of survey process
-                      </p>
-                    </div>
-                    <div className="p-4">
-                      <div className="rounded-lg border bg-card/50 p-3">
-                        <AudioPlayer
-                          src={building.surveyAudioRecording}
-                          autoPlayAfterSrcChange={false}
-                          customProgressBarSection={[
-                            RHAP_UI.CURRENT_TIME,
-                            RHAP_UI.PROGRESS_BAR,
-                            RHAP_UI.DURATION,
-                          ]}
-                          customControlsSection={[
-                            RHAP_UI.MAIN_CONTROLS,
-                            RHAP_UI.VOLUME,
-                          ]}
-                          style={{
-                            background: "transparent",
-                            boxShadow: "none",
-                          }}
-                          className="[&_.rhap_progress-section]:!mx-4 [&_.rhap_controls-section]:!mx-4 [&_.rhap_main-controls-button]:!text-primary [&_.rhap_progress-bar]:!bg-primary/20 [&_.rhap_progress-filled]:!bg-primary [&_.rhap_progress-indicator]:!bg-primary"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Right column: Map and Details */}
               {building?.gps && gpsSchema.safeParse(building.gps).success && (
-                <div className="lg:col-span-3 space-y-6">
-                  <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
-                    <div className="border-b bg-muted/50 p-4">
-                      <h3 className="font-semibold">Location Details</h3>
-                      <p className="text-xs text-muted-foreground">
-                        Building GPS Coordinates and Elevation
-                      </p>
-                    </div>
-                    <div className="aspect-[16/10]">
-                      <ShowPoint
-                        coordinates={[
-                          building.gps.coordinates[1],
-                          building.gps.coordinates[0],
-                        ]}
-                      />
-                    </div>
-                    <div className="grid sm:grid-cols-2 gap-4 p-4">
-                      <div className="rounded-lg border bg-card/50 p-3 hover:bg-accent/50 transition-colors">
-                        <div className="flex items-center gap-2">
-                          <div className="rounded-md bg-primary/10 p-2">
-                            <MapPin className="h-4 w-4 text-primary" />
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium text-muted-foreground">
-                              GPS Accuracy
-                            </p>
-                            <p className="font-medium">
-                              {building.gpsAccuracy?.toFixed(2) || "—"} meters
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="rounded-lg border bg-card/50 p-3 hover:bg-accent/50 transition-colors">
-                        <div className="flex items-center gap-2">
-                          <div className="rounded-md bg-primary/10 p-2">
-                            <Building2 className="h-4 w-4 text-primary" />
-                          </div>
-                          <div>
-                            <p className="text-xs font-medium text-muted-foreground">
-                              Altitude
-                            </p>
-                            <p className="font-medium">
-                              {building.altitude?.toFixed(2) || "—"} meters
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <LocationDetailsSection
+                  coordinates={[
+                    building.gps.coordinates[1],
+                    building.gps.coordinates[0],
+                  ]}
+                  gpsAccuracy={building.gpsAccuracy ?? undefined}
+                  altitude={building.altitude ?? undefined}
+                />
               )}
             </div>
           )}

@@ -196,9 +196,15 @@ const syncStagingToProduction = async (
             )
             .limit(1);
 
-          if (!enumerator || enumerator.length === 0) {
-            throw new Error(`No valid enumerator ID ${enumeratorId}`);
-          }
+          // If enumerator ID is not valid, user_id is NULL
+          // and hence those records where user_id is NULL
+          // are known as invalid records.
+          // Such invalid records must be assigned to a particular
+          // enumerator manually by the admin.
+
+          // if (!enumerator || enumerator.length === 0) {
+          //   throw new Error(`No valid enumerator ID ${enumeratorId}`);
+          // }
 
           await ctx.db
             .update(buildings)
