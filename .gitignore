@@ -50,3 +50,6 @@ tests/e2e/output
 
 # Local Build data
 var/
+
+# Drizzle changing details
+drizzle/
