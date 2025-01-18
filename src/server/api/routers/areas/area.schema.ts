@@ -38,7 +38,30 @@ export const getAreasSchema = z.object({
     .optional(),
 });
 
+export const areaQuerySchema = z.object({
+  wardNumber: z.number().optional(),
+
+  code: z.number().optional(),
+
+  status: z
+    .enum([
+      "unassigned",
+      "newly_assigned",
+      "ongoing_survey",
+      "revision",
+      "asked_for_completion",
+      "asked_for_revision_completion",
+      "asked_for_withdrawl",
+    ])
+    .optional(),
+
+  assignedTo: z.string().optional(),
+});
+
+export type AreaQueryInput = z.infer<typeof areaQuerySchema>;
+
 export interface Area {
+  areaStatus: any;
   id: string;
   code: number;
   wardNumber: number;

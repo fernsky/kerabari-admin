@@ -1,11 +1,14 @@
 export interface AreaAction {
   id: string;
   wardNumber: number;
-  code: string;
+  code: number;
   areaStatus: string;
-  assignedTo?: {
+  assignedTo: {
+    id: string;
     name: string;
-  };
+  } | null;
+  geometry: any | null;
+  centroid: any | null;
 }
 
 export interface ActionHandlerProps {

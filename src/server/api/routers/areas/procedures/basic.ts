@@ -1,8 +1,13 @@
 import { createTRPCRouter, protectedProcedure } from "../../../trpc";
 import { z } from "zod";
-import { areas } from "@/server/db/schema/basic";
-import { eq, sql } from "drizzle-orm";
-import { Area, createAreaSchema, updateAreaSchema } from "../area.schema";
+import { areas, users } from "@/server/db/schema/basic";
+import { and, eq, sql } from "drizzle-orm";
+import {
+  Area,
+  areaQuerySchema,
+  createAreaSchema,
+  updateAreaSchema,
+} from "../area.schema";
 import { nanoid } from "nanoid";
 import { BuildingToken, buildingTokens } from "@/server/db/schema/building";
 
@@ -32,37 +37,74 @@ export const createArea = protectedProcedure
     await ctx.db.insert(buildingTokens).values(tokens);
     return newArea;
   });
+export const getAreas = protectedProcedure
+  .input(areaQuerySchema)
+  .query(async ({ ctx, input }) => {
+    let conditions = sql`TRUE`;
+    const filterConditions = [];
 
-export const getAreas = protectedProcedure.query(async ({ ctx }) => {
-  const allAreas = await ctx.db.execute(
-    sql`SELECT 
-            ${areas.id} as "id",
-            ${areas.code} as "code",
-            ${areas.wardNumber} as "wardNumber",
-            ${areas.assignedTo} as "assignedTo",
-            ST_AsGeoJSON(${areas.geometry}) as "geometry",
-            ST_AsGeoJSON(ST_Centroid(${areas.geometry})) as "centroid"
-          FROM ${areas}
-          ORDER BY ${areas.code}`,
-  );
-
-  return allAreas.map((area) => {
-    try {
-      return {
-        ...area,
-        geometry: area.geometry ? JSON.parse(area.geometry as string) : null,
-        centroid: area.centroid ? JSON.parse(area.centroid as string) : null,
-      };
-    } catch (e) {
-      console.error(`Error parsing geometry for area ${area.id}:`, e);
-      return {
-        ...area,
-        geometry: null,
-        centroid: null,
-      };
+    if (input.wardNumber) {
+      filterConditions.push(eq(areas.wardNumber, input.wardNumber));
     }
-  }) as Area[];
-});
+    if (input.code) {
+      filterConditions.push(eq(areas.code, input.code));
+    }
+    if (input.status) {
+      filterConditions.push(eq(areas.areaStatus, input.status));
+    }
+    if (input.assignedTo) {
+      filterConditions.push(eq(areas.assignedTo, input.assignedTo));
+    }
+
+    if (filterConditions.length > 0) {
+      const andCondition = and(...filterConditions);
+      if (andCondition) conditions = andCondition;
+    }
+    const allAreas = await ctx.db
+      .select({
+        area: {
+          id: areas.id,
+          code: areas.code,
+          wardNumber: areas.wardNumber,
+          assignedTo: areas.assignedTo,
+          areaStatus: areas.areaStatus,
+          geometry: sql`ST_AsGeoJSON(${areas.geometry})`,
+          centroid: sql`ST_AsGeoJSON(ST_Centroid(${areas.geometry}))`,
+        },
+        user: {
+          name: users.name,
+        },
+      })
+      .from(areas)
+      .leftJoin(users, eq(areas.assignedTo, users.id))
+      .where(conditions)
+      .orderBy(areas.code);
+
+    return allAreas.map((result) => {
+      try {
+        return {
+          ...result.area,
+          assignedTo: result.user
+            ? { id: result.area.assignedTo, name: result.user.name }
+            : null,
+          geometry: result.area.geometry
+            ? JSON.parse(result.area.geometry as string)
+            : null,
+          centroid: result.area.centroid
+            ? JSON.parse(result.area.centroid as string)
+            : null,
+        };
+      } catch (e) {
+        console.error(`Error parsing geometry for area ${result.area.id}:`, e);
+        return {
+          ...result.area,
+          assignedTo: null,
+          geometry: null,
+          centroid: null,
+        };
+      }
+    });
+  });
 
 export const getAreaById = protectedProcedure
   .input(z.object({ id: z.string() }))
