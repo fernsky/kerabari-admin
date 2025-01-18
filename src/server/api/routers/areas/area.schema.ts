@@ -45,6 +45,7 @@ export const areaQuerySchema = z.object({
 
   status: z
     .enum([
+      "all",
       "unassigned",
       "newly_assigned",
       "ongoing_survey",

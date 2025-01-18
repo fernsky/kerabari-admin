@@ -49,7 +49,7 @@ export const getAreas = protectedProcedure
     if (input.code) {
       filterConditions.push(eq(areas.code, input.code));
     }
-    if (input.status) {
+    if (input.status && input.status !== "all") {
       filterConditions.push(eq(areas.areaStatus, input.status));
     }
     if (input.assignedTo) {

@@ -1,8 +1,6 @@
 "use client";
 
-import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { api } from "@/trpc/react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { AreaFilters } from "../area/area-filters";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";

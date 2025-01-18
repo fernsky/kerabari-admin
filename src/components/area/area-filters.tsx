@@ -106,10 +106,7 @@ export function AreaFilters({
             options={enumeratorOptions}
             value={assignedTo || "all"}
             onChange={(value) =>
-              onFilterChange(
-                "enumeratorId",
-                value === "all" ? undefined : value,
-              )
+              onFilterChange("assignedTo", value === "all" ? undefined : value)
             }
             placeholder="Search enumerator..."
             className="min-w-[180px] z-[10000]"
