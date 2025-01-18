@@ -4,9 +4,9 @@ import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
 import Link from "next/link";
-import { buildingColumns } from "@/components/buildings/columns";
+import { buildingColumns } from "@/components/building/columns";
 import { DataTable } from "@/components/shared/data-table/data-table";
-import { BuildingFilters } from "@/components/buildings/building-filters";
+import { BuildingFilters } from "@/components/building/building-filters";
 import { FilterDrawer } from "@/components/shared/filters/filter-drawer";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import { useDebounce } from "@/lib/hooks/use-debounce";
 import { ChevronLeft, ChevronRight, Loader2, Plus, Eye } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useMediaQuery } from "react-responsive";
-import { BuildingCard } from "@/components/buildings/building-card";
+import { BuildingCard } from "@/components/building/building-card";
 import { User } from "lucia";
 
 export default function ListBuildings({ user }: { user: User }) {
