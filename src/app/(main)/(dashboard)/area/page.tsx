@@ -1,26 +1,15 @@
+"use client";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { AreaList } from "@/components/dashboard/area-list";
-import { Plus } from "lucide-react";
+import { AreaSidebar } from "@/components/area/area-sidebar";
 
-export default function AreaPage() {
+const AreaPage = () => {
   return (
-    <ContentLayout
-      title="Areas"
-      subtitle="Manage and organize municipality areas"
-      actions={
-        <Link href="/area/create">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Area
-          </Button>
-        </Link>
-      }
-    >
-      <div className="container px-0">
-        <AreaList />
+    <ContentLayout title="Area Management">
+      <div className="container mx-auto space-y-8 px-4 lg:px-8">
+        <AreaSidebar />
       </div>
     </ContentLayout>
   );
-}
+};
+
+export default AreaPage;

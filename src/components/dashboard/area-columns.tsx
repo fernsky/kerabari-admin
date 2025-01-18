@@ -30,7 +30,7 @@ export const areaColumns: ColumnDef<any>[] = [
     id: "actions",
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
-        <Link href={`/area/${row.original.id}`}>
+        <Link href={`/area/show/${row.original.id}`}>
           <Button variant="ghost" size="sm">
             <Eye className="h-4 w-4" />
           </Button>

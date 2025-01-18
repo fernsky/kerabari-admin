@@ -31,8 +31,9 @@ import {
 } from "lucide-react";
 import { AreaTableView } from "./area-table-view";
 import { AreaCardView } from "./area-card-view";
+import { ContentLayout } from "../admin-panel/content-layout";
 
-export function AreaActionHandler() {
+export default function AreaActionHandler() {
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [selectedWard, setSelectedWard] = useState<string>("");
   const [page, setPage] = useState(0);
