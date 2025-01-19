@@ -60,6 +60,7 @@ export default function AreaActionHandler() {
       onSuccess: () => {
         setDialogOpen(false);
         setMessage("");
+        refetchPendingActions();
       },
     });
 
@@ -70,6 +71,7 @@ export default function AreaActionHandler() {
   ) => {
     setSelectedAction({ areaId, type, action });
     setDialogOpen(true);
+    refetchPendingActions();
   };
 
   const Pagination = () => {

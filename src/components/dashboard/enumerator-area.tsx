@@ -72,7 +72,10 @@ export function EnumeratorArea() {
                 </Button>
               </Link>
               <Button variant="outline" size="lg" asChild>
-                <Link href="/help/area-assignment">
+                <Link
+                  href="https://www.youtube.com/playlist?list=PLvMsqIrhicjMXwQb6xl_FchBzhKAw1xjz"
+                  target="_blank"
+                >
                   Learn about area assignments
                 </Link>
               </Button>
@@ -83,6 +86,55 @@ export function EnumeratorArea() {
               <span className="text-sm text-muted-foreground">
                 Contact your supervisor if you need immediate assistance
               </span>
+            </div>
+          </div>
+          <div className="mt-8 border-t pt-8 px-8 pb-10">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="rounded-full bg-primary/10 p-2">
+                <Users className="h-5 w-5 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold">Contact Support Team</h3>
+            </div>
+            <div className="grid gap-6 md:grid-cols-3">
+              {[
+                {
+                  name: "Toshraj Thakur",
+                  phone: "9862768543",
+                  role: "Team Lead",
+                },
+                {
+                  name: "Sarbagya Shrestha",
+                  phone: "9745326651",
+                  role: "Technical Support",
+                },
+                {
+                  name: "Trilochan Bhusal",
+                  phone: "9851402011",
+                  role: "Technical Support",
+                },
+              ].map((contact) => (
+                <div
+                  key={contact.phone}
+                  className="group flex h-[160px] flex-col justify-between p-6 rounded-xl border bg-card hover:bg-muted/50 hover:shadow-md transition-all"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-full bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors">
+                        <Users className="h-4 w-4 text-primary" />
+                      </div>
+                      <p className="font-medium leading-none">{contact.name}</p>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {contact.role}
+                    </p>
+                  </div>
+                  <div className="pt-2">
+                    <Badge variant="secondary" className="font-normal text-sm">
+                      {contact.phone}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </Card>
