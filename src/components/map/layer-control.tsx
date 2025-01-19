@@ -22,7 +22,7 @@ export const LayerControl = () => {
   const { data: wardsData, isLoading: isLoadingWards } =
     api.ward.getWards.useQuery();
   const { data: areasData, isLoading: isLoadingAreas } =
-    api.area.getAreas.useQuery();
+    api.area.getLayerAreas.useQuery();
 
   const {
     wards,

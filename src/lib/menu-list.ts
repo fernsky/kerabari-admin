@@ -7,6 +7,7 @@ import {
   FormInput,
   GitPullRequest,
   Building2,
+  ScanBarcode,
 } from "lucide-react";
 
 export type Role = "admin" | "superadmin" | "enumerator";
@@ -38,6 +39,12 @@ const menuConfig: Menu[] = [
     label: "Home",
     icon: LayoutGrid,
     roles: ["admin", "superadmin", "enumerator"],
+  },
+  {
+    href: "/qr-code",
+    label: "QR Code",
+    icon: ScanBarcode,
+    roles: ["enumerator"],
   },
   {
     href: "/ward",

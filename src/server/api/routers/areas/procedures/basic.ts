@@ -179,3 +179,34 @@ export const getAvailableAreaCodes = protectedProcedure
 
     return availableCodes;
   });
+
+export const getLayerAreas = protectedProcedure.query(async ({ ctx }) => {
+  const allAreas = await ctx.db.execute(
+    sql`SELECT 
+        ${areas.id} as "id",
+        ${areas.code} as "code",
+        ${areas.wardNumber} as "wardNumber",
+        ${areas.assignedTo} as "assignedTo",
+        ST_AsGeoJSON(${areas.geometry}) as "geometry",
+        ST_AsGeoJSON(ST_Centroid(${areas.geometry})) as "centroid"
+      FROM ${areas}
+      ORDER BY ${areas.code}`,
+  );
+
+  return allAreas.map((area) => {
+    try {
+      return {
+        ...area,
+        geometry: area.geometry ? JSON.parse(area.geometry as string) : null,
+        centroid: area.centroid ? JSON.parse(area.centroid as string) : null,
+      };
+    } catch (e) {
+      console.error(`Error parsing geometry for area ${area.id}:`, e);
+      return {
+        ...area,
+        geometry: null,
+        centroid: null,
+      };
+    }
+  }) as Area[];
+});

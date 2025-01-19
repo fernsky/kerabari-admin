@@ -44,11 +44,7 @@ export default function AreaActionHandler() {
   } | null>(null);
   const [message, setMessage] = useState("");
 
-  const {
-    data,
-    isLoading,
-    refetch: refetchPendingActions,
-  } = api.areaManagement.getPendingActions.useQuery({
+  const { data, isLoading } = api.areaManagement.getPendingActions.useQuery({
     status: selectedStatus as any,
     wardNumber: selectedWard ? parseInt(selectedWard) : undefined,
     page,
@@ -60,11 +56,10 @@ export default function AreaActionHandler() {
       onSuccess: () => {
         setDialogOpen(false);
         setMessage("");
-        refetchPendingActions();
       },
     });
 
-  const handleActionClick = async (
+  const handleActionClick = (
     areaId: string,
     type: string,
     action: "approve" | "reject",
@@ -196,7 +191,6 @@ export default function AreaActionHandler() {
                     code: String(action.code),
                   }))}
                   onAction={handleActionClick}
-                  refetchPendingActions={refetchPendingActions}
                 />
               </div>
               <div className="block md:hidden">
