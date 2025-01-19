@@ -11,7 +11,7 @@ export interface AreaAction {
   centroid: any | null;
 }
 
-export interface ActionHandlerProps {
+export interface BaseAreaProps {
   data: Array<{
     id: string;
     wardNumber: number;
@@ -19,4 +19,12 @@ export interface ActionHandlerProps {
     assignedTo: { id: string; name: string } | null;
     areaStatus?: string;
   }>;
+}
+
+export interface ActionHandlerProps extends BaseAreaProps {
+  onAction: (
+    areaId: string,
+    type: string,
+    action: "approve" | "reject",
+  ) => void;
 }

@@ -1,35 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { type BaseAreaProps } from "./types";
-import { MapPin, User, Hash, Pencil, Eye } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { type ActionHandlerProps } from "./types";
+import { MapPin, User, Hash } from "lucide-react";
 
-const getStatusVariant = (
-  status?: string,
-): "default" | "secondary" | "destructive" | "outline" => {
-  if (!status) return "secondary";
-  switch (status) {
-    case "unassigned":
-      return "secondary";
-    case "ongoing_survey":
-      return "default";
-    case "revision":
-      return "destructive";
-    case "asked_for_completion":
-      return "outline";
-    case "asked_for_revision_completion":
-      return "outline";
-    case "asked_for_withdrawl":
-      return "destructive";
-    default:
-      return "default";
-  }
-};
-
-export function AreaCardView({ data }: BaseAreaProps) {
-  const router = useRouter();
-
+export function AreaActionCardView({ data, onAction }: ActionHandlerProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {data.map((area) => (
@@ -48,10 +23,14 @@ export function AreaCardView({ data }: BaseAreaProps) {
                   </div>
                 </div>
                 <Badge
-                  variant={getStatusVariant(area.areaStatus)}
-                  className="capitalize px-2 py-1 text-xs sm:text-sm font-medium rounded-md shadow-sm transition-all duration-200 hover:opacity-80"
+                  variant={
+                    area.areaStatus?.includes("revision")
+                      ? "destructive"
+                      : "default"
+                  }
+                  className="capitalize"
                 >
-                  {area.areaStatus?.replace(/_/g, " ") || "Unknown"}
+                  {area.areaStatus?.replace(/_/g, " ")}
                 </Badge>
               </div>
 
@@ -65,22 +44,19 @@ export function AreaCardView({ data }: BaseAreaProps) {
 
               <div className="mt-4 flex justify-end gap-2">
                 <Button
-                  variant="ghost"
+                  variant="default"
                   size="sm"
-                  onClick={() => router.push(`/area/update/${area.id}`)}
-                  className="text-blue-600 hover:text-blue-700"
+                  onClick={() => onAction(area.id, area.areaStatus!, "approve")}
+                  className="bg-green-600 hover:bg-green-700"
                 >
-                  <Pencil className="h-4 w-4 mr-2" />
-                  Edit
+                  Approve
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="destructive"
                   size="sm"
-                  onClick={() => router.push(`/area/show/${area.id}`)}
-                  className="text-gray-600 hover:text-gray-700"
+                  onClick={() => onAction(area.id, area.areaStatus!, "reject")}
                 >
-                  <Eye className="h-4 w-4 mr-2" />
-                  View
+                  Reject
                 </Button>
               </div>
             </div>
