@@ -48,7 +48,7 @@ export default function BuildingDetails({
 
   return (
     <ContentLayout
-      title="Building Details"
+      title="Businesses Details"
       actions={
         <div className="flex gap-2">
           <Link href={`/buildings/edit/${params.id}`}>
