@@ -18,9 +18,8 @@ import {
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { ContentLayout } from "@/components/admin-panel/content-layout";
+
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/lib/hooks/use-debounce";
 import { FilterDrawer } from "@/components/shared/filters/filter-drawer";
@@ -28,6 +27,22 @@ import { AreaRequestFilters } from "@/components/area-requests/area-request-filt
 import { useMediaQuery } from "react-responsive";
 import { Button } from "@/components/ui/button";
 import L from "leaflet";
+import dynamic from "next/dynamic";
+
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  { ssr: false },
+);
+
+const GeoJSON = dynamic(
+  () => import("react-leaflet").then((mod) => mod.GeoJSON),
+  { ssr: false },
+);
+
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.TileLayer),
+  { ssr: false },
+);
 
 const statusColors = {
   pending: "bg-yellow-100 text-yellow-800",

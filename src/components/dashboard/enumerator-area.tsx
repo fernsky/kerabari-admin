@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/trpc/react";
-import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
+
 import "leaflet/dist/leaflet.css";
 import Link from "next/link";
 import {
@@ -24,6 +24,22 @@ import { UserInfoCard } from "@/components/shared/user-info-card";
 import TokenStats from "@/components/token-stats";
 import { TokenList } from "../tokens/token-list";
 import { AreaStatusActions } from "@/components/area/area-status-actions";
+import dynamic from "next/dynamic";
+
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  { ssr: false },
+);
+
+const GeoJSON = dynamic(
+  () => import("react-leaflet").then((mod) => mod.GeoJSON),
+  { ssr: false },
+);
+
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.TileLayer),
+  { ssr: false },
+);
 
 export function EnumeratorArea() {
   const user = useUserStore((state) => state.user);

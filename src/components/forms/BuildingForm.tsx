@@ -76,6 +76,7 @@ const BuildingForm = ({ areaId }: BuildingFormProps) => {
         // Add these options to handle pagination better
         pageBreak: "auto",
         showHead: "everyPage",
+        //@ts-ignore
         didDrawPage: function (data) {
           // Add page number at the bottom
           doc.setFontSize(8);
