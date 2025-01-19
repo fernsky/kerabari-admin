@@ -17,7 +17,7 @@ export const business = pgTable("buddhashanti_business", {
 
 // Table for building edit requests
 export const businessEditRequests = pgTable(
-  "buddhashanti_building_edit_requests",
+  "buddhashanti_business_edit_requests",
   {
     id: uuid("id").primaryKey(),
     businessId: uuid("business_id").references(() => business.id),
