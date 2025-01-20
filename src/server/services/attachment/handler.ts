@@ -2,12 +2,13 @@ import { and, eq } from "drizzle-orm";
 import { attachmentTypesEnum, surveyAttachments } from "../../db/schema";
 import axios from "axios";
 import { getValueFromNestedField } from "@/server/utils/data";
+import { ODKConfig } from "../types";
 
 export async function handleAttachment(
   submission: any,
   attachmentPath: any,
   ctx: any,
-  odkConfig: any,
+  odkConfig: ODKConfig,
 ) {
   const attachmentName = getValueFromNestedField(
     submission,

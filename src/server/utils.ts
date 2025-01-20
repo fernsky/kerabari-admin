@@ -12,37 +12,10 @@ import {
   users,
 } from "./db/schema";
 import { parseBuilding } from "@/lib/parser/buddhashanti/parse-buildings";
-
-const getODKToken = async (
-  siteUrl: string,
-  username: string,
-  password: string,
-) => {
-  try {
-    const response = await axios.post(`${siteUrl}/v1/sessions`, {
-      email: username,
-      password: password,
-    });
-    return response.data.token;
-  } catch (error) {
-    console.error("Error fetching ODK token:", error);
-    throw new Error("Failed to fetch ODK token");
-  }
-};
-
-const getValueFromNestedField = (data: any, fieldPath: string): any => {
-  return fieldPath.split(".").reduce((acc, part) => {
-    if (acc === undefined || acc === null) return undefined;
-
-    const arrayIndexMatch = part.match(/(\w+)\[(\d+)\]/);
-
-    if (arrayIndexMatch) {
-      const [, property, index] = arrayIndexMatch;
-      return acc[property][parseInt(index, 10)];
-    }
-    return acc[part];
-  }, data);
-};
+import { getODKToken } from "./services/odk/auth";
+import { getValueFromNestedField } from "./utils/data";
+import { handleAttachment } from "./services/attachment/handler";
+import { ODKConfig } from "./services/types";
 
 const getPostgresInsertStatement = (formId: string, data: any) => {
   switch (formId) {
@@ -390,8 +363,13 @@ export const fetchSurveySubmissions = async (
   },
   ctx: any,
 ) => {
-  // Get authentication token from ODK server
   const token = await getODKToken(siteEndpoint, userName, password);
+  const odkConfig: ODKConfig = {
+    siteEndpoint,
+    odkProjectId: odkProjectId.toString(),
+    odkFormId,
+    token,
+  };
 
   // Set default date ranges if not provided
   const today = new Date();
@@ -444,94 +422,27 @@ export const fetchSurveySubmissions = async (
       // Process attachments if any are specified
       if (attachmentPaths) {
         for (let attachmentPath of attachmentPaths) {
-          // Get attachment name from submission data using path
-          const attachmentName = getValueFromNestedField(
-            submission,
-            attachmentPath.path,
-          );
-
-          if (attachmentName) {
-            // Check if attachment already exists in database
-            const existingAttachment = await ctx.db
-              .select()
-              .from(surveyAttachments)
-              .where(
-                and(
-                  eq(surveyAttachments.dataId, submission.__id),
-                  eq(surveyAttachments.name, attachmentName),
-                ),
-              )
-              .limit(1);
-
-            // Generate and execute any form-specific database operations
-            const insertStatement = getPostgresInsertStatement(
-              formId,
-              submission,
-            );
-            console.log(insertStatement);
-            if (insertStatement) {
-              await ctx.db.execute(sql.raw(insertStatement));
-            }
-
-            const productionInsert = await ctx.db
-              .select()
-              .from(stagingToProduction)
-              .where(eq(stagingToProduction.recordId, submission.__id))
-              .limit(1);
-
-            if (productionInsert.length === 0) {
-              await syncStagingToProduction(
-                formId,
-                submission.__id,
-                submission,
-                ctx,
-              );
-            }
-
-            // Skip if attachment already exists
-            if (existingAttachment.length > 0) {
-              console.log(
-                `Attachment ${attachmentName} for submission ${submission.__id} already exists in the database.`,
-              );
-              continue;
-            }
-
-            // Download attachment from ODK
-            const attachmentUrl = `${siteEndpoint}/v1/projects/${odkProjectId}/forms/${odkFormId}/submissions/${submission.__id}/attachments/${attachmentName}`;
-            const attachment = await axios.get(attachmentUrl, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-              responseType: "arraybuffer",
-            });
-
-            // Validate bucket configuration
-            if (!process.env.BUCKET_NAME)
-              throw new Error("Bucket name not found");
-
-            // Generate unique attachment name using last 7 digits of submission ID
-            const lastSevenDigits = submission.__id.slice(-7);
-            const newAttachmentName = `${lastSevenDigits}_${attachmentName}`;
-
-            // Upload attachment to MinIO storage
-            await ctx.minio.putObject(
-              process.env.BUCKET_NAME,
-              newAttachmentName,
-              attachment.data,
-            );
-
-            // Record attachment in database
-            await ctx.db
-              .insert(surveyAttachments)
-              .values({
-                dataId: submission.__id,
-                type: attachmentPath.type as (typeof attachmentTypesEnum.enumValues)[number],
-                name: newAttachmentName,
-              })
-              .onConflictDoNothing();
-          }
+          await handleAttachment(submission, attachmentPath, ctx, odkConfig);
         }
       }
+
+      // Generate and execute any form-specific database operations
+      const insertStatement = getPostgresInsertStatement(formId, submission);
+      console.log(insertStatement);
+      if (insertStatement) {
+        await ctx.db.execute(sql.raw(insertStatement));
+      }
+
+      const productionInsert = await ctx.db
+        .select()
+        .from(stagingToProduction)
+        .where(eq(stagingToProduction.recordId, submission.__id))
+        .limit(1);
+
+      if (productionInsert.length === 0) {
+        await syncStagingToProduction(formId, submission.__id, submission, ctx);
+      }
+
       performPostProcessing(formId, submission, ctx);
     }
   } catch (error) {
