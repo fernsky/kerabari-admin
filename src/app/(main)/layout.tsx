@@ -12,5 +12,5 @@ export default async function DemoLayout({
   const { user } = await validateRequest();
 
   if (!user) redirect(Paths.Login);
-  return <AdminPanelLayout>{children}</AdminPanelLayout>;
+  return <AdminPanelLayout user={user}>{children}</AdminPanelLayout>;
 }
