@@ -8,6 +8,7 @@ import {
   GitPullRequest,
   Building2,
   ScanBarcode,
+  Store,
 } from "lucide-react";
 
 export type Role = "admin" | "superadmin" | "enumerator";
@@ -64,6 +65,12 @@ const menuConfig: Menu[] = [
     href: "/buildings",
     label: "Buildings",
     icon: Building2,
+    roles: ["admin", "superadmin"],
+  },
+  {
+    href: "/businesses",
+    label: "Businesses",
+    icon: Store,
     roles: ["admin", "superadmin"],
   },
   {

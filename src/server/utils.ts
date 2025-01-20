@@ -48,6 +48,8 @@ const getPostgresInsertStatement = (formId: string, data: any) => {
   switch (formId) {
     case "buddhashanti_building_survey":
       return parseBuilding(data);
+    case 'buddhashanti_business_survey':
+      return null;
   }
   return null;
 };
@@ -325,6 +327,8 @@ const syncStagingToProduction = async (
         }
 
         break;
+        case 'buddhashanti_business_survey':
+
       default:
         throw new Error(`Unknown form type: ${formId}`);
     }
@@ -424,6 +428,7 @@ export const fetchSurveySubmissions = async (
       },
     );
     const submissions = response.data.value;
+   
 
     // Process each submission
     for (let submission of submissions) {
