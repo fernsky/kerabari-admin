@@ -71,6 +71,7 @@ const menuConfig: Menu[] = [
     href: "/families",
     label: "Families",
     icon: User2Icon,
+    roles: ["admin", "superadmin"],
   },
   {
     href: "/enumerators",
