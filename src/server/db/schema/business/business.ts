@@ -14,7 +14,7 @@ import { buildings } from "../building";
 export const stagingBusiness = pgTable("staging_buddhashanti_business", {
   id: uuid("id").primaryKey(),
   buildingId: uuid("building_id").references(() => buildings.id),
-  businessName: varchar("business_name", { length: 255 }),
+  businessName: text("business_name"),
   wardNo: integer("ward_no"),
   areaCode: varchar("area_code", { length: 255 }),
   businessNo: integer("business_no"),
@@ -83,7 +83,7 @@ export const businessStatusEnum = pgEnum("business_status_enum", [
 export const business = pgTable("buddhashanti_business", {
   id: uuid("id").primaryKey(),
   buildingId: uuid("building_id").references(() => buildings.id),
-  businessName: varchar("business_name", { length: 255 }),
+  businessName: text("business_name"),
   wardNo: integer("ward_no"),
   areaCode: varchar("area_code", { length: 255 }),
   businessNo: integer("business_no"),
