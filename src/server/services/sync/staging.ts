@@ -12,6 +12,11 @@ export async function syncStagingToProduction(
     switch (formId) {
       case "buddhashanti_building_survey":
         await syncBuildingSurvey(recordId, data, ctx);
+        // Track staging to production sync
+        await ctx.db.execute(sql`
+        INSERT INTO ${stagingToProduction} (staging_table, production_table, record_id)
+        VALUES ('staging_buddhashanti_buildings', 'buddhashanti_buildings', ${recordId})
+      `);
         break;
       case "buddhashanti_business_survey":
         // TODO: Implement business survey sync
@@ -19,12 +24,6 @@ export async function syncStagingToProduction(
       default:
         throw new Error(`Unknown form type: ${formId}`);
     }
-
-    // Track staging to production sync
-    await ctx.db.execute(sql`
-      INSERT INTO ${stagingToProduction} (staging_table, production_table, record_id)
-      VALUES ('staging_buddhashanti_buildings', 'buddhashanti_buildings', ${recordId})
-    `);
   } catch (error) {
     console.error(
       `Failed to sync record ${recordId} from staging to production:`,
