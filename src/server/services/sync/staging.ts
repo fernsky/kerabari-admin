@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
 import { stagingToProduction } from "../../db/schema";
-import { syncBuildingSurvey } from "./building";
+import { syncBuildingSurvey } from "./building/sync";
 
 export async function syncStagingToProduction(
   formId: string,
@@ -13,10 +13,7 @@ export async function syncStagingToProduction(
       case "buddhashanti_building_survey":
         await syncBuildingSurvey(recordId, data, ctx);
         // Track staging to production sync
-        await ctx.db.execute(sql`
-        INSERT INTO ${stagingToProduction} (staging_table, production_table, record_id)
-        VALUES ('staging_buddhashanti_buildings', 'buddhashanti_buildings', ${recordId})
-      `);
+        await trackSync(ctx, recordId);
         break;
       case "buddhashanti_business_survey":
         // TODO: Implement business survey sync
@@ -31,4 +28,11 @@ export async function syncStagingToProduction(
     );
     throw error;
   }
+}
+
+async function trackSync(ctx: any, recordId: string) {
+  await ctx.db.execute(sql`
+    INSERT INTO ${stagingToProduction} (staging_table, production_table, record_id)
+    VALUES ('staging_buddhashanti_buildings', 'buddhashanti_buildings', ${recordId})
+  `);
 }

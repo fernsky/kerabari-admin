@@ -1,5 +1,5 @@
 import { and, eq, sql } from "drizzle-orm";
-import { areas, buildings, buildingTokens, users } from "../../db/schema";
+import { areas, buildings, buildingTokens, users } from "../../../db/schema";
 
 export async function syncBuildingSurvey(
   recordId: string,
