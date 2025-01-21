@@ -9,6 +9,7 @@ import {
   Building2,
   ScanBarcode,
   Store,
+  User
 } from "lucide-react";
 
 export type Role = "admin" | "superadmin" | "enumerator";
@@ -47,6 +48,19 @@ const menuConfig: Menu[] = [
     icon: ScanBarcode,
     roles: ["enumerator"],
   },
+  {
+    href: "/requested-areas",
+    label: "Requested Areas",
+    icon: LandPlot,
+    roles: ["enumerator"],
+  },
+  {
+    href: "/account",
+    label: "User Account",
+    icon: User,
+    roles: ["enumerator"],
+  },
+
   {
     href: "/ward",
     label: "Wards",
