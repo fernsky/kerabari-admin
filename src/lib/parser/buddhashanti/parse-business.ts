@@ -1,375 +1,309 @@
-const agriData = {
-  audio_monitoring: "1737201362376.m4a",
-  NBIZ: null,
-  enumerator_introduction: {
-    enumerator_name: "Sarbagya Shrestha",
-    enumerator_id: "Sarbagya Shrestha",
-    enumerator_phone: "9823833365",
-    building_token_number: "0bywnzaq",
-  },
-  business_name: "Trilo Krishi Farm",
-  b_addr: { ward_no: 2, area_code: "2001", biz_no: 2, locality: "Gyalo Tole" },
-  b: {
-    op_name: "Trilochan Bhusal",
-    opph: "9823833365",
-    op_age: 25,
-    op_gender: "male",
-    op_edu_lvl: "masters_level",
-  },
-  business_nature: "agriculture_livestock_fish_and_beekeeping_farm",
-  business_nature_other: null,
-  business_type: null,
-  business_type_other: null,
-  is_registered: "yes",
-  registered_bodies:
-    "household_and_microindustries commerce_office ministry_of_health_department ward_office",
-  registered_bodies_other: null,
-  statutory_status: "individual",
-  statutory_status_other: null,
-  has_pan: "yes",
-  pan_no: 123456789,
-  ownership_status: null,
-  ownership_status_oth: null,
-  hotel: {
-    accomodation_type: null,
-    room_no: null,
-    bed_no: null,
-    room_type: null,
-    has_hall: null,
-    hcpcty: null,
-  },
-  bag: {
-    agri_business: "agriculatural_products",
-    bagd: {
-      fcrops: "paddy corn wheat millet barley phapar junelo kaguno other",
-      fcrop_details_count: "9",
-      pulses:
-        "pigeon_pea black_gram lentil chickpea soyabean snake_bean bean horse_gram pea other",
-      pulse_details_count: "10",
-      oseeds: "mustard flax sunflower other",
-      oseed_details_count: "4",
-      vtables:
-        "potato cauliflower cabbage tomato radish carrot turnip capsicum okra brinjal onion string_bean red_kidney_bean pumpkin cucumber bitter_gourd luffa snake_gourd calabash balsam_apple mushroom squice mustard_greens garden_cress spinach colocasia yam other",
-      vtable_details_count: "28",
-      fruits:
-        "mango jackfruit litchi banana lemon orange nibuwa pomelo sweet_orange jyamir sweet_lemon pineapple papaya avocado guava kiwi plum peach pear pomegranate walnut japanese_persimmon hog_plum",
-      fruit_details_count: "23",
-      spices:
-        "coriander garlic turmeric ginger chili_pepper other fenugreek cumin sichuan_pepper black_pepper cinnamomum_tamala",
-      spice_details_count: "11",
-      ccrops:
-        "cotton cardamom tea betel_nut tobacco other sugar_cane coffee rubber jute",
-      ccrop_details_count: "10",
-      "fcrop_details@odata.navigationLink":
-        "Submissions('uuid%3Aff7060e4-c0df-4975-bac0-be502a03d753')/bag/bagd/fcrop_details",
-      fcrop_details: [
-        {
-          fcrop_ward_no: "2",
-          fcrop: "अन्य खद्यान्नबाली",
-          fcrop_land: {
-            fbigha: 0,
-            fkattha: 0,
-            fdhur: 0,
-            fcrop_area: "0",
-            fcnt: null,
-          },
-          fp: {
-            BA01_11: 0,
-            BA01_12: 0,
-            BA01_13: 0,
-            BA01_14: 0,
-            fcrop_prod: "0",
-          },
-          fs: {
-            BA01_17: 0,
-            BA01_18: 0,
-            BA01_19: 0,
-            BA01_20: 0,
-            fcrop_sales: "0",
-          },
-          __id: "9f3b302e94449d39c34a36565e472ffae60d596d",
-        },
-      ],
-      "pulse_details@odata.navigationLink":
-        "Submissions('uuid%3Aff7060e4-c0df-4975-bac0-be502a03d753')/bag/bagd/pulse_details",
-      pulse_details: [
-        {
-          pulse_ward_no: "2",
-          pulse: "अन्य दालबाली (मस्याङ्, खेसरी,....)",
-          pl: {
-            pulse_bigha: 0,
-            pulse_kattha: 0,
-            pulse_dhur: 0,
-            pulse_area: "0",
-            plnt: null,
-          },
-          pp: {
-            BA02_11: 0,
-            BA02_12: 0,
-            BA02_13: 0,
-            BA02_14: 0,
-            pulse_prod: "0",
-          },
-          ps: {
-            BA02_17: 0,
-            BA02_18: 0,
-            BA02_19: 0,
-            BA02_20: 0,
-            pulse_sales: "0",
-          },
-          __id: "23cf1b62f2ae9d400724316c5a2ec0024aa172ef",
-        },
-      ],
-      "oseed_details@odata.navigationLink":
-        "Submissions('uuid%3Aff7060e4-c0df-4975-bac0-be502a03d753')/bag/bagd/oseed_details",
-      oseed_details: [
-        {
-          oseed_ward_no: "2",
-          oseed: "अन्य तेलबाली (जैतुन, रायो, ...)",
-          osl: {
-            os_bigha: 0,
-            os_kattha: 0,
-            os_dhur: 0,
-            oseed_area: "0",
-            osnt: null,
-          },
-          oslp: {
-            BA03_10: "1",
-            BA03_11: 0,
-            BA03_12: 0,
-            BA03_13: 0,
-            BA03_14: 0,
-            oseed_prod: "0",
-          },
-          osls: {
-            BA03_17: 0,
-            BA03_18: 0,
-            BA03_19: 0,
-            BA03_20: 0,
-            oseed_sales: "0",
-          },
-          __id: "d9311af4e37c0e8612791114cc4e51865c1591ef",
-        },
-      ],
-      "vtable_details@odata.navigationLink":
-        "Submissions('uuid%3Aff7060e4-c0df-4975-bac0-be502a03d753')/bag/bagd/vtable_details",
-      vtable_details: [
-        {
-          vtable_ward_no: "2",
-          vtable: "आलु",
-          vl: {
-            vt_bigha: 0,
-            vt_kattha: 0,
-            vt_dhur: 0,
-            vtable_area: "0",
-            vtnt: null,
-          },
-          vp: {
-            BA04_10: "1",
-            BA04_11: 0,
-            BA04_12: 0,
-            BA04_13: 0,
-            BA04_14: 0,
-            vtable_prod: "0",
-          },
-          vs: {
-            BA04_17: 0,
-            BA04_18: 0,
-            BA04_19: 0,
-            BA04_20: 0,
-            vtable_sales: "0",
-          },
-          __id: "f7339496f138a0e66cb4884324ad0288ea98a533",
-        },
-      ],
-      "fruit_details@odata.navigationLink":
-        "Submissions('uuid%3Aff7060e4-c0df-4975-bac0-be502a03d753')/bag/bagd/fruit_details",
-      fruit_details: [
-        {
-          fruit_ward_no: "2",
-          fruit: "आँप",
-          frl: {
-            fruit_bigha: 0,
-            fruit_kattha: 0,
-            fruit_dhur: 0,
-            fruit_area: "0",
-            fruit_trees_count: null,
-            frnt: null,
-          },
-          frp: {
-            BA05_11: 0,
-            BA05_12: 0,
-            BA05_13: 0,
-            BA05_14: 0,
-            fruit_prod: "0",
-          },
-          frs: {
-            BA05_17: 0,
-            BA05_18: 0,
-            BA05_19: 0,
-            BA05_20: 0,
-            fruit_sales: "0",
-          },
-          __id: "6d0292f45c86741165ae8eab5e36b3d50912b777",
-        },
-      ],
-      "spice_details@odata.navigationLink":
-        "Submissions('uuid%3Aff7060e4-c0df-4975-bac0-be502a03d753')/bag/bagd/spice_details",
-      spice_details: [
-        {
-          spice_ward_no: "2",
-          spice: "धनिया",
-          sl: {
-            spice_bigha: 0,
-            spice_kattha: 0,
-            spice_dhur: 0,
-            spice_area: "0",
-            spnt: null,
-          },
-          sp: {
-            BA06_11: 0,
-            BA06_12: 0,
-            BA06_13: 0,
-            BA06_14: 0,
-            spice_prod: "0",
-          },
-          ss: {
-            BA06_17: 0,
-            BA06_18: 0,
-            BA06_19: 0,
-            BA06_20: 0,
-            spice_sales: "0",
-          },
-          __id: "e9f2cc6804abc821a0b315f4a508eacec02205dc",
-        },
-      ],
-      "ccrop_details@odata.navigationLink":
-        "Submissions('uuid%3Aff7060e4-c0df-4975-bac0-be502a03d753')/bag/bagd/ccrop_details",
-      ccrop_details: [
-        {
-          ccrop_ward_no: "2",
-          ccrop: "कपास",
-          isBetel: "0",
-          cl: {
-            betet_trees_count: null,
-            cash_bigha: 0,
-            cash_kattha: 0,
-            cash_dhur: 0,
-            ccrop_area: "0",
-            ccnt: null,
-          },
-          cp: {
-            BA07_11: 0,
-            BA07_12: 0,
-            BA07_13: 0,
-            BA07_14: 0,
-            ccrop_prod: "0",
-          },
-          cs: {
-            BA07_17: 0,
-            BA07_18: 0,
-            BA07_19: 0,
-            BA07_20: 0,
-            ccrop_sales: "0",
-          },
-          __id: "e762fb161cae6947bfbba88b9c27332942d360fb",
-        },
-      ],
-    },
-    b_animals: null,
-    banimal_details_count: "0",
-    b_aprods: null,
-    baprod_details_count: "0",
-    aquaculture_details: {
-      aquaculture_ward_no: null,
-      pond_no: null,
-      BC01_3: null,
-      BC01_5: null,
-      BC01_7: null,
-      pond_area: null,
-      BC01_9: null,
-      fish_prod: null,
-    },
-    apiculture_details: {
-      dapi: null,
-      apiculture_ward_no: null,
-      hive_no: null,
-      honey_prod: null,
-    },
-  },
-  investment: 2000000,
-  business_location_ownership: "own_house",
-  business_location_ownership_oth: null,
-  emp: {
-    has_partners: "no",
-    prt: {
-      total_partners: null,
-      nepali_male_partners: null,
-      nepali_female_partners: null,
-      has_foreign_partners: null,
-      foreign_male_partners: null,
-      foreign_female_partners: null,
-      PTOT: null,
-      NIF01: null,
-    },
-    has_involved_family: "no",
-    efam: {
-      total_involved_family: null,
-      male_involved_family: null,
-      female_involved_family: null,
-      IFTOT: null,
-      NIF01: null,
-    },
-    has_perm_employees: "no",
-    etemp: {
-      total_perm_employees: null,
-      nepali_male_perm_employees: null,
-      nepali_female_perm_employees: null,
-      has_foreign_perm_employees: null,
-      foreign_male_perm_employees: null,
-      foreign_female_perm_employees: null,
-      frgnpemp: null,
-      PERMTOT: null,
-      NIF01: null,
-    },
-    frgnpemp_cnt: null,
-    has_temp_employees: "no",
-    eperm: {
-      total_temp_employees: null,
-      nepali_male_temp_employees: null,
-      nepali_female_temp_employees: null,
-      has_foreign_temp_employees: null,
-      foreign_male_temp_employees: null,
-      foreign_female_temp_employees: null,
-      frgntemp: null,
-      TEMPTOT: null,
-      NIF01: null,
-    },
-    frgntemp_cnt: null,
-  },
-  b_location: {
-    type: "Point",
-    coordinates: [85.3840339, 27.6895641, 1286.800048828125],
-    properties: { accuracy: 20.241 },
-  },
-  bimg: "1737201343317.jpg",
-  bimg_selfie: "1737201359833.jpg",
-  meta: {
-    instanceID: "uuid:ff7060e4-c0df-4975-bac0-be502a03d753",
-    instanceName: "Trilo Krishi Farm Trilochan Bhusal",
-  },
-  __id: "uuid:ff7060e4-c0df-4975-bac0-be502a03d753",
-  __system: {
-    submissionDate: "2025-01-18T11:58:09.319Z",
-    updatedAt: null,
-    submitterId: "32",
-    submitterName: "Tester",
-    attachmentsPresent: 3,
-    attachmentsExpected: 3,
-    status: null,
-    reviewState: null,
-    deviceId: "collect:BgMTfEPWdPuOjfpc",
-    edits: 0,
-    formVersion: "1",
-  },
-};
+import { jsonToPostgres } from "@/lib/utils";
+import { sql } from "drizzle-orm";
+import { RawBusiness } from "./business/types";
+import { processGPSData } from "../utils";
+
+/**
+ * Parses raw building survey data into normalized database structure
+ *
+ * @param r - Raw building data from ODK
+ * @returns Normalized building data matching database schema
+ */
+export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
+  // Process GPS data using the new function
+  const gpsData = processGPSData(r.b_location);
+
+  const mainBusinessTable = {
+    // Unique Identifier
+    id: r.__id,
+
+    // Enumerator Information
+    enumerator_name: r.enumerator_introduction.enumerator_name,
+    enumerator_id: r.enumerator_introduction.enumerator_id,
+    phone: r.enumerator_introduction.enumerator_phone,
+    building_token: r.enumerator_introduction.building_token_number,
+
+    // Business Basic Information
+    business_name: r.business_name,
+    ward_no: r.b_addr.ward_no,
+    area_code: r.b_addr.area_code,
+    business_no: r.b_addr.biz_no,
+    locality: r.b_addr.locality,
+
+    // Operator Details
+    operator_name: r.b.op_name,
+    operator_phone: r.b.opph,
+    operator_age: r.b.op_age,
+    operator_gender: r.b.op_gender,
+    operator_education: r.b.op_edu_lvl,
+
+    // Business Classification
+    business_nature: r.business_nature,
+    business_nature_other: r.business_nature_other,
+    business_type: r.business_type,
+    business_type_other: r.business_type_other,
+
+    // Registration and Legal Information
+    registration_status: r.is_registered,
+    registered_bodies: r.registered_bodies,
+    registered_bodies_other: r.registered_bodies_other,
+    statutory_status: r.statutory_status,
+    statutory_status_other: r.statutory_status_other,
+    pan_status: r.has_pan,
+    pan_number: r.pan_no,
+
+    // Location Data
+    gps: gpsData.gps,
+    altitude: gpsData.altitude,
+    gps_accuracy: gpsData.gpsAccuracy,
+
+    // Financial and Property Information
+    investment_amount: r.investment,
+    business_location_ownership: r.business_location_ownership,
+    business_location_ownership_other: r.business_location_ownership_oth,
+
+    // Hotel Information
+    hotel_accommodation_type: r.hotel.accomodation_type,
+    hotel_room_count: r.hotel.room_no,
+    hotel_bed_count: r.hotel.bed_no,
+    hotel_room_type: r.hotel.room_type,
+    hotel_has_hall: r.hotel.has_hall,
+    hotel_hall_capacity: r.hotel.hcpcty,
+
+    // Employee Information
+    has_partners: r.emp.has_partners,
+    total_partners: r.emp.prt.total_partners,
+    nepali_male_partners: r.emp.prt.nepali_male_partners,
+    nepali_female_partners: r.emp.prt.nepali_female_partners,
+    has_foreign_partners: r.emp.prt.has_foreign_partners,
+    foreign_male_partners: r.emp.prt.foreign_male_partners,
+    foreign_female_partners: r.emp.prt.foreign_female_partners,
+
+    has_involved_family: r.emp.has_involved_family,
+    total_involved_family: r.emp.efam.total_involved_family,
+    male_involved_family: r.emp.efam.male_involved_family,
+    female_involved_family: r.emp.efam.female_involved_family,
+
+    has_permanent_employees: r.emp.has_perm_employees,
+    total_permanent_employees: r.emp.etemp.total_perm_employees,
+    nepali_male_permanent_employees: r.emp.etemp.nepali_male_perm_employees,
+    nepali_female_permanent_employees: r.emp.etemp.nepali_female_perm_employees,
+    has_foreign_permanent_employees: r.emp.etemp.has_foreign_perm_employees,
+    foreign_male_permanent_employees: r.emp.etemp.foreign_male_perm_employees,
+    foreign_female_permanent_employees:
+      r.emp.etemp.foreign_female_perm_employees,
+
+    has_temporary_employees: r.emp.has_temp_employees,
+    total_temporary_employees: r.emp.eperm.total_temp_employees,
+    nepali_male_temporary_employees: r.emp.eperm.nepali_male_temp_employees,
+    nepali_female_temporary_employees: r.emp.eperm.nepali_female_temp_employees,
+    has_foreign_temporary_employees: r.emp.eperm.has_foreign_temp_employees,
+    foreign_male_temporary_employees: r.emp.eperm.foreign_male_temp_employees,
+    foreign_female_temporary_employees:
+      r.emp.eperm.foreign_female_temp_employees,
+  };
+
+  const foodCrops = [];
+
+  if (r.bag.bagd.fcrop_details.length > 0) {
+    for (const fcrop of r.bag.bagd.fcrop_details) {
+      foodCrops.push({
+        crop_type: "अन्नबाली",
+        crop_name: fcrop.fcrop,
+        crop_area:
+          (fcrop.fcrop_land.fbigha ?? 0) * 6772.63 +
+          (fcrop.fcrop_land.fkattha ?? 0) * 338.63 +
+          (fcrop.fcrop_land.fdhur ?? 0) * 16.93,
+        crop_production: fcrop.fp.fcrop_prod,
+        crop_sales: fcrop.fs.fcrop_sales,
+      });
+    }
+  }
+
+  const pulses = [];
+  if (r.bag.bagd.pulse_details.length > 0) {
+    for (const pulse of r.bag.bagd.pulse_details) {
+      pulses.push({
+        crop_type: "दलहन",
+        crop_name: pulse.pulse,
+        crop_area:
+          (pulse.pl.pulse_bigha ?? 0) * 6772.63 +
+          (pulse.pl.pulse_kattha ?? 0) * 338.63 +
+          (pulse.pl.pulse_dhur ?? 0) * 16.93,
+        crop_production: pulse.pp.pulse_prod,
+        crop_sales: pulse.ps.pulse_sales,
+      });
+    }
+  }
+
+  const oilSeeds = [];
+  if (r.bag.bagd.oseed_details.length > 0) {
+    for (const oseed of r.bag.bagd.oseed_details) {
+      oilSeeds.push({
+        crop_type: "तेलहन",
+        crop_name: oseed.oseed,
+        crop_area:
+          (oseed.osl.os_bigha ?? 0) * 6772.63 +
+          (oseed.osl.os_kattha ?? 0) * 338.63 +
+          (oseed.osl.os_dhur ?? 0) * 16.93,
+        crop_production: oseed.oslp.oseed_prod,
+        crop_sales: oseed.osls.oseed_sales,
+      });
+    }
+  }
+
+  const vegetables = [];
+  if (r.bag.bagd.vtable_details.length > 0) {
+    for (const veg of r.bag.bagd.vtable_details) {
+      vegetables.push({
+        crop_type: "तरकारी",
+        crop_name: veg.vtable,
+        crop_area:
+          (veg.vl.vt_bigha ?? 0) * 6772.63 +
+          (veg.vl.vt_kattha ?? 0) * 338.63 +
+          (veg.vl.vt_dhur ?? 0) * 16.93,
+        crop_production: veg.vp.vtable_prod,
+        crop_sales: veg.vs.vtable_sales,
+      });
+    }
+  }
+
+  const fruits = [];
+  if (r.bag.bagd.fruit_details.length > 0) {
+    for (const fruit of r.bag.bagd.fruit_details) {
+      fruits.push({
+        crop_type: "फलफूल",
+        crop_name: fruit.fruit,
+        crop_area:
+          (fruit.frl.fruit_bigha ?? 0) * 6772.63 +
+          (fruit.frl.fruit_kattha ?? 0) * 338.63 +
+          (fruit.frl.fruit_dhur ?? 0) * 16.93,
+        crop_production: fruit.frp.fruit_prod,
+        crop_count: fruit.frl.fruit_trees_count,
+        crop_sales: fruit.frs.fruit_sales,
+      });
+    }
+  }
+
+  const spices = [];
+  if (r.bag.bagd.spice_details.length > 0) {
+    for (const spice of r.bag.bagd.spice_details) {
+      spices.push({
+        crop_type: "मसला",
+        crop_name: spice.spice,
+        crop_area:
+          (spice.sl.spice_bigha ?? 0) * 6772.63 +
+          (spice.sl.spice_kattha ?? 0) * 338.63 +
+          (spice.sl.spice_dhur ?? 0) * 16.93,
+        crop_production: spice.sp.spice_prod,
+        crop_sales: spice.ss.spice_sales,
+      });
+    }
+  }
+
+  const cashCrops = [];
+  if (r.bag.bagd.ccrop_details.length > 0) {
+    for (const ccrop of r.bag.bagd.ccrop_details) {
+      cashCrops.push({
+        crop_type: "नगदेबाली",
+        crop_name: ccrop.ccrop,
+        crop_area:
+          (ccrop.cl.cash_bigha ?? 0) * 6772.63 +
+          (ccrop.cl.cash_kattha ?? 0) * 338.63 +
+          (ccrop.cl.cash_dhur ?? 0) * 16.93,
+        crop_production: ccrop.cp.ccrop_prod,
+        crop_count: ccrop.cl.betet_trees_count,
+        crop_sales: ccrop.cs.ccrop_sales,
+      });
+    }
+  }
+
+  const animals = [];
+
+  if (r.bag.b_animals.length > 0) {
+    for (const animal of r.bag.b_animals) {
+      if (animal.banim?.b_animal_oth) {
+        // Handle other animal types
+        animals.push({
+          animal_name: animal.banim.b_animal_oth,
+          animal_ward: animal.animal_ward_no,
+          total_count: animal.banim.othtotal_b_animals,
+          sales_count: animal.banim.othb_animal_sales,
+          revenue: animal.banim.othb_animal_revenue,
+        });
+      } else {
+        // Handle normal animal types
+        animals.push({
+          animal_name: animal.b_animal,
+          animal_ward: animal.animal_ward_no,
+          total_count: animal.banimn.total_b_animals,
+          sales_count: animal.banimn.b_animal_sales,
+          revenue: animal.banimn.b_animal_revenue,
+        });
+      }
+    }
+  }
+  const animalProducts = [];
+  if (r.bag.b_aprods.length > 0) {
+    for (const product of r.bag.b_aprods) {
+      if (product.baprd?.baprod_oth) {
+        // Handle other animal product types
+        animalProducts.push({
+          product_name: product.baprd.baprod_oth,
+          ward_no: product.aprod_ward_no,
+          unit: product.baprd.oth_baprod_unit,
+          production_amount: product.baprd.oth_b_aprod_prod,
+          sales_amount: product.baprd.oth_aprod_sales,
+          monthly_production: product.baprd.oth_b_month_aprod,
+          revenue: product.baprd.oth_aprod_revenue,
+        });
+      } else {
+        // Handle normal animal product types
+        animalProducts.push({
+          product_name: product.b_aprod,
+          ward_no: product.aprod_ward_no,
+          unit: product.baprdn.baprod_unit || product.baprdn.aprod_unit_oth,
+          production_amount: product.baprdn.b_aprod_prod,
+          sales_amount: product.baprdn.approd_sales,
+          monthly_production: product.baprdn.b_month_aprod,
+          revenue: product.baprdn.approd_revenue,
+        });
+      }
+    }
+  }
+
+  const aquacultureDetails = r.bag.aquaculture_details
+    ? {
+        ward_no: r.bag.aquaculture_details.aquaculture_ward_no,
+        pond_count: r.bag.aquaculture_details.pond_no,
+        pond_area: r.bag.aquaculture_details.pond_area,
+        fish_production: r.bag.aquaculture_details.fish_prod,
+        fingerling_number: r.bag.aquaculture_details.BC01_3,
+        total_investment: r.bag.aquaculture_details.BC01_5,
+        annual_income: r.bag.aquaculture_details.BC01_7,
+        employment_count: r.bag.aquaculture_details.BC01_9,
+      }
+    : {};
+
+  const apicultureDetails = r.bag.apiculture_details
+    ? {
+        ward_no: r.bag.apiculture_details.apiculture_ward_no,
+        hive_count: r.bag.apiculture_details.hive_no,
+        honey_production: r.bag.apiculture_details.honey_prod,
+        has_apiculture: r.bag.apiculture_details.dapi,
+      }
+    : {};
+
+  // if (r.bag.b > 0) {
+  // }
+
+  const payload = {
+    ...r,
+    ...gpsData,
+  };
+  const statement = jsonToPostgres("staging_buddhashanti_buildings", payload);
+
+  if (statement) {
+    await ctx.db.execute(sql.raw(statement));
+  }
+}

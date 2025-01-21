@@ -1,7 +1,7 @@
-import { pgTable, timestamp, pgEnum, text, uuid } from "drizzle-orm/pg-core";
+import { pgTable, timestamp, pgEnum, text, varchar } from "drizzle-orm/pg-core";
 
 export const stagingBusiness = pgTable("staging_buddhashanti_business", {
-  id: uuid("id").primaryKey(),
+  id: varchar("id", { length: 48 }).primaryKey(),
 });
 
 export const businessStatusEnum = pgEnum("business_status_enum", [
@@ -12,15 +12,17 @@ export const businessStatusEnum = pgEnum("business_status_enum", [
 ]);
 
 export const business = pgTable("buddhashanti_business", {
-  id: uuid("id").primaryKey(),
+  id: varchar("id", { length: 48 }).primaryKey(),
 });
 
 // Table for building edit requests
 export const businessEditRequests = pgTable(
   "buddhashanti_business_edit_requests",
   {
-    id: uuid("id").primaryKey(),
-    businessId: uuid("business_id").references(() => business.id),
+    id: varchar("id", { length: 48 }).primaryKey(),
+    businessId: varchar("business_id", { length: 48 }).references(
+      () => business.id,
+    ),
     message: text("message").notNull(),
     requestedAt: timestamp("requested_at").defaultNow(),
   },

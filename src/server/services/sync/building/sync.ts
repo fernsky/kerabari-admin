@@ -191,6 +191,7 @@ async function handleBuildingToken(
  */
 async function performBuildingSync(ctx: any, recordId: string) {
   try {
+    console.log(recordId);
     // Fetch record from staging table
     const result = await ctx.db
       .select()

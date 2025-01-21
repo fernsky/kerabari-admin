@@ -1,6 +1,7 @@
 import { jsonToPostgres } from "@/lib/utils";
 import { mapBuildingChoices } from "@/lib/resources/building";
 import { sql } from "drizzle-orm";
+import { processGPSData } from "../utils";
 
 const data = {
   intro: null,
@@ -113,17 +114,6 @@ const dataWithLocationExpanded = {
 };
 
 /**
- * Represents a GeoJSON-like point location structure from ODK
- */
-interface GeoPointLocation {
-  type: "Point";
-  coordinates: [number, number, number]; // [longitude, latitude, altitude]
-  properties: {
-    accuracy: number; // GPS accuracy in meters
-  };
-}
-
-/**
  * Raw building survey data structure from ODK
  */
 export interface RawBuildingData {
@@ -144,7 +134,7 @@ export interface RawBuildingData {
   total_businesses: number;
 
   // Geolocation Data
-  tmp_location: string | GeoPointLocation; // Can be POINT string or GeoJSON object
+  tmp_location: string; // Can be POINT string or GeoJSON object
 
   // Survey Metadata
   survey_date: string;
@@ -208,30 +198,9 @@ export interface RawBuildingData {
 export async function parseAndInsertInStaging(data: RawBuildingData, ctx: any) {
   const r = mapBuildingChoices(data);
   console.log(r);
-  // Initialize location-related variables
-  let gps = null;
-  let altitude = null;
-  let gpsAccuracy = null;
 
-  // Handle location parsing based on input type
-  if (typeof r.tmp_location === "string") {
-    // Parse WKT POINT string format: "POINT (longitude latitude altitude)"
-    const matches = r.tmp_location.match(/POINT \(([^ ]+) ([^ ]+) ([^ ]+)\)/);
-    if (matches) {
-      const [_, longitude, latitude, alt] = matches;
-      gps = `POINT(${longitude} ${latitude})`; // Convert to PostGIS format
-      altitude = parseFloat(alt);
-    }
-  } else if (typeof r.tmp_location === "object" && r.tmp_location !== null) {
-    // Handle GeoJSON-like object format from ODK
-    const { coordinates, properties } = r.tmp_location;
-    if (coordinates && coordinates.length >= 3) {
-      const [longitude, latitude, alt] = coordinates;
-      gps = `POINT(${longitude} ${latitude})`; // Convert to PostGIS format
-      altitude = alt;
-      gpsAccuracy = properties?.accuracy;
-    }
-  }
+  // Process GPS data using the new function
+  const gpsData = processGPSData(r.tmp_location);
 
   // Transform and normalize the data according to database schema
   const payload = {
@@ -251,9 +220,9 @@ export async function parseAndInsertInStaging(data: RawBuildingData, ctx: any) {
     total_businesses: r.total_businesses,
 
     // Media (audio & images stored as bucket keys)
-    gps: gps, // PostGIS POINT geometry
-    altitude: altitude, // Elevation in meters
-    gps_accuracy: gpsAccuracy, // GPS accuracy in meters
+    gps: gpsData.gps,
+    altitude: gpsData.altitude,
+    gps_accuracy: gpsData.gpsAccuracy,
 
     // Building materials
     land_ownership: r.ownership_status, // e.g., Private, Public

@@ -4,6 +4,7 @@ import { surveyData } from "./db/schema";
 import { getODKToken } from "./services/odk/auth";
 import { handleAttachment } from "./services/attachment/handler";
 import { ODKConfig } from "./services/types";
+import { handleBuildingFlow } from "./services/sync/building/building";
 
 export const fetchSurveySubmissions = async (
   {
@@ -96,6 +97,10 @@ export const fetchSurveySubmissions = async (
 
       switch (formId) {
         case "buddhashanti_building_survey":
+          handleBuildingFlow(submission, ctx);
+          break;
+        default:
+          console.log("No handler found for form ID:", formId);
       }
     }
   } catch (error) {
