@@ -1,7 +1,6 @@
 "use client";
 
 import { api } from "@/trpc/react";
-import { MapContainer, TileLayer, GeoJSON, Popup } from "react-leaflet";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,6 +39,26 @@ import "leaflet/dist/leaflet.css";
 import type { GeoJsonObject } from "geojson";
 import type { Session, User } from "lucia";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  { ssr: false },
+);
+
+const GeoJSON = dynamic(
+  () => import("react-leaflet").then((mod) => mod.GeoJSON),
+  { ssr: false },
+);
+
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.TileLayer),
+  { ssr: false },
+);
+
+const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
+  ssr: false,
+});
 
 export default function RequestArea({ user }: { user: User }) {
   const [selectedArea, setSelectedArea] = useState<string | null>(null);

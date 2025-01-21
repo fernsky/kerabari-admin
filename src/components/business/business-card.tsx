@@ -9,14 +9,14 @@ export function BuildingCard({ building }: { building: BuildingSchema }) {
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">Ward {building.wardNumber}</span>
+            <span className="text-sm">Ward {building.tmpWardNumber}</span>
           </div>
 
           <div className="flex items-center gap-2">
             <Binary className="h-4 w-4 text-muted-foreground" />
             <div className="flex flex-col">
               <span className="text-sm text-muted-foreground">Area Code</span>
-              <span className="text-sm">{building.areaCode || "—"}</span>
+              <span className="text-sm">{building.tmpAreaCode || "—"}</span>
             </div>
           </div>
 

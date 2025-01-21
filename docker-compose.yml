@@ -2,11 +2,11 @@ services:
   ## High performance S3 compabitle object storage
   minio:
     image: quay.io/minio/minio
-    container_name: minio
+    container_name: minio-survey
     restart: always
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "50000:9000"
+      - "50001:9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
@@ -30,6 +30,7 @@ services:
 
   cache:
     image: redis:latest
+    container_name: redis-survey
     restart: always
     ports:
       - "6379:6379"

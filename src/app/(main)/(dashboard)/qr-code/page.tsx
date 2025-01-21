@@ -1,9 +1,58 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Download, ScanBarcode, Share2 } from "lucide-react";
 
 export default function QRCodePage() {
+  const handleDownload = async () => {
+    try {
+      const response = await fetch("/images/enumerator-qr-code.png");
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "enumerator-qr-code.png";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading QR code:", error);
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      const response = await fetch("/images/enumerator-qr-code.png");
+      const blob = await response.blob();
+      const file = new File([blob], "enumerator-qr-code.png", {
+        type: "image/png",
+      });
+
+      if (navigator.share) {
+        await navigator.share({
+          title: "Enumerator QR Code",
+          text: "My enumerator QR code for survey identification",
+          files: [file],
+        });
+      } else {
+        // Fallback for browsers that don't support Web Share API
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "enumerator-qr-code.png";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error("Error sharing QR code:", error);
+    }
+  };
+
   return (
     <div className="container mx-auto max-w-4xl space-y-8 px-4 py-8">
       <div className="text-center space-y-2">
@@ -42,11 +91,15 @@ export default function QRCodePage() {
 
             {/* Action Buttons */}
             <div className="flex gap-4">
-              <Button variant="outline" className="gap-2">
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={handleDownload}
+              >
                 <Download className="h-4 w-4" />
                 Download QR
               </Button>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2" onClick={handleShare}>
                 <Share2 className="h-4 w-4" />
                 Share Code
               </Button>

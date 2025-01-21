@@ -1,11 +1,27 @@
 "use client";
 
 import { api } from "@/trpc/react";
-import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import { Loader2 } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import { useEffect } from "react";
 import { GeoJsonObject } from "geojson";
+
+import dynamic from "next/dynamic";
+
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  { ssr: false },
+);
+
+const GeoJSON = dynamic(
+  () => import("react-leaflet").then((mod) => mod.GeoJSON),
+  { ssr: false },
+);
+
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.TileLayer),
+  { ssr: false },
+);
 
 export const ShowWard = ({ wardNumber }: { wardNumber: number }) => {
   const ward = api.ward.getWardByNumber.useQuery({ wardNumber });

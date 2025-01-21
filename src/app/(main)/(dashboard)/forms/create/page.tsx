@@ -81,6 +81,7 @@ const CreateFormPage = () => {
     setIsLoading(true);
 
     try {
+      //@ts-ignore
       await createForm.mutateAsync(values);
       toast.success("Form created successfully");
       router.push("/forms");

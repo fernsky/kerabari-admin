@@ -69,6 +69,7 @@ export default function BuildingDetails({
           <BuildingStatsGrid
             totalFamilies={building?.totalFamilies ?? 0}
             totalBusinesses={building?.totalBusinesses ?? 0}
+            //@ts-ignore
             wardNumber={building?.wardNumber ?? 0}
           />
 

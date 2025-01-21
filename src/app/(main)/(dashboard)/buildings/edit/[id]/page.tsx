@@ -103,9 +103,7 @@ export default function EditBuilding({ params }: { params: { id: string } }) {
         surveyDate: building.surveyDate?.toISOString().split("T")[0] ?? "",
         enumeratorName: building.enumeratorName ?? "",
         enumeratorId: building.enumeratorId ?? "",
-        wardNumber: building.wardNumber ?? 0,
         locality: building.locality ?? "",
-        areaCode: building.areaCode ?? "",
         totalFamilies: building.totalFamilies ?? 0,
         totalBusinesses: building.totalBusinesses ?? 0,
 
@@ -201,7 +199,7 @@ export default function EditBuilding({ params }: { params: { id: string } }) {
         <EnumeratorAssignment
           refetchBuilding={refetchBuilding}
           buildingId={decodedId}
-          currentEnumeratorId={building?.userId ?? undefined}
+          currentEnumeratorId={building?.enumeratorId ?? undefined}
         />
 
         <Form {...form}>

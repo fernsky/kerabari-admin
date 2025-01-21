@@ -28,7 +28,9 @@ export const getAll = publicProcedure
       }
       // Add enumerator filter
       if (filters.enumeratorId) {
-        filterConditions.push(eq(buildings.enumeratorId, filters.enumeratorId));
+        filterConditions.push(
+          eq(buildings.tmpEnumeratorId, filters.enumeratorId),
+        );
       }
       // Add status filter
       if (filters.status) {

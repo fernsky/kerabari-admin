@@ -29,8 +29,8 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { AreaTableView } from "./area-table-view";
-import { AreaCardView } from "./area-card-view";
+import { AreaActionTableView } from "./area-action-table-view";
+import { AreaActionCardView } from "./area-action-card-view";
 
 export default function AreaActionHandler() {
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
@@ -44,7 +44,11 @@ export default function AreaActionHandler() {
   } | null>(null);
   const [message, setMessage] = useState("");
 
-  const { data, isLoading } = api.areaManagement.getPendingActions.useQuery({
+  const {
+    data,
+    isLoading,
+    refetch: refetchPendingActions,
+  } = api.areaManagement.getPendingActions.useQuery({
     status: selectedStatus as any,
     wardNumber: selectedWard ? parseInt(selectedWard) : undefined,
     page,
@@ -56,6 +60,7 @@ export default function AreaActionHandler() {
       onSuccess: () => {
         setDialogOpen(false);
         setMessage("");
+        refetchPendingActions();
       },
     });
 
@@ -66,6 +71,7 @@ export default function AreaActionHandler() {
   ) => {
     setSelectedAction({ areaId, type, action });
     setDialogOpen(true);
+    refetchPendingActions();
   };
 
   const Pagination = () => {
@@ -184,7 +190,7 @@ export default function AreaActionHandler() {
           ) : (
             <>
               <div className="hidden md:block">
-                <AreaTableView
+                <AreaActionTableView
                   //@ts-ignore
                   data={data.actions.map((action) => ({
                     ...action,
@@ -194,7 +200,7 @@ export default function AreaActionHandler() {
                 />
               </div>
               <div className="block md:hidden">
-                <AreaCardView
+                <AreaActionCardView
                   //@ts-ignore
                   data={data.actions.map((action) => ({
                     ...action,
@@ -233,9 +239,9 @@ export default function AreaActionHandler() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => {
+              onClick={async () => {
                 if (selectedAction) {
-                  handleAction({
+                  await handleAction({
                     areaId: selectedAction.areaId,
                     action: selectedAction.action,
                     message,
@@ -244,6 +250,7 @@ export default function AreaActionHandler() {
                         ? "unassigned"
                         : "ongoing_survey",
                   });
+                  refetchPendingActions();
                 }
               }}
               className={
