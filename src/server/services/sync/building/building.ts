@@ -1,4 +1,4 @@
-import { parseBuilding } from "@/lib/parser/buddhashanti/parse-buildings";
+import { parseAndInsertInStaging } from "@/lib/parser/buddhashanti/parse-buildings";
 import { stagingToProduction } from "@/server/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { syncBuildingSurvey } from "./sync";
@@ -6,11 +6,13 @@ import { syncBuildingSurvey } from "./sync";
 export const handleBuildingFlow = async (buildingSubmission: any, ctx: any) => {
   // First regardless of the status, store it in the staging database
   // Generate and execute any form-specific database operations
-  const insertStatement = parseBuilding(buildingSubmission);
-  console.log(insertStatement);
-  if (insertStatement) {
-    await ctx.db.execute(sql.raw(insertStatement));
-  }
+
+  // Steps:
+  // 1. Parse the building data.
+  // 2. Insert the building data into the staging database.
+  // 3. Check if the building data is already in the production database.
+
+  await parseAndInsertInStaging(buildingSubmission, ctx);
 
   const productionInsert = await ctx.db
     .select()

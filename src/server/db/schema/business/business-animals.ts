@@ -1,11 +1,11 @@
 import { pgTable, uuid, varchar, integer, decimal } from "drizzle-orm/pg-core";
-import { business, stagingBusiness } from "./business";
+import { business } from "./business";
 
 export const stagingBusinessAnimals = pgTable(
   "staging_buddhashanti_business_animals",
   {
-    id: uuid("id").primaryKey(),
-    businessId: uuid("business_id").references(() => stagingBusiness.id),
+    id: varchar("id", { length: 48 }).primaryKey(),
+    businessId: varchar("business_id", { length: 48 }),
     wardNo: integer("ward_no"),
     animalType: varchar("animal_type", { length: 100 }), // e.g., "cattle", "poultry", "fish"
     count: integer("count"),
@@ -16,8 +16,10 @@ export const stagingBusinessAnimals = pgTable(
 );
 
 export const businessAnimals = pgTable("buddhashanti_business_animals", {
-  id: uuid("id").primaryKey(),
-  businessId: uuid("business_id").references(() => business.id),
+  id: varchar("id", { length: 48 }).primaryKey(),
+  businessId: varchar("business_id", { length: 48 }).references(
+    () => business.id,
+  ),
   wardNo: integer("ward_no"),
   animalType: varchar("animal_type", { length: 100 }), // e.g., "cattle", "poultry", "fish"
   count: integer("count"),

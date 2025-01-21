@@ -1,11 +1,11 @@
-import { pgTable, uuid, varchar, integer, decimal } from "drizzle-orm/pg-core";
-import { business, stagingBusiness } from "./business";
+import { pgTable, varchar, integer, decimal } from "drizzle-orm/pg-core";
+import { business } from "./business";
 
 export const stagingBusinessAnimalProducts = pgTable(
   "staging_buddhashanti_business_animal_products",
   {
-    id: uuid("id").primaryKey(),
-    businessId: uuid("business_id").references(() => stagingBusiness.id),
+    id: varchar("id", { length: 48 }).primaryKey(),
+    businessId: varchar("business_id", { length: 48 }),
     wardNo: integer("ward_no"),
     animalProduct: varchar("animal_product", { length: 100 }),
     unit: varchar("unit", { length: 255 }),
@@ -18,8 +18,10 @@ export const stagingBusinessAnimalProducts = pgTable(
 export const businessAnimals = pgTable(
   "buddhashanti_business_animal_products",
   {
-    id: uuid("id").primaryKey(),
-    businessId: uuid("business_id").references(() => business.id),
+    id: varchar("id", { length: 48 }).primaryKey(),
+    businessId: varchar("business_id", { length: 48 }).references(
+      () => business.id,
+    ),
     wardNo: integer("ward_no"),
     animalProduct: varchar("animal_product", { length: 100 }),
     unit: varchar("unit", { length: 255 }),

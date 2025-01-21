@@ -1,5 +1,6 @@
 import { jsonToPostgres } from "@/lib/utils";
 import { mapBuildingChoices } from "@/lib/resources/building";
+import { sql } from "drizzle-orm";
 
 const data = {
   intro: null,
@@ -204,7 +205,7 @@ export interface RawBuildingData {
  * @param r - Raw building data from ODK
  * @returns Normalized building data matching database schema
  */
-export function parseBuilding(data: RawBuildingData) {
+export async function parseAndInsertInStaging(data: RawBuildingData, ctx: any) {
   const r = mapBuildingChoices(data);
   console.log(r);
   // Initialize location-related variables
@@ -274,5 +275,9 @@ export function parseBuilding(data: RawBuildingData) {
     road_status: r.road_status, // e.g., Graveled, Paved
   };
 
-  return jsonToPostgres("staging_buddhashanti_buildings", payload);
+  const statement = jsonToPostgres("staging_buddhashanti_buildings", payload);
+
+  if (statement) {
+    await ctx.db.execute(sql.raw(statement));
+  }
 }

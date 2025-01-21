@@ -12,8 +12,10 @@ import {
 import { buildings } from "../building";
 
 export const stagingBusiness = pgTable("staging_buddhashanti_business", {
-  id: uuid("id").primaryKey(),
-  buildingId: uuid("building_id").references(() => buildings.id),
+  id: varchar("id", { length: 48 }).primaryKey(),
+  buildingId: varchar("building_id", { length: 48 }).references(
+    () => buildings.id,
+  ),
   businessName: text("business_name"),
   wardNo: integer("ward_no"),
   areaCode: varchar("area_code", { length: 255 }),
@@ -81,8 +83,10 @@ export const businessStatusEnum = pgEnum("business_status_enum", [
 ]);
 
 export const business = pgTable("buddhashanti_business", {
-  id: uuid("id").primaryKey(),
-  buildingId: uuid("building_id").references(() => buildings.id),
+  id: varchar("id", { length: 48 }).primaryKey(),
+  buildingId: varchar("building_id", { length: 48 }).references(
+    () => buildings.id,
+  ),
   businessName: text("business_name"),
   wardNo: integer("ward_no"),
   areaCode: varchar("area_code", { length: 255 }),
@@ -147,8 +151,10 @@ export const business = pgTable("buddhashanti_business", {
 export const businessEditRequests = pgTable(
   "buddhashanti_business_edit_requests",
   {
-    id: uuid("id").primaryKey(),
-    businessId: uuid("business_id").references(() => business.id),
+    id: varchar("id", { length: 48 }).primaryKey(),
+    businessId: varchar("business_id", { length: 48 }).references(
+      () => business.id,
+    ),
     message: text("message").notNull(),
     requestedAt: timestamp("requested_at").defaultNow(),
   },
