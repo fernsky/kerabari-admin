@@ -3,54 +3,82 @@ import {
   areas,
   buildings,
   buildingTokens,
-  stagingBuildings,
   stagingToProduction,
   users,
   wards,
 } from "../../../db/schema";
-import { stagingBusiness } from "@/server/db/schema/business/business";
-import { stagingBusinessCrops } from "@/server/db/schema/business/business-crops";
-import { stagingBusinessAnimalProducts } from "@/server/db/schema/business/business-animal-products";
+import {
+  business,
+  stagingBusiness,
+} from "@/server/db/schema/business/business";
+import {
+  businessCrops,
+  StagingBusinessCrop,
+  stagingBusinessCrops,
+} from "@/server/db/schema/business/business-crops";
+import {
+  businessAnimalProducts,
+  StagingBusinessAnimalProduct,
+  stagingBusinessAnimalProducts,
+} from "@/server/db/schema/business/business-animal-products";
 
-export async function syncBuildingSurvey(
+export async function syncBusinessSurvey(
   recordId: string,
   data: any,
   ctx: any,
 ) {
-  /*
-    // Perform main building sync
-  await performBuildingSync(ctx, recordId);
-  // 4. If it is not, do the following.
-  // 4.1 Check if there is a valid ward number correpsponding to the submitted building data.
-  // 4.2 If there is, link the ward number with the building data.
-  // 4.3 Check if there is a valid area code corresponding to the submitted building data.
-  // 4.4 If there is, link the area code with the building data.
-  // 4.5 Check if there is a valid building token corresponding to the submitted building data.
-  // 4.6 If there is, link the building token with the building data.
-  // 4.7 Check if there is a valid enumerator ID corresponding to the submitted building data.
-  // 4.8 If there is, link the enumerator ID with the building data.
-  const wardNumber = data.ward_no;
-  const areaCode = data.area_code;
-  const buildingToken = data.building_token;
-  const enumeratorId = data.enumerator_id;
+  try {
+    await performBusinessSync(ctx, recordId);
 
-  // Find enumerator
-  const enumerator = await handleEnumerator(ctx, enumeratorId, recordId);
+    const wardNumber = data.b_addr.ward_no;
+    const areaCode = data.b_addr.area_code;
+    const buildingToken = data.enumerator_introduction.building_token_number;
+    const enumeratorId = data.enumerator_introduction.enumerator_id;
 
-  // Handle Ward Number
-  console.log("Fetching ward number..");
-  const ward = await handleWardNumber(ctx, wardNumber, recordId);
-  console.log("Fetched ward number...", ward);
+    // Find enumerator with error handling
+    let enumerator;
+    try {
+      enumerator = await handleEnumerator(ctx, enumeratorId, recordId);
+    } catch (error) {
+      console.error(`[Enumerator Handling Error] Record ${recordId}:`, error);
+      // throw new Error(`Failed to handle enumerator: ${error}`);
+    }
 
-  // Handle Area Code
-  const dbAreaCode = await handlAreaCode(ctx, areaCode, recordId);
+    // Handle Ward Number with error handling
+    try {
+      await handleWardNumber(ctx, wardNumber, recordId);
+    } catch (error) {
+      console.error(`[Ward Handling Error] Record ${recordId}:`, error);
+      // throw new Error(`Failed to handle ward: ${error}`);
+    }
 
-  // Handle building token allocation
-  await handleBuildingToken(ctx, buildingToken, recordId);
+    // Handle Area Code with error handling
+    try {
+      await handlAreaCode(ctx, areaCode, recordId);
+    } catch (error) {
+      console.error(`[Area Code Handling Error] Record ${recordId}:`, error);
+      // throw new Error(`Failed to handle area code: ${error}`);
+    }
 
-  // Update area status if needed
-  await updateAreaStatus(ctx, enumerator?.[0]?.id, areaCode);
-  */
+    // Handle building token allocation with error handling
+    try {
+      await handleBuildingToken(ctx, buildingToken, recordId);
+    } catch (error) {
+      console.error(`[Building Token Error] Record ${recordId}:`, error);
+      // throw new Error(`Failed to handle building token: ${error}`);
+    }
+
+    // Update area status with error handling
+    try {
+      await updateAreaStatus(ctx, enumerator?.[0]?.id, areaCode);
+    } catch (error) {
+      console.error(`[Area Status Update Error] Record ${recordId}:`, error);
+      // throw new Error(`Failed to update area status: ${error}`);
+    }
+  } catch (error) {
+    console.error(`[Sync Building Survey Error] Record ${recordId}:`, error);
+    // throw new Error(`Building survey sync failed: ${error}`);
+  }
 }
 
 async function handleEnumerator(
@@ -58,34 +86,41 @@ async function handleEnumerator(
   enumeratorId: string,
   recordId: string,
 ) {
-  const enumerator = await ctx.db
-    .select()
-    .from(users)
-    .where(
-      eq(
-        sql`UPPER(SUBSTRING(${users.id}::text, 1, 8))`,
-        enumeratorId.substring(0, 8).toUpperCase(),
-      ),
-    )
-    .limit(1);
-  if (enumerator.length > 0) {
+  try {
+    if (!enumeratorId) {
+      throw new Error("Enumerator ID is required");
+    }
+
+    const enumerator = await ctx.db
+      .select()
+      .from(users)
+      .where(
+        eq(
+          sql`UPPER(SUBSTRING(${users.id}::text, 1, 8))`,
+          enumeratorId.substring(0, 8).toUpperCase(),
+        ),
+      )
+      .limit(1);
+
     await ctx.db
-      .update(buildings)
-      .set({ enumeratorId: enumerator[0].id, isEnumeratorValid: true })
-      .where(eq(buildings.id, recordId));
-  } else {
-    await ctx.db
-      .update(buildings)
-      .set({ isEnumeratorValid: false })
-      .where(eq(buildings.id, recordId));
+      .update(business)
+      .set({
+        enumeratorId: enumerator.length > 0 ? enumerator[0].id : null,
+        isEnumeratorValid: enumerator.length > 0,
+      })
+      .where(eq(business.id, recordId));
+
+    return enumerator;
+  } catch (error) {
+    console.error(`[Enumerator Query Error] Record ${recordId}:`, error);
+    throw new Error(`Database operation failed for enumerator: ${error}`);
   }
-  return enumerator;
 }
 
 async function handleWardNumber(
   ctx: any,
   wardNumber: number,
-  buildingId: string,
+  businessId: string,
 ) {
   console.log(wardNumber);
   const ward = await ctx.db
@@ -97,39 +132,45 @@ async function handleWardNumber(
     .limit(1);
 
   if (ward.length > 0) {
-    console.log(ward[0].wardNumber, buildingId);
+    console.log(ward[0].wardNumber, businessId);
     await ctx.db
-      .update(buildings)
+      .update(business)
       .set({ wardId: ward[0].wardNumber, isWardValid: true })
-      .where(eq(buildings.id, buildingId));
+      .where(eq(business.id, businessId));
   } else {
     await ctx.db
-      .update(buildings)
+      .update(business)
       .set({ isWardValid: false })
-      .where(eq(buildings.id, buildingId));
+      .where(eq(business.id, businessId));
   }
   return ward;
 }
 
-async function handlAreaCode(ctx: any, areaCode: number, buildingId: string) {
-  const area = await ctx.db
-    .select({ id: areas.id })
-    .from(areas)
-    .where(eq(areas.code, areaCode))
-    .limit(1);
+async function handlAreaCode(ctx: any, areaCode: number, businessId: string) {
+  try {
+    if (!areaCode) {
+      throw new Error("Area code is required");
+    }
 
-  if (area.length > 0) {
+    const area = await ctx.db
+      .select({ id: areas.id })
+      .from(areas)
+      .where(eq(areas.code, areaCode))
+      .limit(1);
+
     await ctx.db
-      .update(buildings)
-      .set({ areaId: area[0].id, isAreaValid: true })
-      .where(eq(buildings.id, buildingId));
-  } else {
-    await ctx.db
-      .update(buildings)
-      .set({ isAreaValid: false })
-      .where(eq(buildings.id, buildingId));
+      .update(business)
+      .set({
+        areaId: area.length > 0 ? area[0].id : null,
+        isAreaValid: area.length > 0,
+      })
+      .where(eq(business.id, businessId));
+
+    return area;
+  } catch (error) {
+    console.error(`[Area Code Error] Building ${businessId}:`, error);
+    throw new Error(`Area code handling failed: ${error}`);
   }
-  return area;
 }
 
 async function updateAreaStatus(
@@ -166,35 +207,49 @@ async function handleBuildingToken(
   buildingToken: string,
   recordId: string,
 ) {
-  const validToken = await ctx.db
-    .select()
-    .from(buildingTokens)
-    .where(
-      eq(
-        sql`UPPER(SUBSTRING(${buildingTokens.token}, 1, 8))`,
-        buildingToken.substring(0, 8).toUpperCase(),
-      ),
-    )
-    .limit(1);
+  try {
+    if (!buildingToken) {
+      throw new Error("Building token is required");
+    }
 
-  if (validToken.length > 0) {
-    await ctx.db
-      .update(buildings)
-      .set({ buildingToken: validToken[0].token, isBuildingTokenValid: true })
-      .where(eq(buildings.id, recordId));
+    const validToken = await ctx.db
+      .select()
+      .from(buildingTokens)
+      .where(
+        eq(
+          sql`UPPER(SUBSTRING(${buildingTokens.token}, 1, 8))`,
+          buildingToken.substring(0, 8).toUpperCase(),
+        ),
+      )
+      .limit(1);
 
-    await ctx.db
-      .update(buildingTokens)
-      .set({
-        status: "allocated",
-        token: buildingToken,
-      })
-      .where(eq(buildingTokens.token, validToken[0].token));
-  } else {
-    await ctx.db
-      .update(buildings)
-      .set({ isBuildingTokenValid: false })
-      .where(eq(buildings.id, recordId));
+    if (validToken.length > 0) {
+      await Promise.all([
+        ctx.db
+          .update(buildings)
+          .set({
+            buildingToken: validToken[0].token,
+            isBuildingTokenValid: true,
+          })
+          .where(eq(buildings.id, recordId)),
+
+        ctx.db
+          .update(buildingTokens)
+          .set({
+            status: "allocated",
+            token: buildingToken,
+          })
+          .where(eq(buildingTokens.token, validToken[0].token)),
+      ]);
+    } else {
+      await ctx.db
+        .update(business)
+        .set({ isBuildingTokenValid: false })
+        .where(eq(business.id, recordId));
+    }
+  } catch (error) {
+    console.error(`[Building Token Error] Record ${recordId}:`, error);
+    throw new Error(`Building token handling failed: ${error}`);
   }
 }
 /**
@@ -237,60 +292,166 @@ async function performBusinessSync(ctx: any, recordId: string) {
 
     // Insert validated data into production buildings table
     await ctx.db
-      .insert(buildings)
+      .insert(business)
       .values({
-        // Core identifiers and metadata
+        // Core identifiers
         id: stagingData.id,
-        surveyDate: stagingData.surveyDate,
         enumeratorName: stagingData.enumeratorName,
+        phone: stagingData.phone,
 
-        // Location information
+        // Business Basic Information
+        businessName: stagingData.businessName,
+        wardNo: stagingData.wardNo,
+        areaCode: stagingData.areaCode,
+        businessNo: stagingData.businessNo,
         locality: stagingData.locality,
 
-        // Occupancy details
-        totalFamilies: stagingData.totalFamilies ?? 0, // Default to 0 if null
-        totalBusinesses: stagingData.totalBusinesses ?? 0,
+        // Operator Details
+        operatorName: stagingData.operatorName,
+        operatorPhone: stagingData.operatorPhone,
+        operatorAge: stagingData.operatorAge,
+        operatorGender: stagingData.operatorGender,
+        operatorEducation: stagingData.operatorEducation,
 
-        // Survey media and geolocation
-        surveyAudioRecording: stagingData.surveyAudioRecording,
+        // Business Classification
+        businessNature: stagingData.businessNature,
+        businessNatureOther: stagingData.businessNatureOther,
+        businessType: stagingData.businessType,
+        businessTypeOther: stagingData.businessTypeOther,
+
+        // Registration and Legal Information
+        registrationStatus: stagingData.registrationStatus,
+        registeredBodies: stagingData.registeredBodies,
+        registeredBodiesOther: stagingData.registeredBodiesOther,
+        statutoryStatus: stagingData.statutoryStatus,
+        statutoryStatusOther: stagingData.statutoryStatusOther,
+        panStatus: stagingData.panStatus,
+        panNumber: stagingData.panNumber,
+
+        // Location Data
         gps: stagingData.gps,
         altitude: stagingData.altitude,
         gpsAccuracy: stagingData.gpsAccuracy,
-        buildingImage: stagingData.buildingImage,
-        enumeratorSelfie: stagingData.enumeratorSelfie,
 
-        // Building physical attributes
-        landOwnership: stagingData.landOwnership,
-        base: stagingData.base,
-        outerWall: stagingData.outerWall,
-        roof: stagingData.roof,
-        floor: stagingData.floor,
+        // Financial and Property Information
+        investmentAmount: stagingData.investmentAmount,
+        businessLocationOwnership: stagingData.businessLocationOwnership,
+        businessLocationOwnershipOther:
+          stagingData.businessLocationOwnershipOther,
 
-        // Compliance and risk factors
-        mapStatus: stagingData.mapStatus,
-        naturalDisasters: stagingData.naturalDisasters,
+        // Employee Information - Partners
+        hasPartners: stagingData.hasPartners,
+        totalPartners: stagingData.totalPartners,
+        nepaliMalePartners: stagingData.nepaliMalePartners,
+        nepaliFemalePartners: stagingData.nepaliFemalePartners,
+        hasForeignPartners: stagingData.hasForeignPartners,
+        foreignMalePartners: stagingData.foreignMalePartners,
+        foreignFemalePartners: stagingData.foreignFemalePartners,
 
-        // Accessibility metrics
-        timeToMarket: stagingData.timeToMarket,
-        timeToActiveRoad: stagingData.timeToActiveRoad,
-        timeToPublicBus: stagingData.timeToPublicBus,
-        timeToHealthOrganization: stagingData.timeToHealthOrganization,
-        timeToFinancialOrganization: stagingData.timeToFinancialOrganization,
-        roadStatus: stagingData.roadStatus,
+        // Employee Information - Family
+        hasInvolvedFamily: stagingData.hasInvolvedFamily,
+        totalInvolvedFamily: stagingData.totalInvolvedFamily,
+        maleInvolvedFamily: stagingData.maleInvolvedFamily,
+        femaleInvolvedFamily: stagingData.femaleInvolvedFamily,
 
-        // Approval workflow
-        status: "pending",
+        // Employee Information - Permanent
+        hasPermanentEmployees: stagingData.hasPermanentEmployees,
+        totalPermanentEmployees: stagingData.totalPermanentEmployees,
+        nepaliMalePermanentEmployees: stagingData.nepaliMalePermanentEmployees,
+        nepaliFemalePermanentEmployees:
+          stagingData.nepaliFemalePermanentEmployees,
+        hasForeignPermanentEmployees: stagingData.hasForeignPermanentEmployees,
+        foreignMalePermanentEmployees:
+          stagingData.foreignMalePermanentEmployees,
+        foreignFemalePermanentEmployees:
+          stagingData.foreignFemalePermanentEmployees,
 
-        // Temporary reference fields for validation
+        // Employee Information - Temporary
+        hasTemporaryEmployees: stagingData.hasTemporaryEmployees,
+        totalTemporaryEmployees: stagingData.totalTemporaryEmployees,
+        nepaliMaleTemporaryEmployees: stagingData.nepaliMaleTemporaryEmployees,
+        nepaliFemaleTemporaryEmployees:
+          stagingData.nepaliFemaleTemporaryEmployees,
+        hasForeignTemporaryEmployees: stagingData.hasForeignTemporaryEmployees,
+        foreignMaleTemporaryEmployees:
+          stagingData.foreignMaleTemporaryEmployees,
+        foreignFemaleTemporaryEmployees:
+          stagingData.foreignFemaleTemporaryEmployees,
+
+        // Aquaculture Information
+        aquacultureWardNo: stagingData.aquacultureWardNo,
+        pondCount: stagingData.pondCount,
+        pondArea: stagingData.pondArea,
+        fishProduction: stagingData.fishProduction,
+        fingerlingNumber: stagingData.fingerlingNumber,
+        totalInvestment: stagingData.totalInvestment,
+        annualIncome: stagingData.annualIncome,
+        employmentCount: stagingData.employmentCount,
+
+        // Apiculture Information
+        apicultureWardNo: stagingData.apicultureWardNo,
+        hiveCount: stagingData.hiveCount,
+        honeyProduction: stagingData.honeyProduction,
+        hasApiculture: stagingData.hasApiculture,
+
+        // Temporary fields
         tmpAreaCode: stagingData.areaCode,
-        tmpWardNumber: stagingData.wardNumber,
+        tmpWardNumber: stagingData.wardNo,
         tmpEnumeratorId: stagingData.enumeratorId,
         tmpBuildingToken: stagingData.buildingToken,
+
+        // Default flags
+        isAreaValid: false,
+        isWardValid: false,
+        isBuildingTokenValid: false,
+        isEnumeratorValid: false,
+
+        // Status
+        status: "pending",
       })
       .onConflictDoNothing();
 
+    // Insert crops data into production table
+    if (crops.length > 0) {
+      await ctx.db
+        .insert(businessCrops)
+        .values(
+          crops.map((crop: StagingBusinessCrop) => ({
+            businessId: crop.businessId,
+            wardNo: crop.wardNo,
+            cropType: crop.cropType,
+            cropName: crop.cropName,
+            cropArea: crop.cropArea,
+            cropProduction: crop.cropProduction,
+            cropSales: crop.cropSales,
+            cropRevenue: crop.cropRevenue,
+            cropCount: crop.cropCount,
+          })),
+        )
+        .onConflictDoNothing();
+    }
+
+    // Insert animal products data into production table
+    if (animalProducts.length > 0) {
+      await ctx.db
+        .insert(businessAnimalProducts)
+        .values(
+          animalProducts.map((product: StagingBusinessAnimalProduct) => ({
+            businessId: product.businessId,
+            wardNo: product.wardNo,
+            animalProduct: product.animalProduct,
+            productName: product.productName,
+            unit: product.unit,
+            productionAmount: product.productionAmount,
+            salesAmount: product.salesAmount,
+            monthlyProduction: product.monthlyProduction,
+            revenue: product.revenue,
+          })),
+        )
+        .onConflictDoNothing();
+    }
+
     // Track the sync operation
-    console.log("Syncing building", recordId);
     await ctx.db
       .insert(stagingToProduction)
       .values({
