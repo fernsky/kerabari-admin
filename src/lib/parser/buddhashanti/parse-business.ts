@@ -2,6 +2,11 @@ import { jsonToPostgres } from "@/lib/utils";
 import { sql } from "drizzle-orm";
 import { RawBusiness } from "./business/types";
 import { processGPSData } from "../utils";
+import {
+  decodeMultipleChoices,
+  decodeSingleChoice,
+} from "@/lib/resources/utils";
+import { businessChoices } from "@/lib/resources/business";
 
 /**
  * Parses raw building survey data into normalized database structure
@@ -38,18 +43,33 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
     operator_education: r.b.op_edu_lvl,
 
     // Business Classification
-    business_nature: r.business_nature,
+    business_nature: decodeSingleChoice(
+      r.business_nature,
+      businessChoices.business_natures,
+    ),
     business_nature_other: r.business_nature_other,
-    business_type: r.business_type,
+    business_type: decodeSingleChoice(
+      r.business_type,
+      businessChoices.business_types,
+    ),
     business_type_other: r.business_type_other,
 
     // Registration and Legal Information
-    registration_status: r.is_registered,
-    registered_bodies: r.registered_bodies,
+    registration_status: decodeSingleChoice(
+      r.is_registered,
+      businessChoices.true_false,
+    ),
+    registered_bodies: decodeMultipleChoices(
+      r.registered_bodies,
+      businessChoices.governmental_bodies,
+    ),
     registered_bodies_other: r.registered_bodies_other,
-    statutory_status: r.statutory_status,
+    statutory_status: decodeSingleChoice(
+      r.statutory_status,
+      businessChoices.statutory_status,
+    ),
     statutory_status_other: r.statutory_status_other,
-    pan_status: r.has_pan,
+    pan_status: decodeSingleChoice(r.has_pan, businessChoices.true_false),
     pan_number: r.pan_no,
 
     // Location Data
@@ -59,45 +79,78 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
 
     // Financial and Property Information
     investment_amount: r.investment,
-    business_location_ownership: r.business_location_ownership,
+    business_location_ownership: decodeSingleChoice(
+      r.business_location_ownership,
+      businessChoices.business_location_ownerships,
+    ),
     business_location_ownership_other: r.business_location_ownership_oth,
 
     // Hotel Information
-    hotel_accommodation_type: r.hotel.accomodation_type,
+    hotel_accommodation_type: decodeSingleChoice(
+      r.hotel.accomodation_type,
+      businessChoices.accomodation_types,
+    ),
     hotel_room_count: r.hotel.room_no,
     hotel_bed_count: r.hotel.bed_no,
-    hotel_room_type: r.hotel.room_type,
-    hotel_has_hall: r.hotel.has_hall,
+    hotel_room_type: decodeSingleChoice(
+      r.hotel.room_type,
+      businessChoices.room_types,
+    ),
+    hotel_has_hall: decodeSingleChoice(
+      r.hotel.has_hall,
+      businessChoices.true_false,
+    ),
     hotel_hall_capacity: r.hotel.hcpcty,
 
     // Employee Information
-    has_partners: r.emp.has_partners,
+    has_partners: decodeSingleChoice(
+      r.emp.has_partners,
+      businessChoices.true_false,
+    ),
     total_partners: r.emp.prt.total_partners,
     nepali_male_partners: r.emp.prt.nepali_male_partners,
     nepali_female_partners: r.emp.prt.nepali_female_partners,
-    has_foreign_partners: r.emp.prt.has_foreign_partners,
+    has_foreign_partners: decodeSingleChoice(
+      r.emp.prt.has_foreign_partners,
+      businessChoices.true_false,
+    ),
     foreign_male_partners: r.emp.prt.foreign_male_partners,
     foreign_female_partners: r.emp.prt.foreign_female_partners,
 
-    has_involved_family: r.emp.has_involved_family,
+    has_involved_family: decodeSingleChoice(
+      r.emp.has_involved_family,
+      businessChoices.true_false,
+    ),
     total_involved_family: r.emp.efam.total_involved_family,
     male_involved_family: r.emp.efam.male_involved_family,
     female_involved_family: r.emp.efam.female_involved_family,
 
-    has_permanent_employees: r.emp.has_perm_employees,
+    has_permanent_employees: decodeSingleChoice(
+      r.emp.has_perm_employees,
+      businessChoices.true_false,
+    ),
     total_permanent_employees: r.emp.etemp.total_perm_employees,
     nepali_male_permanent_employees: r.emp.etemp.nepali_male_perm_employees,
     nepali_female_permanent_employees: r.emp.etemp.nepali_female_perm_employees,
-    has_foreign_permanent_employees: r.emp.etemp.has_foreign_perm_employees,
+    has_foreign_permanent_employees: decodeSingleChoice(
+      r.emp.etemp.has_foreign_perm_employees,
+      businessChoices.true_false,
+    ),
     foreign_male_permanent_employees: r.emp.etemp.foreign_male_perm_employees,
     foreign_female_permanent_employees:
       r.emp.etemp.foreign_female_perm_employees,
 
-    has_temporary_employees: r.emp.has_temp_employees,
+    has_temporary_employees: decodeSingleChoice(
+      r.emp.has_temp_employees,
+      businessChoices.true_false,
+    ),
     total_temporary_employees: r.emp.eperm.total_temp_employees,
     nepali_male_temporary_employees: r.emp.eperm.nepali_male_temp_employees,
     nepali_female_temporary_employees: r.emp.eperm.nepali_female_temp_employees,
-    has_foreign_temporary_employees: r.emp.eperm.has_foreign_temp_employees,
+    has_foreign_temporary_employees: decodeSingleChoice(
+      r.emp.eperm.has_foreign_temp_employees,
+      businessChoices.true_false,
+    ),
     foreign_male_temporary_employees: r.emp.eperm.foreign_male_temp_employees,
     foreign_female_temporary_employees:
       r.emp.eperm.foreign_female_temp_employees,
@@ -251,7 +304,10 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
         animalProducts.push({
           product_name: product.baprd.baprod_oth,
           ward_no: product.aprod_ward_no,
-          unit: product.baprd.oth_baprod_unit,
+          unit: decodeSingleChoice(
+            product.baprd.oth_baprod_unit,
+            businessChoices.animal_prods_unit,
+          ),
           production_amount: product.baprd.oth_b_aprod_prod,
           sales_amount: product.baprd.oth_aprod_sales,
           monthly_production: product.baprd.oth_b_month_aprod,

@@ -5,7 +5,7 @@
 // 2 : Public
 
 export const decodeSingleChoice = <T extends Record<string, string>>(
-  value: keyof T,
+  value: any,
   choices: T,
 ): string => {
   try {
