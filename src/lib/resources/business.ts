@@ -458,6 +458,7 @@ export const businessChoices = {
     ministry_of_health_department: "स्वास्थ्य मन्त्रालय/विभाग",
     office_of_the_company_registrar: "कम्पनी रजिष्ट्रारको कार्यालय",
     municipality: "पालिकामा",
+    ward_office: "वडा कार्यालयमा",
     cooperative_department_office: "सहकारी विभाग/कार्यालय",
     industrial_department: "उद्योग विभाग",
     ministry_of_education_department_office: "शिक्षा मन्त्रालय/ विभाग/कार्यालय",

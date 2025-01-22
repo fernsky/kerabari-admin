@@ -92,12 +92,14 @@ export const jsonToPostgres = (table: string, data: TableData): string => {
   const keys = Object.keys(data);
 
   const values = Object.values(data).map((val) => {
-    if (val === null) return "NULL";
+    if (val === null || val === undefined) return "NULL";
 
     if (Array.isArray(val)) {
-      const escapedValues = val.map((item) =>
-        typeof item === "string" ? `'${item.replace(/'/g, "''")}'` : item,
-      );
+      const escapedValues = val
+        .filter((item) => item !== undefined && item !== null)
+        .map((item) =>
+          typeof item === "string" ? `'${item.replace(/'/g, "''")}'` : item,
+        );
       return `ARRAY[${escapedValues.join(",")}]`;
     }
 

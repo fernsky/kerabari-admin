@@ -102,6 +102,7 @@ export const fetchSurveySubmissions = async (
           break;
         case "buddhashanti_business_survey":
           handleBusinessFlow(submission, ctx);
+          break;
         default:
           console.log("No handler found for form ID:", formId);
       }
