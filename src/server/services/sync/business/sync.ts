@@ -120,7 +120,7 @@ async function handleEnumerator(
 async function handleWardNumber(
   ctx: any,
   wardNumber: number,
-  buildingId: string,
+  businessId: string,
 ) {
   console.log(wardNumber);
   const ward = await ctx.db
@@ -132,21 +132,21 @@ async function handleWardNumber(
     .limit(1);
 
   if (ward.length > 0) {
-    console.log(ward[0].wardNumber, buildingId);
+    console.log(ward[0].wardNumber, businessId);
     await ctx.db
       .update(business)
       .set({ wardId: ward[0].wardNumber, isWardValid: true })
-      .where(eq(business.id, buildingId));
+      .where(eq(business.id, businessId));
   } else {
     await ctx.db
       .update(business)
       .set({ isWardValid: false })
-      .where(eq(business.id, buildingId));
+      .where(eq(business.id, businessId));
   }
   return ward;
 }
 
-async function handlAreaCode(ctx: any, areaCode: number, buildingId: string) {
+async function handlAreaCode(ctx: any, areaCode: number, businessId: string) {
   try {
     if (!areaCode) {
       throw new Error("Area code is required");
@@ -164,11 +164,11 @@ async function handlAreaCode(ctx: any, areaCode: number, buildingId: string) {
         areaId: area.length > 0 ? area[0].id : null,
         isAreaValid: area.length > 0,
       })
-      .where(eq(business.id, buildingId));
+      .where(eq(business.id, businessId));
 
     return area;
   } catch (error) {
-    console.error(`[Area Code Error] Building ${buildingId}:`, error);
+    console.error(`[Area Code Error] Building ${businessId}:`, error);
     throw new Error(`Area code handling failed: ${error}`);
   }
 }
