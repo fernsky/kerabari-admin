@@ -5,6 +5,7 @@ import { getODKToken } from "./services/odk/auth";
 import { handleAttachment } from "./services/attachment/handler";
 import { ODKConfig } from "./services/types";
 import { handleBuildingFlow } from "./services/sync/building/building";
+import { handleBusinessFlow } from "./services/sync/business/business";
 
 export const fetchSurveySubmissions = async (
   {
@@ -99,6 +100,8 @@ export const fetchSurveySubmissions = async (
         case "buddhashanti_building_survey":
           handleBuildingFlow(submission, ctx);
           break;
+        case "buddhashanti_business_survey":
+          handleBusinessFlow(submission, ctx);
         default:
           console.log("No handler found for form ID:", formId);
       }

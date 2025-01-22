@@ -8,6 +8,7 @@ import {
   boolean,
   decimal,
 } from "drizzle-orm/pg-core";
+import { geometry } from "../geographical";
 
 export const stagingBusiness = pgTable("staging_buddhashanti_business", {
   id: varchar("id", { length: 48 }).primaryKey(),
@@ -47,9 +48,9 @@ export const stagingBusiness = pgTable("staging_buddhashanti_business", {
   panNumber: varchar("pan_number", { length: 50 }),
 
   // Location Data
-  gps: varchar("gps", { length: 100 }),
-  altitude: decimal("altitude", { precision: 10, scale: 2 }),
-  gpsAccuracy: decimal("gps_accuracy", { precision: 10, scale: 2 }),
+  gps: geometry("gps", { type: "Point" }),
+  altitude: decimal("altitude"),
+  gpsAccuracy: decimal("gps_accuracy"),
 
   // Financial and Property Information
   investmentAmount: decimal("investment_amount", { precision: 15, scale: 2 }),
@@ -156,9 +157,9 @@ export const business = pgTable("buddhashanti_business", {
   panNumber: varchar("pan_number", { length: 50 }),
 
   // Location Data
-  gps: varchar("gps", { length: 100 }),
-  altitude: decimal("altitude", { precision: 10, scale: 2 }),
-  gpsAccuracy: decimal("gps_accuracy", { precision: 10, scale: 2 }),
+  gps: geometry("gps", { type: "Point" }),
+  altitude: decimal("altitude"),
+  gpsAccuracy: decimal("gps_accuracy"),
 
   // Financial and Property Information
   investmentAmount: decimal("investment_amount", { precision: 15, scale: 2 }),
