@@ -75,7 +75,7 @@ export const getById = publicProcedure
       .limit(1);
 
     const attachments = await ctx.db.query.surveyAttachments.findMany({
-      where: eq(surveyAttachments.dataId, `uuid:${input.id}`),
+      where: eq(surveyAttachments.dataId, input.id),
     });
 
     if (!building[0]) {
