@@ -40,6 +40,7 @@ import type { GeoJsonObject } from "geojson";
 import type { Session, User } from "lucia";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
+import { useMapViewStore } from "@/store/toggle-layer-store";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
@@ -101,6 +102,8 @@ export default function RequestArea({ user }: { user: User }) {
   };
 
   console.log(areas);
+
+  const { isStreetView, toggleView } = useMapViewStore();
 
   const StatCard = ({
     icon: Icon,
@@ -217,64 +220,89 @@ export default function RequestArea({ user }: { user: User }) {
           </div>
           <div className="h-[600px] relative">
             {selectedWard ? (
-              <MapContainer
-                className="h-full w-full z-10"
-                center={[26.72069444681497, 88.04840072844279]}
-                zoom={13}
-                scrollWheelZoom={false}
-              >
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                {areas.data?.map((area) => (
-                  <GeoJSON
-                    key={area.code}
-                    data={area.geometry as GeoJsonObject}
-                    style={{
-                      color: area.assignedTo ? "#9ca3af" : "#2563eb",
-                      weight: 2,
-                      opacity: 0.6,
-                      fillColor: area.assignedTo ? "#d1d5db" : "#3b82f6",
-                      fillOpacity: 0.1,
-                    }}
+              <>
+                <div className="absolute top-2 right-2 z-[400]">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="bg-white"
+                    onClick={toggleView}
                   >
-                    <Popup className="z-[10000]">
-                      <div className="w-64 overflow-hidden rounded-lg bg-white shadow-sm">
-                        <div className="border-b bg-muted/50 p-2">
-                          <div className="rounded-md bg-primary/10 p-4">
-                            <div className="flex items-center gap-2">
-                              <MapPin className="h-4 w-4 text-primary" />
-                              <h3 className="font-medium text-[14px]">
-                                Area Details
-                              </h3>
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted-foreground">
-                                Code: {area.code}
-                              </p>
+                    <Map className="h-4 w-4 mr-2" />
+                    {isStreetView ? "Satellite View" : "Street View"}
+                  </Button>
+                </div>
+                <MapContainer
+                  className="h-full w-full z-10"
+                  center={[26.72069444681497, 88.04840072844279]}
+                  zoom={13}
+                  scrollWheelZoom={false}
+                >
+                  <TileLayer
+                    key={isStreetView ? "street" : "satellite"} // Add this key prop
+                    attribution={
+                      isStreetView
+                        ? "© OpenStreetMap contributors"
+                        : "© Google"
+                    }
+                    url={
+                      isStreetView
+                        ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        : "http://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}"
+                    }
+                  />
+                  {areas.data?.map((area) => (
+                    <GeoJSON
+                      key={area.code}
+                      data={area.geometry as GeoJsonObject}
+                      style={{
+                        color: area.assignedTo ? "#9ca3af" : "#2563eb",
+                        weight: 2,
+                        opacity: 0.6,
+                        fillColor: area.assignedTo ? "#d1d5db" : "#3b82f6",
+                        fillOpacity: 0.1,
+                      }}
+                    >
+                      <Popup className="z-[10000]">
+                        <div className="w-64 overflow-hidden rounded-lg bg-white shadow-sm">
+                          <div className="border-b bg-muted/50 p-2">
+                            <div className="rounded-md bg-primary/10 p-4">
+                              <div className="flex items-center gap-2">
+                                <MapPin className="h-4 w-4 text-primary" />
+                                <h3 className="font-medium text-[14px]">
+                                  Area Details
+                                </h3>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground">
+                                  Code: {area.code}
+                                </p>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="p-3">
-                        {!area.assignedTo ? (
-                          <Button
-                            className="w-full"
-                            size="sm"
-                            onClick={() => setSelectedArea(area.id)}
-                          >
-                            <MapPin className="mr-2 h-4 w-4" />
-                            Request Area
-                          </Button>
-                        ) : (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Users className="h-4 w-4" />
-                            <span>Already assigned</span>
-                          </div>
-                        )}
-                      </div>
-                    </Popup>
-                  </GeoJSON>
-                ))}
-              </MapContainer>
+                        <div className="p-3">
+                          {!area.assignedTo ? (
+                            <Button
+                              className="w-full"
+                              size="sm"
+                              onClick={() => setSelectedArea(area.id)}
+                            >
+                              <MapPin className="mr-2 h-4 w-4" />
+                              Request Area
+                            </Button>
+                          ) : (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Users className="h-4 w-4" />
+                              <span>Already assigned</span>
+                            </div>
+                          )}
+                        </div>
+                      </Popup>
+                    </GeoJSON>
+                  ))}
+                </MapContainer>
+              </>
             ) : (
               <div className="flex h-full items-center justify-center bg-muted/10">
                 <div className="text-center space-y-2">

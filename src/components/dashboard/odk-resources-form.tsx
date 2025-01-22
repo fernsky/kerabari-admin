@@ -85,7 +85,7 @@ export const ODKResourcesForm = ({ formId }: { formId: string }) => {
           //@ts-ignore
           path: ap.path,
           //@ts-ignore
-          type: ap.type ?? "building_image",
+          type: ap.type ?? "business_image",
         })),
       };
       setInitialData({ ...initialData });
@@ -223,7 +223,7 @@ export const ODKResourcesForm = ({ formId }: { formId: string }) => {
                 <div className="grid gap-2">
                   <Button
                     type="button"
-                    onClick={() => append({ path: "", type: "building_image" })}
+                    onClick={() => append({ path: "", type: "business_image" })}
                     variant="secondary"
                     className="mt-2"
                   >

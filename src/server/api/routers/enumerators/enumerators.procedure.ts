@@ -1,14 +1,14 @@
 import { TRPCError } from "@trpc/server";
 import { Scrypt } from "lucia";
 import { generateId } from "lucia";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, is, sql } from "drizzle-orm";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import {
   createEnumeratorSchema,
   resetEnumeratorPasswordSchema,
   updateEnumeratorSchema,
 } from "./enumerators.schema";
-import { Area, areas, users } from "@/server/db/schema/basic";
+import { Area, areaRequests, areas, users } from "@/server/db/schema/basic";
 import * as z from "zod";
 
 export const enumeratorRouter = createTRPCRouter({
@@ -112,18 +112,84 @@ export const enumeratorRouter = createTRPCRouter({
         });
       }
 
-      const enumerator = await ctx.db.query.users.findFirst({
-        where: (users, { eq }) => eq(users.id, input),
-      });
+      const enumerator = await ctx.db
+        .select({
+          id: users.id,
+          name: users.name,
+          userName: users.userName,
+          role: users.role,
+          phoneNumber: users.phoneNumber,
+          email: users.email,
+          isActive: users.isActive,
+          wardNumber: users.wardNumber,
+          area: {
+            id: areas.id,
+            code: areas.code,
+            wardNumber: areas.wardNumber,
+            areaStatus: areas.areaStatus,
+          },
+        })
+        .from(users)
+        .leftJoin(areas, eq(areas.assignedTo, users.id))
+        .where(eq(users.id, input));
 
-      if (!enumerator) {
+      if (!enumerator || enumerator.length === 0) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Enumerator not found",
         });
       }
+      return enumerator[0];
+    }),
 
-      return enumerator;
+  getRequestedAreas: protectedProcedure.query(async ({ ctx }) => {
+    const requestedAreas = await ctx.db.execute(
+      sql`SELECT 
+        ${areaRequests.userId} as "userid",
+        ${areaRequests.areaId} as "areaId",
+        ${areas.code} as "code",
+        ${areas.wardNumber} as "wardNumber",
+        ${areas.areaStatus} as "areaStatus",
+        ST_AsGeoJSON(${areas.geometry}) as "geometry",
+        ST_AsGeoJSON(ST_Centroid(${areas.geometry})) as "centroid"
+      FROM ${areaRequests}
+      LEFT JOIN ${areas} ON ${areas.id} = ${areaRequests.areaId}
+      WHERE ${areaRequests.userId} = ${ctx.user.id}
+      `,
+    );
+
+    return requestedAreas.map((area) => ({
+      ...area,
+      geometry: area.geometry ? JSON.parse(area.geometry as string) : null,
+      centroid: area.centroid ? JSON.parse(area.centroid as string) : null,
+    }));
+  }),
+
+  withdrawArea: protectedProcedure
+    .input(
+      z.object({
+        areaId: z.string(),
+        userId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await ctx.db
+          .delete(areaRequests)
+          .where(
+            and(
+              eq(areaRequests.areaId, input.areaId),
+              eq(areaRequests.userId, input.userId),
+            ),
+          );
+
+        return {
+          success: true,
+          message: "Area request withdrawn successfully",
+        };
+      } catch (error) {
+        throw new Error("Failed to withdraw area request");
+      }
     }),
 
   getAssignedArea: protectedProcedure.query(async ({ ctx }) => {

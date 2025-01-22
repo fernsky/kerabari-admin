@@ -3,7 +3,7 @@ import { DATABASE_PREFIX } from "@/lib/constants";
 import { env } from "@/env";
 
 export default defineConfig({
-  schema: "./src/server/db/schema/*.ts",
+  schema: "./src/server/db/schema/**/*.ts",
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {

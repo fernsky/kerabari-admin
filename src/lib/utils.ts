@@ -88,16 +88,22 @@ interface TableData {
  * //          ON CONFLICT (id) DO UPDATE SET id = EXCLUDED.id, ...
  * ```
  */
-export const jsonToPostgres = (table: string, data: TableData): string => {
+export const jsonToPostgres = (
+  table: string,
+  data: TableData,
+  conflictClause: string = "ON CONFLICT(id)",
+): string => {
   const keys = Object.keys(data);
 
   const values = Object.values(data).map((val) => {
-    if (val === null) return "NULL";
+    if (val === null || val === undefined) return "NULL";
 
     if (Array.isArray(val)) {
-      const escapedValues = val.map((item) =>
-        typeof item === "string" ? `'${item.replace(/'/g, "''")}'` : item,
-      );
+      const escapedValues = val
+        .filter((item) => item !== undefined && item !== null)
+        .map((item) =>
+          typeof item === "string" ? `'${item.replace(/'/g, "''")}'` : item,
+        );
       return `ARRAY[${escapedValues.join(",")}]`;
     }
 
@@ -105,9 +111,11 @@ export const jsonToPostgres = (table: string, data: TableData): string => {
       if (val.startsWith("POINT")) {
         return `ST_GeomFromText('${val}', 4326)`;
       }
+      /*
       if (val.startsWith("uuid:")) {
         return `'${val.substring(5)}'::UUID`;
       }
+        */
       return `'${val.replace(/'/g, "''")}'`;
     }
 
@@ -121,7 +129,7 @@ export const jsonToPostgres = (table: string, data: TableData): string => {
   return `
         INSERT INTO ${table} (${keys.join(",")}) 
         VALUES (${values.join(",")})
-        ON CONFLICT (id)
+        ${conflictClause}
         DO UPDATE SET ${conflictUpdateClause}
     `;
 };

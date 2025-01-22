@@ -48,7 +48,7 @@ export default function BuildingDetails({
 
   return (
     <ContentLayout
-      title="Building Details"
+      title="Businesses Details"
       actions={
         <div className="flex gap-2">
           <Link href={`/buildings/edit/${params.id}`}>
@@ -69,6 +69,7 @@ export default function BuildingDetails({
           <BuildingStatsGrid
             totalFamilies={building?.totalFamilies ?? 0}
             totalBusinesses={building?.totalBusinesses ?? 0}
+            //@ts-ignore
             wardNumber={building?.wardNumber ?? 0}
           />
 

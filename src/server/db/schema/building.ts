@@ -7,10 +7,10 @@ import {
   doublePrecision,
   pgEnum,
   text,
-  uuid,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { geometry } from "../geographical";
-import { areas, users } from "./basic";
+import { areas, users, wards } from "./basic";
 
 /*
 We need to create two tables.
@@ -23,7 +23,7 @@ There must be an option to Restore Survey Data while modifying in the actual bui
 */
 
 export const stagingBuildings = pgTable("staging_buddhashanti_buildings", {
-  id: uuid("id").primaryKey(), // Unique identifier for the record
+  id: varchar("id", { length: 48 }).primaryKey(), // Unique identifier for the record
   surveyDate: timestamp("survey_date"),
   enumeratorName: varchar("enumerator_name", { length: 255 }),
   enumeratorId: varchar("enumerator_id", { length: 255 }),
@@ -85,19 +85,12 @@ export const buildingStatusEnum = pgEnum("building_status_enum", [
 ]);
 
 export const buildings = pgTable("buddhashanti_buildings", {
-  id: uuid("id").primaryKey(), // Unique identifier for the record
+  id: varchar("id", { length: 48 }).primaryKey(), // Unique identifier for the record
   surveyDate: timestamp("survey_date"),
   enumeratorName: varchar("enumerator_name", { length: 255 }),
-  enumeratorId: varchar("enumerator_id", { length: 255 }),
-  userId: varchar("user_id", { length: 255 }).references(() => users.id),
 
   // Location & general information
-  areaCode: varchar("area_code", { length: 255 }),
-  wardNumber: integer("ward_number"),
   locality: varchar("locality", { length: 255 }),
-  buildingToken: varchar("building_token", { length: 255 }).references(
-    () => buildingTokens.token,
-  ),
 
   // Family and business details
   totalFamilies: integer("total_families"),
@@ -134,15 +127,36 @@ export const buildings = pgTable("buddhashanti_buildings", {
   }),
   roadStatus: varchar("road_status", { length: 255 }), // e.g., Graveled, Paved
   status: buildingStatusEnum("status").default("pending"),
+
+  // Temoprary fields to store the data that is not yet approved
+  tmpAreaCode: varchar("tmp_area_code", { length: 255 }),
+  tmpWardNumber: integer("tmp_ward_number"),
+  tmpEnumeratorId: varchar("tmp_enumerator_id", { length: 255 }),
+  tmpBuildingToken: varchar("tmp_building_token", { length: 255 }),
+
+  // Foreign keys that satisfy the building constraints
   areaId: varchar("area_id", { length: 255 }).references(() => areas.id),
+  enumeratorId: varchar("user_id", { length: 21 }).references(() => users.id),
+  wardId: integer("ward_id").references(() => wards.wardNumber),
+  buildingToken: varchar("building_token", { length: 255 }).references(
+    () => buildingTokens.token,
+  ),
+
+  // Flags to identify the correctness of given input data
+  isAreaValid: boolean("is_area_invalid").default(false),
+  isWardValid: boolean("is_ward_invalid").default(false),
+  isBuildingTokenValid: boolean("is_building_token_invalid").default(false),
+  isEnumeratorValid: boolean("is_enumerator_invalid").default(false),
 });
 
 // Table for building edit requests
 export const buildingEditRequests = pgTable(
   "buddhashanti_building_edit_requests",
   {
-    id: uuid("id").primaryKey(),
-    buildingId: uuid("building_id").references(() => buildings.id),
+    id: varchar("id", { length: 48 }).primaryKey(),
+    buildingId: varchar("building_id", { length: 48 }).references(
+      () => buildings.id,
+    ),
     message: text("message").notNull(), // Description of what needs to be edited
     requestedAt: timestamp("requested_at").defaultNow(),
   },
@@ -159,8 +173,8 @@ export const buildingTokenStatusEnum = pgEnum("building_token_status_enum", [
 ]);
 
 export const buildingTokens = pgTable("buddhashanti_building_tokens", {
-  token: varchar("token", { length: 255 }).primaryKey(),
-  areaId: varchar("area_id", { length: 255 }).references(() => areas.id),
+  token: varchar("token", { length: 48 }).primaryKey(),
+  areaId: varchar("area_id", { length: 48 }).references(() => areas.id),
   status: buildingTokenStatusEnum("status").default("unallocated"),
   createdAt: timestamp("created_at").defaultNow(),
 });

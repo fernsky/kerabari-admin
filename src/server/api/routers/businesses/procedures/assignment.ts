@@ -33,7 +33,7 @@ export const assignToEnumerator = protectedProcedure
     await ctx.db
       .update(buildings)
       .set({
-        userId: input.enumeratorId,
+        enumeratorId: input.enumeratorId,
         enumeratorName: enumerator.name,
       })
       .where(eq(buildings.id, input.buildingId));

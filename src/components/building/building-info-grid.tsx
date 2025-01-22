@@ -44,10 +44,14 @@ export function BuildingInfoGrid({ building }: BuildingInfoGridProps) {
         <DetailRow
           icon={MapPin}
           label="Ward Number"
-          value={building?.wardNumber}
+          value={building?.tmpWardNumber}
         />
         <DetailRow icon={Globe} label="Locality" value={building?.locality} />
-        <DetailRow icon={Binary} label="Area Code" value={building?.areaCode} />
+        <DetailRow
+          icon={Binary}
+          label="Area Code"
+          value={building?.tmpAreaCode}
+        />
       </Card>
 
       <Card title="Building Details" icon={Building2}>

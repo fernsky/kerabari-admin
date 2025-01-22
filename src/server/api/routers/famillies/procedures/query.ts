@@ -16,7 +16,7 @@ export const getAll = publicProcedure
     if (filters) {
       const filterConditions = [];
       if (filters.wardNumber) {
-        filterConditions.push(eq(buildings.wardNumber, filters.wardNumber));
+        filterConditions.push(eq(buildings.tmpWardNumber, filters.wardNumber));
       }
       if (filters.locality) {
         filterConditions.push(
@@ -28,7 +28,9 @@ export const getAll = publicProcedure
       }
       // Add enumerator filter
       if (filters.enumeratorId) {
-        filterConditions.push(eq(buildings.userId, filters.enumeratorId));
+        filterConditions.push(
+          eq(buildings.tmpEnumeratorId, filters.enumeratorId),
+        );
       }
       // Add status filter
       if (filters.status) {
