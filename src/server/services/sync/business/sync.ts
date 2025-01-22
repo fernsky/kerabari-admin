@@ -22,7 +22,7 @@ import {
   stagingBusinessAnimalProducts,
 } from "@/server/db/schema/business/business-animal-products";
 
-export async function syncBuildingSurvey(
+export async function syncBusinessSurvey(
   recordId: string,
   data: any,
   ctx: any,
@@ -30,7 +30,10 @@ export async function syncBuildingSurvey(
   try {
     await performBusinessSync(ctx, recordId);
 
-    const { wardNumber, areaCode, buildingToken, enumeratorId } = data;
+    const wardNumber = data.b_addr.ward_no;
+    const areaCode = data.b_addr.area_code;
+    const buildingToken = data.enumerator_introduction.building_token_number;
+    const enumeratorId = data.enumerator_introduction.enumerator_id;
 
     // Find enumerator with error handling
     let enumerator;
@@ -38,7 +41,7 @@ export async function syncBuildingSurvey(
       enumerator = await handleEnumerator(ctx, enumeratorId, recordId);
     } catch (error) {
       console.error(`[Enumerator Handling Error] Record ${recordId}:`, error);
-      throw new Error(`Failed to handle enumerator: ${error}`);
+      // throw new Error(`Failed to handle enumerator: ${error}`);
     }
 
     // Handle Ward Number with error handling
@@ -46,7 +49,7 @@ export async function syncBuildingSurvey(
       await handleWardNumber(ctx, wardNumber, recordId);
     } catch (error) {
       console.error(`[Ward Handling Error] Record ${recordId}:`, error);
-      throw new Error(`Failed to handle ward: ${error}`);
+      // throw new Error(`Failed to handle ward: ${error}`);
     }
 
     // Handle Area Code with error handling
@@ -54,7 +57,7 @@ export async function syncBuildingSurvey(
       await handlAreaCode(ctx, areaCode, recordId);
     } catch (error) {
       console.error(`[Area Code Handling Error] Record ${recordId}:`, error);
-      throw new Error(`Failed to handle area code: ${error}`);
+      // throw new Error(`Failed to handle area code: ${error}`);
     }
 
     // Handle building token allocation with error handling
@@ -62,7 +65,7 @@ export async function syncBuildingSurvey(
       await handleBuildingToken(ctx, buildingToken, recordId);
     } catch (error) {
       console.error(`[Building Token Error] Record ${recordId}:`, error);
-      throw new Error(`Failed to handle building token: ${error}`);
+      // throw new Error(`Failed to handle building token: ${error}`);
     }
 
     // Update area status with error handling
@@ -70,11 +73,11 @@ export async function syncBuildingSurvey(
       await updateAreaStatus(ctx, enumerator?.[0]?.id, areaCode);
     } catch (error) {
       console.error(`[Area Status Update Error] Record ${recordId}:`, error);
-      throw new Error(`Failed to update area status: ${error}`);
+      // throw new Error(`Failed to update area status: ${error}`);
     }
   } catch (error) {
     console.error(`[Sync Building Survey Error] Record ${recordId}:`, error);
-    throw new Error(`Building survey sync failed: ${error}`);
+    // throw new Error(`Building survey sync failed: ${error}`);
   }
 }
 
