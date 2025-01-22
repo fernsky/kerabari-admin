@@ -327,17 +327,17 @@ interface AgriculturalDetails {
     spice_details_count: string;
     ccrops: string;
     ccrop_details_count: string;
-    fcrop_details: FCropDetail[];
-    pulse_details: PPulseDetail[];
-    oseed_details: OSeedDetail[];
-    vtable_details: VTableDetail[];
-    fruit_details: FruitDetail[];
-    spice_details: SpiceDetail[];
-    ccrop_details: CCropDetail[];
+    fcrop_details: FCropDetail[] | null | undefined;
+    pulse_details: PPulseDetail[] | null | undefined;
+    oseed_details: OSeedDetail[] | null | undefined;
+    vtable_detail?: VTableDetail[];
+    fruit_details?: FruitDetail[];
+    spice_details?: SpiceDetail[];
+    ccrop_details?: CCropDetail[];
   };
-  b_animals: BAnimalDetail[];
+  b_animals?: BAnimalDetail[];
   banimal_details_count: string;
-  b_aprods: BAprodDetail[];
+  b_aprods?: BAprodDetail[];
   baprod_details_count: string;
   aquaculture_details: {
     aquaculture_ward_no: string | null;

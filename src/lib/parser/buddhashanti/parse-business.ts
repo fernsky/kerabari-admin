@@ -158,8 +158,8 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
 
   const foodCrops = [];
 
-  if (r.bag.bagd.fcrop_details.length > 0) {
-    for (const fcrop of r.bag.bagd.fcrop_details) {
+  if ((r.bag?.bagd?.fcrop_details?.length ?? 0) > 0) {
+    for (const fcrop of r.bag?.bagd?.fcrop_details ?? []) {
       foodCrops.push({
         crop_type: "अन्नबाली",
         crop_name: fcrop.fcrop,
@@ -174,8 +174,8 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
   }
 
   const pulses = [];
-  if (r.bag.bagd.pulse_details.length > 0) {
-    for (const pulse of r.bag.bagd.pulse_details) {
+  if ((r.bag?.bagd?.pulse_details?.length ?? 0) > 0) {
+    for (const pulse of r.bag?.bagd?.pulse_details ?? []) {
       pulses.push({
         crop_type: "दलहन",
         crop_name: pulse.pulse,
@@ -190,8 +190,8 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
   }
 
   const oilSeeds = [];
-  if (r.bag.bagd.oseed_details.length > 0) {
-    for (const oseed of r.bag.bagd.oseed_details) {
+  if ((r.bag?.bagd?.oseed_details?.length ?? 0) > 0) {
+    for (const oseed of r.bag?.bagd?.oseed_details ?? []) {
       oilSeeds.push({
         crop_type: "तेलहन",
         crop_name: oseed.oseed,
@@ -206,8 +206,8 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
   }
 
   const vegetables = [];
-  if (r.bag.bagd.vtable_details.length > 0) {
-    for (const veg of r.bag.bagd.vtable_details) {
+  if ((r.bag?.bagd?.vtable_detail?.length ?? 0) > 0) {
+    for (const veg of r.bag?.bagd?.vtable_detail ?? []) {
       vegetables.push({
         crop_type: "तरकारी",
         crop_name: veg.vtable,
@@ -222,8 +222,8 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
   }
 
   const fruits = [];
-  if (r.bag.bagd.fruit_details.length > 0) {
-    for (const fruit of r.bag.bagd.fruit_details) {
+  if (r.bag?.bagd?.fruit_details?.length ?? 0 > 0) {
+    for (const fruit of r.bag.bagd.fruit_details ?? []) {
       fruits.push({
         crop_type: "फलफूल",
         crop_name: fruit.fruit,
@@ -239,8 +239,9 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
   }
 
   const spices = [];
-  if (r.bag.bagd.spice_details.length > 0) {
-    for (const spice of r.bag.bagd.spice_details) {
+  const spiceDetails = r?.bag?.bagd?.spice_details ?? [];
+  if (spiceDetails.length > 0) {
+    for (const spice of spiceDetails) {
       spices.push({
         crop_type: "मसला",
         crop_name: spice.spice,
@@ -255,8 +256,9 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
   }
 
   const cashCrops = [];
-  if (r.bag.bagd.ccrop_details.length > 0) {
-    for (const ccrop of r.bag.bagd.ccrop_details) {
+  const ccropDetails = r.bag?.bagd?.ccrop_details ?? [];
+  if (ccropDetails.length > 0) {
+    for (const ccrop of ccropDetails) {
       cashCrops.push({
         crop_type: "नगदेबाली",
         crop_name: ccrop.ccrop,
@@ -273,7 +275,7 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
 
   const animals = [];
 
-  if (r.bag.b_animals.length > 0) {
+  if (Array.isArray(r.bag?.b_animals) && r.bag.b_animals.length > 0) {
     for (const animal of r.bag.b_animals) {
       if (animal.banim?.b_animal_oth) {
         // Handle other animal types
@@ -297,7 +299,7 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
     }
   }
   const animalProducts = [];
-  if (r.bag.b_aprods.length > 0) {
+  if (Array.isArray(r.bag?.b_aprods) && r.bag.b_aprods.length > 0) {
     for (const product of r.bag.b_aprods) {
       if (product.baprd?.baprod_oth) {
         // Handle other animal product types
