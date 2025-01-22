@@ -9,6 +9,8 @@ import {
   decimal,
 } from "drizzle-orm/pg-core";
 import { geometry } from "../../geographical";
+import { areas, users, wards } from "../basic";
+import { buildingTokens } from "../building";
 
 export const stagingBusiness = pgTable("staging_buddhashanti_business", {
   id: varchar("id", { length: 48 }).primaryKey(),
@@ -135,9 +137,7 @@ export const business = pgTable("buddhashanti_business", {
   id: varchar("id", { length: 48 }).primaryKey(),
   // Enumerator Information
   enumeratorName: varchar("enumerator_name", { length: 255 }),
-  enumeratorId: varchar("enumerator_id", { length: 48 }),
   phone: varchar("phone", { length: 20 }),
-  buildingToken: varchar("building_token", { length: 48 }),
 
   // Business Basic Information
   businessName: varchar("business_name", { length: 255 }),
@@ -235,6 +235,26 @@ export const business = pgTable("buddhashanti_business", {
   hiveCount: integer("hive_count"),
   honeyProduction: decimal("honey_production", { precision: 10, scale: 2 }),
   hasApiculture: boolean("has_apiculture"),
+
+  // Temoprary fields to store the data that is not yet approved
+  tmpAreaCode: varchar("tmp_area_code", { length: 255 }),
+  tmpWardNumber: integer("tmp_ward_number"),
+  tmpEnumeratorId: varchar("tmp_enumerator_id", { length: 255 }),
+  tmpBuildingToken: varchar("tmp_building_token", { length: 255 }),
+
+  // Foreign keys that satisfy the building constraints
+  areaId: varchar("area_id", { length: 255 }).references(() => areas.id),
+  enumeratorId: varchar("user_id", { length: 21 }).references(() => users.id),
+  wardId: integer("ward_id").references(() => wards.wardNumber),
+  buildingToken: varchar("building_token", { length: 255 }).references(
+    () => buildingTokens.token,
+  ),
+
+  // Flags to identify the correctness of given input data
+  isAreaValid: boolean("is_area_invalid").default(false),
+  isWardValid: boolean("is_ward_invalid").default(false),
+  isBuildingTokenValid: boolean("is_building_token_invalid").default(false),
+  isEnumeratorValid: boolean("is_enumerator_invalid").default(false),
 });
 
 // Table for building edit requests
