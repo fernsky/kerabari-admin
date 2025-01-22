@@ -14,6 +14,8 @@ import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Phone, Mail, MapPin, User2, UserCheck } from "lucide-react";
+import { AreaStatusActions } from "@/components/area/area-status-actions";
+import { SuperadminAreaStatusActions } from "@/components/area/superadmin-area-status-actions";
 
 export default function EnumeratorDetailsPage({
   params,
@@ -164,7 +166,10 @@ export default function EnumeratorDetailsPage({
             </div>
           </div>
         </FormCard>
-
+        <SuperadminAreaStatusActions
+          area={enumerator.area}
+          enumeratorId={params.id}
+        />
         {/* Add more sections as needed */}
       </div>
     </ContentLayout>

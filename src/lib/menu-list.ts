@@ -94,14 +94,7 @@ const menuConfig: Menu[] = [
     roles: ["admin", "superadmin"],
     submenus: [],
   },
-  {
-    href: "/area/requested-areas",
-    label: "Requested Areas",
-    icon: GitPullRequest,
-    roles: ["admin", "superadmin"],
-    submenus: [],
-  },
-  {
+ {
     href: "/area/handle-actions",
     label: "Handle Actions",
     icon: FormInput,

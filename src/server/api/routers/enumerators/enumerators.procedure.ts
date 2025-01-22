@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { Scrypt } from "lucia";
 import { generateId } from "lucia";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, is, sql } from "drizzle-orm";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import {
   createEnumeratorSchema,
@@ -112,18 +112,35 @@ export const enumeratorRouter = createTRPCRouter({
         });
       }
 
-      const enumerator = await ctx.db.query.users.findFirst({
-        where: (users, { eq }) => eq(users.id, input),
-      });
+      const enumerator = await ctx.db
+        .select({
+          id: users.id,
+          name: users.name,
+          userName: users.userName,
+          role: users.role,
+          phoneNumber:users.phoneNumber,
+          email: users.email,
+          isActive: users.isActive,
+          wardNumber: users.wardNumber,
+          area: {
+        id: areas.id,
+        code: areas.code,
+        wardNumber: areas.wardNumber,
+        areaStatus: areas.areaStatus,
+          }
+        })
+        .from(users)
+        .leftJoin(areas, eq(areas.assignedTo, users.id))
+        .where(eq(users.id, input));
 
-      if (!enumerator) {
+      if (!enumerator || enumerator.length === 0) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Enumerator not found",
         });
       }
 
-      return enumerator;
+      return enumerator[0];
     }),
 
      getRequestedAreas: protectedProcedure.query(async ({ ctx }) => {

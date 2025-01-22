@@ -1,6 +1,6 @@
 import { fetchSubmissionsSchema, surveyFormSchema } from "./superadmin.schema";
 import { eq, and } from "drizzle-orm";
-import { surveyForms } from "@/server/db/schema";
+import { areas, surveyForms } from "@/server/db/schema";
 import { createTRPCRouter, superAdminProcedure } from "../../trpc";
 import axios from "axios";
 import dotenv from "dotenv";
@@ -8,6 +8,7 @@ import { FormAttachment } from "@/types";
 import * as z from "zod";
 import { fetchSurveySubmissions } from "@/server/utils";
 import { updateSyncInterval } from "@/server/jobs";
+import { TRPCError } from "@trpc/server";
 
 dotenv.config();
 
@@ -169,5 +170,101 @@ export const superadminRouter = createTRPCRouter({
         },
         ctx,
       );
+    }),
+
+  /**
+   * Request completion on behalf of an enumerator.
+   *
+   * @param {Object} input - The input data containing enumeratorId.
+   * @returns {Promise<Object>} A promise that resolves to the success status.
+   */
+  requestCompletion: superAdminProcedure
+    .input(z.object({ enumeratorId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const area = await ctx.db.query.areas.findFirst({
+        columns: {
+          id: true,
+          areaStatus: true,
+        },
+        where: (areas, { eq }) => eq(areas.assignedTo, input.enumeratorId),
+      });
+
+      if (!area) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No assigned area found",
+        });
+      }
+
+      await ctx.db
+        .update(areas)
+        .set({ areaStatus: "asked_for_completion" })
+        .where(eq(areas.id, area.id));
+
+      return { success: true };
+    }),
+
+  /**
+   * Request revision completion on behalf of an enumerator.
+   *
+   * @param {Object} input - The input data containing enumeratorId.
+   * @returns {Promise<Object>} A promise that resolves to the success status.
+   */
+  requestRevisionCompletion: superAdminProcedure
+    .input(z.object({ enumeratorId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const area = await ctx.db.query.areas.findFirst({
+        columns: {
+          id: true,
+          areaStatus: true,
+        },
+        where: (areas, { eq }) => eq(areas.assignedTo, input.enumeratorId),
+      });
+
+      if (!area || area.areaStatus !== "revision") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Area must be in revision status",
+        });
+      }
+
+      await ctx.db
+        .update(areas)
+        .set({ areaStatus: "asked_for_revision_completion" })
+        .where(eq(areas.id, area.id));
+
+      return { success: true };
+    }),
+
+  /**
+   * Request withdrawal on behalf of an enumerator.
+   *
+   * @param {Object} input - The input data containing enumeratorId.
+   * @returns {Promise<Object>} A promise that resolves to the success status.
+   */
+  requestWithdrawal: superAdminProcedure
+    .input(z.object({ enumeratorId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const area = await ctx.db.query.areas.findFirst({
+        columns: {
+          id: true,
+          areaStatus: true,
+        },
+        where: (areas, { eq }) => eq(areas.assignedTo, input.enumeratorId),
+      });
+
+      if (!area) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "No assigned area found",
+        });
+      }
+
+      await ctx.db
+        .update(areas)
+        .set({ areaStatus: "asked_for_withdrawl" })
+        .where(eq(areas.id, area.id));
+
+      return { success: true };
     }),
 });
