@@ -294,16 +294,133 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
       }
     : {};
 
-  // if (r.bag.b > 0) {
-  // }
-
-  const payload = {
-    ...r,
+  const mainPayload = {
+    ...mainBusinessTable,
+    ...aquacultureDetails,
+    ...apicultureDetails,
     ...gpsData,
   };
-  const statement = jsonToPostgres("staging_buddhashanti_buildings", payload);
 
-  if (statement) {
-    await ctx.db.execute(sql.raw(statement));
+  const mainStatement = jsonToPostgres(
+    "staging_buddhashanti_business",
+    mainPayload,
+  );
+  if (mainStatement) {
+    await ctx.db.execute(sql.raw(mainStatement));
+  }
+
+  // Insert food crops into staging
+  if (foodCrops.length > 0) {
+    for (const crop of foodCrops) {
+      const statement = jsonToPostgres("staging_buddhashanti_business_crops", {
+        business_id: r.__id,
+        ward_no: r.b_addr.ward_no,
+        ...crop,
+      });
+      if (statement) {
+        await ctx.db.execute(sql.raw(statement));
+      }
+    }
+  }
+
+  // Insert pulses into staging
+  if (pulses.length > 0) {
+    for (const crop of pulses) {
+      const statement = jsonToPostgres("staging_buddhashanti_business_crops", {
+        business_id: r.__id,
+        ward_no: r.b_addr.ward_no,
+        ...crop,
+      });
+      if (statement) {
+        await ctx.db.execute(sql.raw(statement));
+      }
+    }
+  }
+
+  // Insert oil seeds into staging
+  if (oilSeeds.length > 0) {
+    for (const crop of oilSeeds) {
+      const statement = jsonToPostgres("staging_buddhashanti_business_crops", {
+        business_id: r.__id,
+        ward_no: r.b_addr.ward_no,
+        ...crop,
+      });
+      if (statement) {
+        await ctx.db.execute(sql.raw(statement));
+      }
+    }
+  }
+
+  // Insert vegetables into staging
+  if (vegetables.length > 0) {
+    for (const crop of vegetables) {
+      const statement = jsonToPostgres("staging_buddhashanti_business_crops", {
+        business_id: r.__id,
+        ward_no: r.b_addr.ward_no,
+        ...crop,
+      });
+      if (statement) {
+        await ctx.db.execute(sql.raw(statement));
+      }
+    }
+  }
+
+  // Insert fruits into staging
+  if (fruits.length > 0) {
+    for (const crop of fruits) {
+      const statement = jsonToPostgres("staging_buddhashanti_business_crops", {
+        business_id: r.__id,
+        ward_no: r.b_addr.ward_no,
+        ...crop,
+      });
+      if (statement) {
+        await ctx.db.execute(sql.raw(statement));
+      }
+    }
+  }
+
+  // Insert spices into staging
+  if (spices.length > 0) {
+    for (const crop of spices) {
+      const statement = jsonToPostgres("staging_buddhashanti_business_crops", {
+        business_id: r.__id,
+        ward_no: r.b_addr.ward_no,
+        ...crop,
+      });
+      if (statement) {
+        await ctx.db.execute(sql.raw(statement));
+      }
+    }
+  }
+
+  // Insert cash crops into staging
+  if (cashCrops.length > 0) {
+    for (const crop of cashCrops) {
+      const statement = jsonToPostgres("staging_buddhashanti_business_crops", {
+        business_id: r.__id,
+        ward_no: r.b_addr.ward_no,
+        ...crop,
+      });
+      if (statement) {
+        await ctx.db.execute(sql.raw(statement));
+      }
+    }
+  }
+
+  // Insert animal products into staging
+  if (animalProducts.length > 0) {
+    for (const product of animalProducts) {
+      const statement = jsonToPostgres(
+        "staging_buddhashanti_business_animal_products",
+        {
+          business_id: r.__id,
+          ...product,
+          ward_no: product.ward_no || r.b_addr.ward_no,
+        },
+      );
+      if (statement) {
+        await ctx.db.execute(sql.raw(statement));
+      }
+    }
   }
 }

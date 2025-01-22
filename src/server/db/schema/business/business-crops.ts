@@ -8,16 +8,11 @@ export const stagingBusinessCrops = pgTable(
     businessId: varchar("business_id", { length: 48 }),
     wardNo: integer("ward_no"),
     cropType: varchar("crop_type", { length: 100 }), // e.g., "fcrop", "pulse", "oseed", "vtable", "fruit", "spice", "ccrop"
-    cropName: varchar("crop_name", { length: 255 }),
-
-    // Land measurements
-    area: decimal("area", { precision: 10, scale: 2 }),
-    treesCount: integer("trees_count"), // For fruits/special crops
-
-    // Production and sales
-    production: decimal("production", { precision: 10, scale: 2 }),
-    sales: decimal("sales", { precision: 10, scale: 2 }),
-    revenue: decimal("revenue", { precision: 10, scale: 2 }),
+    cropArea: decimal("crop_area", { precision: 10, scale: 2 }),
+    cropProduction: decimal("crop_production", { precision: 10, scale: 2 }),
+    cropSales: decimal("crop_sales", { precision: 10, scale: 2 }),
+    cropRevenue: decimal("crop_revenue", { precision: 10, scale: 2 }),
+    cropCount: integer("crop_count"), // For trees count in fruits/cash crops
   },
 );
 
@@ -28,16 +23,11 @@ export const businessCrops = pgTable("buddhashanti_business_crops", {
   ),
   wardNo: integer("ward_no"),
   cropType: varchar("crop_type", { length: 100 }), // e.g., "fcrop", "pulse", "oseed", "vtable", "fruit", "spice", "ccrop"
-  cropName: varchar("crop_name", { length: 255 }),
-
-  // Land measurements
-  area: decimal("area", { precision: 10, scale: 2 }),
-  treesCount: integer("trees_count"), // For fruits/special crops
-
-  // Production and sales
-  production: decimal("production", { precision: 10, scale: 2 }),
-  sales: decimal("sales", { precision: 10, scale: 2 }),
-  revenue: decimal("revenue", { precision: 10, scale: 2 }),
+  cropArea: decimal("crop_area", { precision: 10, scale: 2 }),
+  cropProduction: decimal("crop_production", { precision: 10, scale: 2 }),
+  cropSales: decimal("crop_sales", { precision: 10, scale: 2 }),
+  cropRevenue: decimal("crop_revenue", { precision: 10, scale: 2 }),
+  cropCount: integer("crop_count"), // For trees count in fruits/cash crops
 });
 
 export type BusinessCrop = typeof businessCrops.$inferSelect;

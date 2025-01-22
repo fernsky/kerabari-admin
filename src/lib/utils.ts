@@ -105,9 +105,11 @@ export const jsonToPostgres = (table: string, data: TableData): string => {
       if (val.startsWith("POINT")) {
         return `ST_GeomFromText('${val}', 4326)`;
       }
+      /*
       if (val.startsWith("uuid:")) {
         return `'${val.substring(5)}'::UUID`;
       }
+        */
       return `'${val.replace(/'/g, "''")}'`;
     }
 

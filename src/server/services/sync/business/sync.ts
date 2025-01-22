@@ -14,7 +14,8 @@ export async function syncBuildingSurvey(
   data: any,
   ctx: any,
 ) {
-  // Perform main building sync
+  /*
+    // Perform main building sync
   await performBuildingSync(ctx, recordId);
   // 4. If it is not, do the following.
   // 4.1 Check if there is a valid ward number correpsponding to the submitted building data.
@@ -46,6 +47,7 @@ export async function syncBuildingSurvey(
 
   // Update area status if needed
   await updateAreaStatus(ctx, enumerator?.[0]?.id, areaCode);
+  */
 }
 
 async function handleEnumerator(
@@ -199,7 +201,7 @@ async function handleBuildingToken(
  * @param ctx Database context
  * @param recordId Unique identifier for the building record
  */
-async function performBuildingSync(ctx: any, recordId: string) {
+async function performBusinessSync(ctx: any, recordId: string) {
   try {
     console.log(recordId);
     // Fetch record from staging table
