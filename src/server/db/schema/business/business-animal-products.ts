@@ -28,7 +28,7 @@ export const stagingBusinessAnimalProducts = pgTable(
   }),
 );
 
-export const businessAnimals = pgTable(
+export const businessAnimalProducts = pgTable(
   "buddhashanti_business_animal_products",
   {
     businessId: varchar("business_id", { length: 48 }).references(
@@ -53,4 +53,4 @@ export const businessAnimals = pgTable(
 
 export type StagingBusinessAnimalProduct =
   typeof stagingBusinessAnimalProducts.$inferSelect;
-export type BusinessAnimal = typeof businessAnimals.$inferSelect;
+export type BusinessAnimalProduct = typeof businessAnimalProducts.$inferSelect;

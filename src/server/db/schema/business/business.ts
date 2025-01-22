@@ -123,7 +123,7 @@ export const stagingBusiness = pgTable("staging_buddhashanti_business", {
   apicultureWardNo: integer("apiculture_ward_no"),
   hiveCount: integer("hive_count"),
   honeyProduction: decimal("honey_production", { precision: 10, scale: 2 }),
-  hasApiculture: boolean("has_apiculture"),
+  hasApiculture: varchar("has_apiculture"),
 });
 
 export const businessStatusEnum = pgEnum("business_status_enum", [
@@ -234,7 +234,7 @@ export const business = pgTable("buddhashanti_business", {
   apicultureWardNo: integer("apiculture_ward_no"),
   hiveCount: integer("hive_count"),
   honeyProduction: decimal("honey_production", { precision: 10, scale: 2 }),
-  hasApiculture: boolean("has_apiculture"),
+  hasApiculture: varchar("has_apiculture"),
 
   // Temoprary fields to store the data that is not yet approved
   tmpAreaCode: varchar("tmp_area_code", { length: 255 }),
@@ -255,6 +255,8 @@ export const business = pgTable("buddhashanti_business", {
   isWardValid: boolean("is_ward_invalid").default(false),
   isBuildingTokenValid: boolean("is_building_token_invalid").default(false),
   isEnumeratorValid: boolean("is_enumerator_invalid").default(false),
+
+  status: businessStatusEnum("status").default("pending"),
 });
 
 // Table for building edit requests
