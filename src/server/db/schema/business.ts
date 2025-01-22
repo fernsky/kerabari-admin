@@ -93,6 +93,22 @@ export const stagingBusiness = pgTable("staging_buddhashanti_business", {
   foreignFemaleTemporaryEmployees: integer(
     "foreign_female_temporary_employees",
   ),
+
+  // Aquaculture Information
+  aquacultureWardNo: integer("aquaculture_ward_no"),
+  pondCount: integer("pond_count"),
+  pondArea: decimal("pond_area", { precision: 10, scale: 2 }),
+  fishProduction: decimal("fish_production", { precision: 10, scale: 2 }),
+  fingerlingNumber: integer("fingerling_number"),
+  totalInvestment: decimal("total_investment", { precision: 10, scale: 2 }),
+  annualIncome: decimal("annual_income", { precision: 10, scale: 2 }),
+  employmentCount: integer("employment_count"),
+
+  // Apiculture Information
+  apicultureWardNo: integer("apiculture_ward_no"),
+  hiveCount: integer("hive_count"),
+  honeyProduction: decimal("honey_production", { precision: 10, scale: 2 }),
+  hasApiculture: boolean("has_apiculture"),
 });
 
 export const businessStatusEnum = pgEnum("business_status_enum", [
@@ -186,6 +202,22 @@ export const business = pgTable("buddhashanti_business", {
   foreignFemaleTemporaryEmployees: integer(
     "foreign_female_temporary_employees",
   ),
+
+  // Aquaculture Information
+  aquacultureWardNo: integer("aquaculture_ward_no"),
+  pondCount: integer("pond_count"),
+  pondArea: decimal("pond_area", { precision: 10, scale: 2 }),
+  fishProduction: decimal("fish_production", { precision: 10, scale: 2 }),
+  fingerlingNumber: integer("fingerling_number"),
+  totalInvestment: decimal("total_investment", { precision: 10, scale: 2 }),
+  annualIncome: decimal("annual_income", { precision: 10, scale: 2 }),
+  employmentCount: integer("employment_count"),
+
+  // Apiculture Information
+  apicultureWardNo: integer("apiculture_ward_no"),
+  hiveCount: integer("hive_count"),
+  honeyProduction: decimal("honey_production", { precision: 10, scale: 2 }),
+  hasApiculture: boolean("has_apiculture"),
 });
 
 // Table for building edit requests
