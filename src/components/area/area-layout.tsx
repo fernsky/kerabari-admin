@@ -33,14 +33,18 @@ export const AreaLayout = () => {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-2xl font-bold tracking-tight">Areas</h2>
+      <div className="flex items-center justify-between border-b pb-4">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Areas</h2>
+          <p className="text-muted-foreground">Manage and create new areas</p>
+        </div>
         <Button
           onClick={() => router.push("/area/create")}
           className="flex items-center gap-2"
+          size="lg"
         >
-          <Plus className="h-4 w-4" />
-          <span>New Area</span>
+          <Plus className="h-5 w-5" />
+          <span>Create New Area</span>
         </Button>
       </div>
 

@@ -49,6 +49,19 @@ const menuConfig: Menu[] = [
     roles: ["enumerator"],
   },
   {
+    href: "/requested-areas",
+    label: "Requested Areas",
+    icon: LandPlot,
+    roles: ["enumerator"],
+  },
+  {
+    href: "/account",
+    label: "User Account",
+    icon: User2Icon,
+    roles: ["enumerator"],
+  },
+
+  {
     href: "/ward",
     label: "Wards",
     icon: AreaChart,
@@ -78,18 +91,12 @@ const menuConfig: Menu[] = [
     href: "/families",
     label: "Families",
     icon: User2Icon,
+    roles: ["admin", "superadmin"],
   },
   {
     href: "/enumerators",
     label: "Enumerators",
     icon: UsersRound,
-    roles: ["admin", "superadmin"],
-    submenus: [],
-  },
-  {
-    href: "/area/requested-areas",
-    label: "Requested Areas",
-    icon: GitPullRequest,
     roles: ["admin", "superadmin"],
     submenus: [],
   },

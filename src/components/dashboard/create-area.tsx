@@ -1,5 +1,4 @@
 "use client";
-
 import dynamic from "next/dynamic";
 import { Card } from "@/components/ui/card";
 import { MapStateProvider, useMapContext } from "@/lib/map-state";
