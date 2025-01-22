@@ -399,7 +399,6 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
         ...mainBusinessTable,
         ...aquacultureDetails,
         ...apicultureDetails,
-        ...gpsData,
       };
 
       try {
@@ -437,7 +436,9 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
                   ward_no: r.b_addr.ward_no,
                   ...crop,
                 },
+                "ON CONFLICT(business_id, crop_name)",
               );
+              console.log(statement);
               if (statement) {
                 await ctx.db.execute(sql.raw(statement));
               }
@@ -445,6 +446,29 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
           } catch (error) {
             console.error(`Error inserting ${cropType.name}:`, error);
           }
+        }
+      }
+
+      // Insert animals into staging
+      if (animals.length > 0) {
+        try {
+          for (const animal of animals) {
+            const statement = jsonToPostgres(
+              "staging_buddhashanti_business_animals",
+              {
+                business_id: r.__id,
+                ...animal,
+                ward_no: animal.animal_ward || r.b_addr.ward_no,
+                animal_type: "livestock", // Default type since not specified in input
+              },
+              "ON CONFLICT(business_id, animal_name)",
+            );
+            if (statement) {
+              await ctx.db.execute(sql.raw(statement));
+            }
+          }
+        } catch (error) {
+          console.error("Error inserting animals:", error);
         }
       }
 
@@ -459,6 +483,7 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
                 ...product,
                 ward_no: product.ward_no || r.b_addr.ward_no,
               },
+              "ON CONFLICT(business_id, product_name)",
             );
             if (statement) {
               await ctx.db.execute(sql.raw(statement));

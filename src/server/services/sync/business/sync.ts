@@ -8,6 +8,9 @@ import {
   users,
   wards,
 } from "../../../db/schema";
+import { stagingBusiness } from "@/server/db/schema/business/business";
+import { stagingBusinessCrops } from "@/server/db/schema/business/business-crops";
+import { stagingBusinessAnimalProducts } from "@/server/db/schema/business/business-animal-products";
 
 export async function syncBuildingSurvey(
   recordId: string,
@@ -203,18 +206,32 @@ async function handleBuildingToken(
  */
 async function performBusinessSync(ctx: any, recordId: string) {
   try {
-    console.log(recordId);
     // Fetch record from staging table
     const result = await ctx.db
       .select()
-      .from(stagingBuildings)
-      .where(eq(stagingBuildings.id, recordId))
+      .from(stagingBusiness)
+      .where(eq(stagingBusiness.id, recordId))
       .limit(1);
 
     // Validate that record exists
     if (!result.length) {
       throw new Error(`No staging record found for ID: ${recordId}`);
     }
+
+    const crops = await ctx.db
+      .select()
+      .from(stagingBusinessCrops)
+      .where(eq(stagingBusinessCrops.businessId, recordId));
+
+    const animals = await ctx.db
+      .select()
+      .from(stagingBusinessCrops)
+      .where(eq(stagingBusinessCrops.businessId, recordId));
+
+    const animalProducts = ctx.db
+      .select()
+      .from(stagingBusinessAnimalProducts)
+      .where(eq(stagingBusinessAnimalProducts.businessId, recordId));
 
     const stagingData = result[0];
 

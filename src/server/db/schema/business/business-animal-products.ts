@@ -1,10 +1,15 @@
-import { pgTable, varchar, integer, decimal } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  varchar,
+  integer,
+  decimal,
+  primaryKey,
+} from "drizzle-orm/pg-core";
 import { business } from "./business";
 
 export const stagingBusinessAnimalProducts = pgTable(
   "staging_buddhashanti_business_animal_products",
   {
-    id: varchar("id", { length: 48 }).primaryKey(),
     businessId: varchar("business_id", { length: 48 }),
     wardNo: integer("ward_no"),
     animalProduct: varchar("animal_product", { length: 100 }),
@@ -18,12 +23,14 @@ export const stagingBusinessAnimalProducts = pgTable(
     }),
     revenue: decimal("revenue", { precision: 10, scale: 2 }),
   },
+  (t) => ({
+    pk: primaryKey(t.businessId, t.animalProduct),
+  }),
 );
 
 export const businessAnimals = pgTable(
   "buddhashanti_business_animal_products",
   {
-    id: varchar("id", { length: 48 }).primaryKey(),
     businessId: varchar("business_id", { length: 48 }).references(
       () => business.id,
     ),
@@ -39,6 +46,9 @@ export const businessAnimals = pgTable(
     }),
     revenue: decimal("revenue", { precision: 10, scale: 2 }),
   },
+  (t) => ({
+    pk: primaryKey(t.businessId, t.productName),
+  }),
 );
 
 export type StagingBusinessAnimalProduct =

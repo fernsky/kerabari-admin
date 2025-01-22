@@ -88,7 +88,11 @@ interface TableData {
  * //          ON CONFLICT (id) DO UPDATE SET id = EXCLUDED.id, ...
  * ```
  */
-export const jsonToPostgres = (table: string, data: TableData): string => {
+export const jsonToPostgres = (
+  table: string,
+  data: TableData,
+  conflictClause: string = "ON CONFLICT(id)",
+): string => {
   const keys = Object.keys(data);
 
   const values = Object.values(data).map((val) => {
@@ -125,7 +129,7 @@ export const jsonToPostgres = (table: string, data: TableData): string => {
   return `
         INSERT INTO ${table} (${keys.join(",")}) 
         VALUES (${values.join(",")})
-        ON CONFLICT (id)
+        ${conflictClause}
         DO UPDATE SET ${conflictUpdateClause}
     `;
 };
