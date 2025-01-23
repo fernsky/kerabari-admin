@@ -8,11 +8,11 @@ export async function parseAnimalProducts(r: RawFamily, ctx: any) {
       id: i.__id,
       family_id: r.__id,
       ward_no: r.id.ward_no,
-      product_name: i.aprod,
-      product_name_other: i.apo.aprod_oth,
-      unit: i.apon.aprod_unit,
-      unit_other: i.apon.aprod_unit_oth,
-      production: i.apon.aprod_prod,
+      animal_product_name: i.aprod,
+      animal_product_name_other: i.apo.aprod_oth,
+      animal_product_unit: i.apon.aprod_unit,
+      animal_product_unit_other: i.apon.aprod_unit_oth,
+      animal_product_production: i.apon.aprod_prod,
     };
 
     const animalProductStatement = jsonToPostgres(
