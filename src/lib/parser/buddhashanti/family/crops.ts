@@ -9,9 +9,9 @@ export async function parseCrops(r: RawFamily, ctx: any) {
     ward_no: r.id.ward_no,
     crop_type: cropType,
     crop_name: i[cropType],
-    area: calculateArea(i, cropType),
-    production: i[`${cropType.charAt(0)}p`][`${cropType}_prod`],
-    tree_count: getTreeCount(i, cropType),
+    crop_area: calculateArea(i, cropType),
+    crop_production: i[`${cropType.charAt(0)}p`][`${cropType}_prod`],
+    crop_count: getTreeCount(i, cropType),
   });
 
   const calculateArea = (item: any, type: string) => {
