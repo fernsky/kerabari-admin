@@ -6,7 +6,7 @@ import {
   users,
   wards,
 } from "../../../db/schema";
-import { family } from "@/server/db/schema/family/family";
+import { family, stagingFamily } from "@/server/db/schema/family/family";
 import {
   stagingBuddhashantiIndividual,
   buddhashantiIndividual,
@@ -206,8 +206,8 @@ async function performFamilySync(ctx: any, recordId: string) {
     // Get staging data
     const familyData = await ctx.db
       .select()
-      .from(family)
-      .where(eq(family.id, recordId))
+      .from(stagingFamily)
+      .where(eq(stagingFamily.id, recordId))
       .limit(1);
 
     if (!familyData.length) {
@@ -243,7 +243,72 @@ async function performFamilySync(ctx: any, recordId: string) {
     // Begin transaction
     await ctx.db.transaction(async (tx: any) => {
       // Insert family data
-      await tx.insert(family).values(familyData[0]).onConflictDoNothing();
+      await tx
+        .insert(family)
+        .values({
+          id: familyData[0].id,
+
+          // Enumerator Information
+          enumeratorName: familyData[0].enumeratorName,
+          enumeratorPhone: familyData[0].enumeratorPhone,
+
+          // Location Details
+          wardNo: familyData[0].wardNo,
+          areaCode: familyData[0].areaCode,
+          locality: familyData[0].locality,
+          devOrg: familyData[0].devOrg,
+          geom: familyData[0].gps,
+          altitude: familyData[0].altitude,
+          gpsAccuracy: familyData[0].gpsAccuracy,
+
+          // Family Details
+          headName: familyData[0].headName,
+          headPhone: familyData[0].headPhone,
+          totalMembers: familyData[0].totalMembers,
+          isSanitized: familyData[0].isSanitized === "yes",
+
+          // House Details
+          houseOwnership: familyData[0].houseOwnership,
+          houseOwnershipOther: familyData[0].houseOwnershipOther,
+          feels_safe: familyData[0].feelsSafe,
+          waterSource: familyData[0].waterSource,
+          waterSourceOther: familyData[0].waterSourceOther,
+          waterPurificationMethods: familyData[0].waterPurificationMethods,
+          toiletType: familyData[0].toiletType,
+          solidWaste: familyData[0].solidWaste,
+          solidWasteOther: familyData[0].solidWasteOther,
+
+          // Energy and Facilities
+          primaryCookingFuel: familyData[0].primaryCookingFuel,
+          primaryEnergySource: familyData[0].primaryEnergySource,
+          primaryEnergySourceOther: familyData[0].primaryEnergySourceOther,
+          facilities: familyData[0].facilities,
+
+          // Economic Details
+          femaleProperties: familyData[0].femaleProperties,
+          loanedOrganizations: familyData[0].loanedOrganizations,
+          loanUse: familyData[0].loanUse,
+          hasBank: familyData[0].hasBank,
+          hasInsurance: familyData[0].hasInsurance,
+          healthOrg: familyData[0].healthOrg,
+          healthOrgOther: familyData[0].healthOrgOther,
+          incomeSources: familyData[0].incomeSources,
+          municipalSuggestions: familyData[0].municipalSuggestions,
+          municipalSuggestionsOther: familyData[0].municipalSuggestionsOther,
+
+          // Additional Data
+          hasRemittance: familyData[0].hasRemittance,
+          remittanceExpenses: familyData[0].remittanceExpenses,
+
+          tmpAreaCode: familyData[0].areaCode,
+          tmpWardNumber: familyData[0].wardNo,
+          tmpEnumeratorId: familyData[0].enumeratorId,
+          tmpBuildingToken: familyData[0].buildingToken,
+
+          // Status
+          status: "pending",
+        })
+        .onConflictDoNothing();
 
       // Insert individuals
       if (individuals.length > 0) {

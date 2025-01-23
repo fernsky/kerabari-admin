@@ -79,8 +79,6 @@ export const familyStatusEnum = pgEnum("family_status_enum", [
 
 export const family = pgTable("buddhashanti_family", {
   id: text("id").primaryKey().notNull(),
-  tenantId: text("tenant_id").default("buddhashanti"),
-  deviceId: text("device_id"),
 
   // Enumerator Information
   enumeratorName: text("enumerator_name"),
@@ -95,8 +93,8 @@ export const family = pgTable("buddhashanti_family", {
   devOrg: text("dev_org"),
   location: text("location"),
   geom: geometry("geom", { type: "Point" }),
-  altitude: integer("altitude"),
-  gpsAccuracy: integer("gps_accuracy"),
+  altitude: decimal("altitude"),
+  gpsAccuracy: decimal("gps_accuracy"),
 
   // Family Details
   headName: text("head_name"),
@@ -136,6 +134,12 @@ export const family = pgTable("buddhashanti_family", {
   // Additional Data
   hasRemittance: boolean("has_remittance"),
   remittanceExpenses: text("remittance_expenses").array(),
+
+  // Temoprary fields to store the data that is not yet approved
+  tmpAreaCode: varchar("tmp_area_code", { length: 255 }),
+  tmpWardNumber: integer("tmp_ward_number"),
+  tmpEnumeratorId: varchar("tmp_enumerator_id", { length: 255 }),
+  tmpBuildingToken: varchar("tmp_building_token", { length: 255 }),
 
   // Foreign keys that satisfy the building constraints
   areaId: varchar("area_id", { length: 255 }).references(() => areas.id),

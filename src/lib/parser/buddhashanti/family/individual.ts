@@ -39,11 +39,11 @@ export async function parseIndividuals(r: RawFamily, ctx: any) {
         dead_daughters: null as number | null,
 
         // Initialize Recent Birth Details fields
-        recent_alive_sons: null as number | null,
-        recent_alive_daughters: null as number | null,
-        recent_birth_total: null as number | null,
-        recent_birth_location: null as string | null,
-        prenatal_checkup: null as string | null,
+        recent_born_sons: null as number | null,
+        recent_born_daughters: null as number | null,
+        total_recent_children: null as number | null,
+        recent_delivery_location: null as string | null,
+        prenatal_checkups: null as string | null,
 
         // Cultural and Demographic Information
         citizen_of: decodeSingleChoice(
@@ -96,7 +96,7 @@ export async function parseIndividuals(r: RawFamily, ctx: any) {
         goes_school: null as string | null,
         work_barrier: null as string | null,
         school_barrier: null as string | null,
-        months_worked: null as string | null,
+        financial_work_duration: null as string | null,
         primary_occupation: null as string | null,
         work_availability: null as string | null,
       };
@@ -174,17 +174,17 @@ export async function parseIndividuals(r: RawFamily, ctx: any) {
 
           // Add recent birth details if available
           if (fertilityRecord.ftd.frcb?.gave_recent_live_birth === "yes") {
-            individual.recent_alive_sons =
+            individual.recent_born_sons =
               fertilityRecord.ftd.frcb.recent_alive_sons;
-            individual.recent_alive_daughters =
+            individual.recent_born_daughters =
               fertilityRecord.ftd.frcb.recent_alive_daughters;
-            individual.recent_birth_total =
+            individual.total_recent_children =
               fertilityRecord.ftd.frcb.total_recent_children;
-            individual.recent_birth_location = decodeSingleChoice(
+            individual.recent_delivery_location = decodeSingleChoice(
               fertilityRecord.ftd.frcb.recent_delivery_location,
               familyChoices.delivery_locations,
             );
-            individual.prenatal_checkup = decodeSingleChoice(
+            individual.prenatal_checkups = decodeSingleChoice(
               fertilityRecord.ftd.frcb.prenatal_checkup,
               familyChoices.true_false,
             );
@@ -237,7 +237,7 @@ export async function parseIndividuals(r: RawFamily, ctx: any) {
             (j) => j.eco_name === i.name && parseInt(j.eco_age) === i.age,
           );
           if (economyRecord) {
-            individual.months_worked = decodeSingleChoice(
+            individual.financial_work_duration = decodeSingleChoice(
               economyRecord.ed.m_work,
               familyChoices.financial_work_duration,
             );

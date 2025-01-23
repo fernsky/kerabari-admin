@@ -107,7 +107,6 @@ export const buddhashantiIndividual = pgTable("buddhashanti_individual", {
   id: varchar("id", { length: 48 }).primaryKey().notNull(),
   familyId: varchar("family_id", { length: 48 }).references(() => family.id),
   wardNo: integer("ward_no").notNull(),
-  deviceId: varchar("device_id", { length: 48 }),
 
   // Personal Information
   name: varchar("name", { length: 255 }).notNull(),
