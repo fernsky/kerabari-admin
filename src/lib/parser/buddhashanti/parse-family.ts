@@ -53,7 +53,7 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
           familyChoices.house_ownership,
         ),
         house_ownership_other: r.hh.h_oship_oth,
-        is_house_safe: r.hh.is_safe,
+        feels_safe: r.hh.is_safe,
         water_source: decodeMultipleChoices(
           r.hh.wsrc,
           familyChoices.drinking_water_source,

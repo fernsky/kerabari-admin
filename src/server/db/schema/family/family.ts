@@ -107,7 +107,7 @@ export const family = pgTable("buddhashanti_family", {
   // House Details
   houseOwnership: text("house_ownership"),
   houseOwnershipOther: text("house_ownership_other"),
-  isHouseSafe: boolean("is_house_safe"),
+  feels_safe: text("feels_safe"),
   waterSource: text("water_source").array(),
   waterSourceOther: text("water_source_other"),
   waterPurificationMethods: text("water_purification_methods").array(),
