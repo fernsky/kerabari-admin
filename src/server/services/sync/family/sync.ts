@@ -1,83 +1,54 @@
 import { and, eq, sql } from "drizzle-orm";
 import {
   areas,
-  buildings,
   buildingTokens,
   stagingToProduction,
   users,
   wards,
 } from "../../../db/schema";
+import { family } from "@/server/db/schema/family/family";
 import {
-  business,
-  stagingBusiness,
-} from "@/server/db/schema/business/business";
+  stagingBuddhashantiIndividual,
+  buddhashantiIndividual,
+} from "@/server/db/schema/family/individual";
 import {
-  businessCrops,
-  StagingBusinessCrop,
-  stagingBusinessCrops,
-} from "@/server/db/schema/business/business-crops";
+  stagingBuddhashantiDeath,
+  buddhashantiDeath,
+} from "@/server/db/schema/family/deaths";
 import {
-  businessAnimalProducts,
-  StagingBusinessAnimalProduct,
-  stagingBusinessAnimalProducts,
-} from "@/server/db/schema/business/business-animal-products";
+  stagingBuddhashantiCrop,
+  buddhashantiCrop,
+} from "@/server/db/schema/family/crops";
+import {
+  stagingBuddhashantiAnimal,
+  buddhashantiAnimal,
+} from "@/server/db/schema/family/animals";
+import {
+  stagingBuddhashantiAnimalProduct,
+  buddhashantiAnimalProduct,
+} from "@/server/db/schema/family/animal-products";
 
-export async function syncBusinessSurvey(
-  recordId: string,
-  data: any,
-  ctx: any,
-) {
+export async function syncFamilySurvey(recordId: string, data: any, ctx: any) {
   try {
-    await performBusinessSync(ctx, recordId);
+    await performFamilySync(ctx, recordId);
 
-    const wardNumber = data.b_addr.ward_no;
-    const areaCode = data.b_addr.area_code;
-    const buildingToken = data.enumerator_introduction.building_token_number;
+    const wardNumber = data.id.ward_no;
+    const areaCode = data.id.area_code;
+    const buildingToken = data.enumerator_introduction.building_token;
     const enumeratorId = data.enumerator_introduction.enumerator_id;
 
-    // Find enumerator with error handling
-    let enumerator;
+    // Handle validations using existing helper functions
     try {
-      enumerator = await handleEnumerator(ctx, enumeratorId, recordId);
-    } catch (error) {
-      console.error(`[Enumerator Handling Error] Record ${recordId}:`, error);
-      // throw new Error(`Failed to handle enumerator: ${error}`);
-    }
-
-    // Handle Ward Number with error handling
-    try {
+      const enumerator = await handleEnumerator(ctx, enumeratorId, recordId);
       await handleWardNumber(ctx, wardNumber, recordId);
-    } catch (error) {
-      console.error(`[Ward Handling Error] Record ${recordId}:`, error);
-      // throw new Error(`Failed to handle ward: ${error}`);
-    }
-
-    // Handle Area Code with error handling
-    try {
-      await handlAreaCode(ctx, areaCode, recordId);
-    } catch (error) {
-      console.error(`[Area Code Handling Error] Record ${recordId}:`, error);
-      // throw new Error(`Failed to handle area code: ${error}`);
-    }
-
-    // Handle building token allocation with error handling
-    try {
+      await handleAreaCode(ctx, areaCode, recordId);
       await handleBuildingToken(ctx, buildingToken, recordId);
-    } catch (error) {
-      console.error(`[Building Token Error] Record ${recordId}:`, error);
-      // throw new Error(`Failed to handle building token: ${error}`);
-    }
-
-    // Update area status with error handling
-    try {
       await updateAreaStatus(ctx, enumerator?.[0]?.id, areaCode);
     } catch (error) {
-      console.error(`[Area Status Update Error] Record ${recordId}:`, error);
-      // throw new Error(`Failed to update area status: ${error}`);
+      console.error(`[Validation Error] Record ${recordId}:`, error);
     }
   } catch (error) {
-    console.error(`[Sync Building Survey Error] Record ${recordId}:`, error);
-    // throw new Error(`Building survey sync failed: ${error}`);
+    console.error(`[Sync Family Survey Error] Record ${recordId}:`, error);
   }
 }
 
@@ -87,9 +58,7 @@ async function handleEnumerator(
   recordId: string,
 ) {
   try {
-    if (!enumeratorId) {
-      throw new Error("Enumerator ID is required");
-    }
+    if (!enumeratorId) throw new Error("Enumerator ID is required");
 
     const enumerator = await ctx.db
       .select()
@@ -103,54 +72,45 @@ async function handleEnumerator(
       .limit(1);
 
     await ctx.db
-      .update(business)
+      .update(family)
       .set({
         enumeratorId: enumerator.length > 0 ? enumerator[0].id : null,
         isEnumeratorValid: enumerator.length > 0,
       })
-      .where(eq(business.id, recordId));
+      .where(eq(family.id, recordId));
 
     return enumerator;
   } catch (error) {
     console.error(`[Enumerator Query Error] Record ${recordId}:`, error);
-    throw new Error(`Database operation failed for enumerator: ${error}`);
+    throw error;
   }
 }
 
 async function handleWardNumber(
   ctx: any,
   wardNumber: number,
-  businessId: string,
+  familyId: string,
 ) {
-  console.log(wardNumber);
   const ward = await ctx.db
-    .select({
-      wardNumber: wards.wardNumber,
-    })
+    .select({ wardNumber: wards.wardNumber })
     .from(wards)
     .where(eq(wards.wardNumber, wardNumber))
     .limit(1);
 
-  if (ward.length > 0) {
-    console.log(ward[0].wardNumber, businessId);
-    await ctx.db
-      .update(business)
-      .set({ wardId: ward[0].wardNumber, isWardValid: true })
-      .where(eq(business.id, businessId));
-  } else {
-    await ctx.db
-      .update(business)
-      .set({ isWardValid: false })
-      .where(eq(business.id, businessId));
-  }
+  await ctx.db
+    .update(family)
+    .set({
+      wardId: ward.length > 0 ? ward[0].wardNumber : null,
+      isWardValid: ward.length > 0,
+    })
+    .where(eq(family.id, familyId));
+
   return ward;
 }
 
-async function handlAreaCode(ctx: any, areaCode: number, businessId: string) {
+async function handleAreaCode(ctx: any, areaCode: number, familyId: string) {
   try {
-    if (!areaCode) {
-      throw new Error("Area code is required");
-    }
+    if (!areaCode) throw new Error("Area code is required");
 
     const area = await ctx.db
       .select({ id: areas.id })
@@ -159,17 +119,17 @@ async function handlAreaCode(ctx: any, areaCode: number, businessId: string) {
       .limit(1);
 
     await ctx.db
-      .update(business)
+      .update(family)
       .set({
         areaId: area.length > 0 ? area[0].id : null,
         isAreaValid: area.length > 0,
       })
-      .where(eq(business.id, businessId));
+      .where(eq(family.id, familyId));
 
     return area;
   } catch (error) {
-    console.error(`[Area Code Error] Building ${businessId}:`, error);
-    throw new Error(`Area code handling failed: ${error}`);
+    console.error(`[Area Code Error] Family ${familyId}:`, error);
+    throw error;
   }
 }
 
@@ -208,9 +168,7 @@ async function handleBuildingToken(
   recordId: string,
 ) {
   try {
-    if (!buildingToken) {
-      throw new Error("Building token is required");
-    }
+    if (!buildingToken) throw new Error("Building token is required");
 
     const validToken = await ctx.db
       .select()
@@ -223,246 +181,116 @@ async function handleBuildingToken(
       )
       .limit(1);
 
-    if (validToken.length > 0) {
-      await Promise.all([
-        ctx.db
-          .update(buildings)
-          .set({
-            buildingToken: validToken[0].token,
-            isBuildingTokenValid: true,
-          })
-          .where(eq(buildings.id, recordId)),
+    await ctx.db
+      .update(family)
+      .set({
+        buildingToken: validToken.length > 0 ? validToken[0].token : null,
+        isBuildingTokenValid: validToken.length > 0,
+      })
+      .where(eq(family.id, recordId));
 
-        ctx.db
-          .update(buildingTokens)
-          .set({
-            status: "allocated",
-            token: buildingToken,
-          })
-          .where(eq(buildingTokens.token, validToken[0].token)),
-      ]);
-    } else {
+    if (validToken.length > 0) {
       await ctx.db
-        .update(business)
-        .set({ isBuildingTokenValid: false })
-        .where(eq(business.id, recordId));
+        .update(buildingTokens)
+        .set({ status: "allocated", token: buildingToken })
+        .where(eq(buildingTokens.token, validToken[0].token));
     }
   } catch (error) {
     console.error(`[Building Token Error] Record ${recordId}:`, error);
-    throw new Error(`Building token handling failed: ${error}`);
+    throw error;
   }
 }
-/**
- * Performs the main building data sync from staging to production table
- * Includes error handling and data validation
- *
- * @param ctx Database context
- * @param recordId Unique identifier for the building record
- */
-async function performBusinessSync(ctx: any, recordId: string) {
+
+async function performFamilySync(ctx: any, recordId: string) {
   try {
-    // Fetch record from staging table
-    const result = await ctx.db
+    // Get staging data
+    const familyData = await ctx.db
       .select()
-      .from(stagingBusiness)
-      .where(eq(stagingBusiness.id, recordId))
+      .from(family)
+      .where(eq(family.id, recordId))
       .limit(1);
 
-    // Validate that record exists
-    if (!result.length) {
+    if (!familyData.length) {
       throw new Error(`No staging record found for ID: ${recordId}`);
     }
 
+    // Get related data
+    const individuals = await ctx.db
+      .select()
+      .from(stagingBuddhashantiIndividual)
+      .where(eq(stagingBuddhashantiIndividual.familyId, recordId));
+
+    const deaths = await ctx.db
+      .select()
+      .from(stagingBuddhashantiDeath)
+      .where(eq(stagingBuddhashantiDeath.familyId, recordId));
+
     const crops = await ctx.db
       .select()
-      .from(stagingBusinessCrops)
-      .where(eq(stagingBusinessCrops.businessId, recordId));
+      .from(stagingBuddhashantiCrop)
+      .where(eq(stagingBuddhashantiCrop.familyId, recordId));
 
     const animals = await ctx.db
       .select()
-      .from(stagingBusinessCrops)
-      .where(eq(stagingBusinessCrops.businessId, recordId));
+      .from(stagingBuddhashantiAnimal)
+      .where(eq(stagingBuddhashantiAnimal.familyId, recordId));
 
-    const animalProducts = ctx.db
+    const animalProducts = await ctx.db
       .select()
-      .from(stagingBusinessAnimalProducts)
-      .where(eq(stagingBusinessAnimalProducts.businessId, recordId));
+      .from(stagingBuddhashantiAnimalProduct)
+      .where(eq(stagingBuddhashantiAnimalProduct.familyId, recordId));
 
-    const stagingData = result[0];
+    // Begin transaction
+    await ctx.db.transaction(async (tx: any) => {
+      // Insert family data
+      await tx.insert(family).values(familyData[0]).onConflictDoNothing();
 
-    // Insert validated data into production buildings table
-    await ctx.db
-      .insert(business)
-      .values({
-        // Core identifiers
-        id: stagingData.id,
-        enumeratorName: stagingData.enumeratorName,
-        phone: stagingData.phone,
+      // Insert individuals
+      if (individuals.length > 0) {
+        await tx
+          .insert(buddhashantiIndividual)
+          .values(individuals)
+          .onConflictDoNothing();
+      }
 
-        // Business Basic Information
-        businessName: stagingData.businessName,
-        wardNo: stagingData.wardNo,
-        areaCode: stagingData.areaCode,
-        businessNo: stagingData.businessNo,
-        locality: stagingData.locality,
+      // Insert deaths
+      if (deaths.length > 0) {
+        await tx.insert(buddhashantiDeath).values(deaths).onConflictDoNothing();
+      }
 
-        // Operator Details
-        operatorName: stagingData.operatorName,
-        operatorPhone: stagingData.operatorPhone,
-        operatorAge: stagingData.operatorAge,
-        operatorGender: stagingData.operatorGender,
-        operatorEducation: stagingData.operatorEducation,
+      // Insert crops
+      if (crops.length > 0) {
+        await tx.insert(buddhashantiCrop).values(crops).onConflictDoNothing();
+      }
 
-        // Business Classification
-        businessNature: stagingData.businessNature,
-        businessNatureOther: stagingData.businessNatureOther,
-        businessType: stagingData.businessType,
-        businessTypeOther: stagingData.businessTypeOther,
+      // Insert animals
+      if (animals.length > 0) {
+        await tx
+          .insert(buddhashantiAnimal)
+          .values(animals)
+          .onConflictDoNothing();
+      }
 
-        // Registration and Legal Information
-        registrationStatus: stagingData.registrationStatus,
-        registeredBodies: stagingData.registeredBodies,
-        registeredBodiesOther: stagingData.registeredBodiesOther,
-        statutoryStatus: stagingData.statutoryStatus,
-        statutoryStatusOther: stagingData.statutoryStatusOther,
-        panStatus: stagingData.panStatus,
-        panNumber: stagingData.panNumber,
+      // Insert animal products
+      if (animalProducts.length > 0) {
+        await tx
+          .insert(buddhashantiAnimalProduct)
+          .values(animalProducts)
+          .onConflictDoNothing();
+      }
 
-        // Location Data
-        gps: stagingData.gps,
-        altitude: stagingData.altitude,
-        gpsAccuracy: stagingData.gpsAccuracy,
-
-        // Financial and Property Information
-        investmentAmount: stagingData.investmentAmount,
-        businessLocationOwnership: stagingData.businessLocationOwnership,
-        businessLocationOwnershipOther:
-          stagingData.businessLocationOwnershipOther,
-
-        // Employee Information - Partners
-        hasPartners: stagingData.hasPartners,
-        totalPartners: stagingData.totalPartners,
-        nepaliMalePartners: stagingData.nepaliMalePartners,
-        nepaliFemalePartners: stagingData.nepaliFemalePartners,
-        hasForeignPartners: stagingData.hasForeignPartners,
-        foreignMalePartners: stagingData.foreignMalePartners,
-        foreignFemalePartners: stagingData.foreignFemalePartners,
-
-        // Employee Information - Family
-        hasInvolvedFamily: stagingData.hasInvolvedFamily,
-        totalInvolvedFamily: stagingData.totalInvolvedFamily,
-        maleInvolvedFamily: stagingData.maleInvolvedFamily,
-        femaleInvolvedFamily: stagingData.femaleInvolvedFamily,
-
-        // Employee Information - Permanent
-        hasPermanentEmployees: stagingData.hasPermanentEmployees,
-        totalPermanentEmployees: stagingData.totalPermanentEmployees,
-        nepaliMalePermanentEmployees: stagingData.nepaliMalePermanentEmployees,
-        nepaliFemalePermanentEmployees:
-          stagingData.nepaliFemalePermanentEmployees,
-        hasForeignPermanentEmployees: stagingData.hasForeignPermanentEmployees,
-        foreignMalePermanentEmployees:
-          stagingData.foreignMalePermanentEmployees,
-        foreignFemalePermanentEmployees:
-          stagingData.foreignFemalePermanentEmployees,
-
-        // Employee Information - Temporary
-        hasTemporaryEmployees: stagingData.hasTemporaryEmployees,
-        totalTemporaryEmployees: stagingData.totalTemporaryEmployees,
-        nepaliMaleTemporaryEmployees: stagingData.nepaliMaleTemporaryEmployees,
-        nepaliFemaleTemporaryEmployees:
-          stagingData.nepaliFemaleTemporaryEmployees,
-        hasForeignTemporaryEmployees: stagingData.hasForeignTemporaryEmployees,
-        foreignMaleTemporaryEmployees:
-          stagingData.foreignMaleTemporaryEmployees,
-        foreignFemaleTemporaryEmployees:
-          stagingData.foreignFemaleTemporaryEmployees,
-
-        // Aquaculture Information
-        aquacultureWardNo: stagingData.aquacultureWardNo,
-        pondCount: stagingData.pondCount,
-        pondArea: stagingData.pondArea,
-        fishProduction: stagingData.fishProduction,
-        fingerlingNumber: stagingData.fingerlingNumber,
-        totalInvestment: stagingData.totalInvestment,
-        annualIncome: stagingData.annualIncome,
-        employmentCount: stagingData.employmentCount,
-
-        // Apiculture Information
-        apicultureWardNo: stagingData.apicultureWardNo,
-        hiveCount: stagingData.hiveCount,
-        honeyProduction: stagingData.honeyProduction,
-        hasApiculture: stagingData.hasApiculture,
-
-        // Temporary fields
-        tmpAreaCode: stagingData.areaCode,
-        tmpWardNumber: stagingData.wardNo,
-        tmpEnumeratorId: stagingData.enumeratorId,
-        tmpBuildingToken: stagingData.buildingToken,
-
-        // Default flags
-        isAreaValid: false,
-        isWardValid: false,
-        isBuildingTokenValid: false,
-        isEnumeratorValid: false,
-
-        // Status
-        status: "pending",
-      })
-      .onConflictDoNothing();
-
-    // Insert crops data into production table
-    if (crops.length > 0) {
-      await ctx.db
-        .insert(businessCrops)
-        .values(
-          crops.map((crop: StagingBusinessCrop) => ({
-            businessId: crop.businessId,
-            wardNo: crop.wardNo,
-            cropType: crop.cropType,
-            cropName: crop.cropName,
-            cropArea: crop.cropArea,
-            cropProduction: crop.cropProduction,
-            cropSales: crop.cropSales,
-            cropRevenue: crop.cropRevenue,
-            cropCount: crop.cropCount,
-          })),
-        )
+      // Track the sync operation
+      await tx
+        .insert(stagingToProduction)
+        .values({
+          staging_table: "staging_buddhashanti_family",
+          production_table: "buddhashanti_family",
+          recordId: recordId,
+        })
         .onConflictDoNothing();
-    }
-
-    // Insert animal products data into production table
-    if (animalProducts.length > 0) {
-      await ctx.db
-        .insert(businessAnimalProducts)
-        .values(
-          animalProducts.map((product: StagingBusinessAnimalProduct) => ({
-            businessId: product.businessId,
-            wardNo: product.wardNo,
-            animalProduct: product.animalProduct,
-            productName: product.productName,
-            unit: product.unit,
-            productionAmount: product.productionAmount,
-            salesAmount: product.salesAmount,
-            monthlyProduction: product.monthlyProduction,
-            revenue: product.revenue,
-          })),
-        )
-        .onConflictDoNothing();
-    }
-
-    // Track the sync operation
-    await ctx.db
-      .insert(stagingToProduction)
-      .values({
-        staging_table: "staging_buddhashanti_buildings",
-        production_table: "buddhashanti_buildings",
-        recordId: recordId,
-      })
-      .onConflictDoNothing();
+    });
   } catch (error) {
-    // Log error and re-throw
-    console.error(`Error syncing building ${recordId}:`, error);
-    throw new Error(`Building sync failed: ${error}`);
+    console.error(`Error syncing family ${recordId}:`, error);
+    throw error;
   }
 }
