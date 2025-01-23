@@ -6,7 +6,7 @@ export const stagingBuddhashantiIndividual = pgTable(
   {
     // Primary Keys and Basic Info
     id: varchar("id", { length: 48 }).primaryKey().notNull(),
-    familyId: varchar("parent_id", { length: 48 }).notNull(),
+    familyId: varchar("family_id", { length: 48 }).notNull(),
     wardNo: integer("ward_no").notNull(),
 
     // Personal Information

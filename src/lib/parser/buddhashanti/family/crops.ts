@@ -14,18 +14,17 @@ export async function parseCrops(r: RawFamily, ctx: any) {
           ward_no: r.id.ward_no,
           crop_type: "food",
           crop_name: i.fcrop,
-          crop_crop_area:
+          crop_area:
             (i.fcrop_area_description.fcrop_bigha ?? 0) * 6772.63 +
             (i.fcrop_area_description.fcrop_kattha ?? 0) * 338.63 +
             (i.fcrop_area_description.fcrop_dhur ?? 0) * 16.93,
-          production: i.fp.fcrop_prod,
+          crop_production: i.fp.fcrop_prod,
         };
 
         try {
           const cropStatement = jsonToPostgres(
             "staging_buddhashanti_crop",
             crop,
-            "ON CONFLICT(id) DO UPDATE SET",
           );
           if (cropStatement) {
             await ctx.db.execute(sql.raw(cropStatement));
@@ -49,7 +48,7 @@ export async function parseCrops(r: RawFamily, ctx: any) {
             (i.pulse_area_description.pulse_bigha ?? 0) * 6772.63 +
             (i.pulse_area_description.pulse_kattha ?? 0) * 338.63 +
             (i.pulse_area_description.pulse_dhur ?? 0) * 16.93,
-          production: i.pp.pulse_prod,
+          crop_production: i.pp.pulse_prod,
         };
 
         try {
@@ -79,7 +78,7 @@ export async function parseCrops(r: RawFamily, ctx: any) {
             (i.vtables_area_description.vtables_bigha ?? 0) * 6772.63 +
             (i.vtables_area_description.vtables_kattha ?? 0) * 338.63 +
             (i.vtables_area_description.vtables_dhur ?? 0) * 16.93,
-          production: i.vp.vtable_prod,
+          crop_production: i.vp.vtable_prod,
         };
 
         try {
@@ -110,7 +109,7 @@ export async function parseCrops(r: RawFamily, ctx: any) {
           (i.oseed_area_description.oseed_bigha ?? 0) * 6772.63 +
           (i.oseed_area_description.oseed_kattha ?? 0) * 338.63 +
           (i.oseed_area_description.oseed_dhur ?? 0) * 16.93,
-        production: i.oslp.oseed_prod,
+        crop_production: i.oslp.oseed_prod,
       };
 
       try {
@@ -137,7 +136,7 @@ export async function parseCrops(r: RawFamily, ctx: any) {
           (i.fruits_area_description.fruits_bigha ?? 0) * 6772.63 +
           (i.fruits_area_description.fruits_kattha ?? 0) * 338.63 +
           (i.fruits_area_description.fruits_dhur ?? 0) * 16.93,
-        production: i.frp.fruit_prod,
+        crop_production: i.frp.fruit_prod,
       };
 
       try {
@@ -164,7 +163,7 @@ export async function parseCrops(r: RawFamily, ctx: any) {
           (i.spice_area_description.spice_bigha ?? 0) * 6772.63 +
           (i.spice_area_description.spice_kattha ?? 0) * 338.63 +
           (i.spice_area_description.spice_dhur ?? 0) * 16.93,
-        production: i.sp.spice_prod,
+        crop_production: i.sp.spice_prod,
       };
 
       try {
@@ -191,7 +190,7 @@ export async function parseCrops(r: RawFamily, ctx: any) {
           (i.ccrop_area_description.ccrop_bigha ?? 0) * 6772.63 +
           (i.ccrop_area_description.ccrop_kattha ?? 0) * 338.63 +
           (i.ccrop_area_description.ccrop_dhur ?? 0) * 16.93,
-        production: i.cp.ccrop_prod,
+        crop_production: i.cp.ccrop_prod,
       };
 
       try {
