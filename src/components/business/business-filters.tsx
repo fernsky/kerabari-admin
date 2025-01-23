@@ -19,8 +19,9 @@ import {
   Clock,
   Edit,
 } from "lucide-react";
+import { business } from "@/server/db/schema";
 
-interface BusinessFiltersProps {
+interface BuildingFiltersProps {
   wardNumber: number | undefined;
   locality: string | undefined;
   mapStatus: string | undefined;
@@ -29,14 +30,14 @@ interface BusinessFiltersProps {
   onFilterChange: (key: string, value: any) => void;
 }
 
-export function BusinessFilters({
+export function BuildingFilters({
   wardNumber,
   locality,
   mapStatus,
   enumeratorId,
   status,
   onFilterChange,
-}: BusinessFiltersProps) {
+}: BuildingFiltersProps) {
   const { data: enumerators } = api.admin.getEnumerators.useQuery();
 
   const enumeratorOptions = [
@@ -209,5 +210,63 @@ export function BusinessFilters({
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+export function BusinessFilters({
+  wardNumber,
+  businessNature,
+  onFilterChange,
+}: {
+  wardNumber?: number;
+  businessNature?: string;
+  onFilterChange: (key: string, value: any) => void;
+}) {
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <div className="space-y-2">
+        <Label>Ward Number</Label>
+        <Select
+          value={wardNumber?.toString()}
+          onValueChange={(value) => onFilterChange("wardNumber", Number(value))}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select ward" />
+          </SelectTrigger>
+          <SelectContent>
+            {Array.from({ length: 8 }, (_, i) => i + 1).map((ward) => (
+              <SelectItem key={ward} value={ward.toString()}>
+                Ward {ward}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Business Nature</Label>
+        <Select
+          value={businessNature}
+          onValueChange={(value) => onFilterChange("businessNature", value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select type" />
+          </SelectTrigger>
+          <SelectContent>
+            {[
+              "वस्तु (मालसामान)को बिक्री",
+              "सेवाको बिक्री",
+              "वस्तुको उत्पादन",
+              "कृषि, पशुपन्छी, माछा तथा मौरी पालन फार्म ",
+              "अन्य",
+            ].map((type) => (
+              <SelectItem key={type} value={type}>
+                {type}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
   );
 }

@@ -26,9 +26,14 @@ export const businessSchema = z.object({
   businessType: z.string(),
   businessTypeOther: z.string().optional(),
 
+  // Media fields
+  surveyAudioRecording: z.string().optional(),
+  buildingImage: z.string().optional(),
+  enumeratorSelfie: z.string().optional(),
+
   // Registration and Legal Information
   registrationStatus: z.string(),
-  registeredBodies: z.array(z.string()),
+  registeredBodies: z.string(), // Changed from array to string to match DB schema
   registeredBodiesOther: z.string().optional(),
   statutoryStatus: z.string(),
   statutoryStatusOther: z.string().optional(),
@@ -44,6 +49,14 @@ export const businessSchema = z.object({
   investmentAmount: z.number(),
   businessLocationOwnership: z.string(),
   businessLocationOwnershipOther: z.string().optional(),
+
+  // Hotel details
+  hotelAccommodationType: z.string().optional(),
+  hotelRoomCount: z.number().optional(),
+  hotelBedCount: z.number().optional(),
+  hotelRoomType: z.string().optional(),
+  hotelHasHall: z.string().optional(),
+  hotelHallCapacity: z.number().optional(),
 
   // Employee Information
   hasPartners: z.string(),
@@ -91,6 +104,18 @@ export const businessSchema = z.object({
   honeyProduction: z.number().optional(),
   hasApiculture: z.string().optional(),
 
+  // Temporary fields
+  tmpAreaCode: z.string().optional(),
+  tmpWardNumber: z.number().optional(),
+  tmpEnumeratorId: z.string().optional(),
+  tmpBuildingToken: z.string().optional(),
+
+  // Foreign key fields
+  areaId: z.string().optional(),
+  enumeratorId: z.string().optional(),
+  wardId: z.number().optional(),
+  buildingToken: z.string().optional(),
+
   // Status and validation fields
   status: z.enum(["approved", "pending", "requested_for_edit", "rejected"]).default("pending"),
   isAreaValid: z.boolean().default(false),
@@ -99,10 +124,9 @@ export const businessSchema = z.object({
   isEnumeratorValid: z.boolean().default(false),
 });
 
+// Rest of the code remains the same
 export const createBusinessSchema = businessSchema.omit({ id: true });
-
 export const updateBusinessSchema = businessSchema.partial();
-
 export const businessQuerySchema = z.object({
   limit: z.number().min(1).max(100).default(10),
   offset: z.number().min(0).default(0),

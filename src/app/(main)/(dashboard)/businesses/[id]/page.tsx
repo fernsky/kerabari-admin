@@ -1,5 +1,4 @@
 "use client";
-
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { api } from "@/trpc/react";
 import { BusinessLoadingState } from "@/components/business/business-loading-state";

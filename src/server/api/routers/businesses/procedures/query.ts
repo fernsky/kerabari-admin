@@ -10,7 +10,11 @@ import { env } from "@/env";
 export const getAll = publicProcedure
   .input(businessQuerySchema)
   .query(async ({ ctx, input }) => {
-    const { limit, offset, sortBy, sortOrder, filters } = input;
+    const { limit, offset, sortBy = "id", sortOrder = "desc", filters } = input;
+
+    // Validate sortBy field exists in business table
+    const validSortColumns = ["id", "businessNature", "businessType", "wardNo", "status", "registrationNo"];
+    const actualSortBy = validSortColumns.includes(sortBy) ? sortBy : "id";
 
     let conditions = sql`TRUE`;
     if (filters) {
@@ -45,7 +49,7 @@ export const getAll = publicProcedure
         .select()
         .from(business)
         .where(conditions)
-        .orderBy(sql`${sql.identifier(sortBy)} ${sql.raw(sortOrder)}`)
+        .orderBy(sql`${sql.identifier(actualSortBy)} ${sql.raw(sortOrder)}`)
         .limit(limit)
         .offset(offset),
       ctx.db
@@ -54,7 +58,7 @@ export const getAll = publicProcedure
         .where(conditions)
         .then((result) => result[0].count),
     ]);
-
+console.log(filters,data);
     return {
       data,
       pagination: {
@@ -65,6 +69,8 @@ export const getAll = publicProcedure
     };
   });
 
+
+
 export const getById = publicProcedure
   .input(z.object({ id: z.string() }))
   .query(async ({ ctx, input }) => {
@@ -74,10 +80,48 @@ export const getById = publicProcedure
       .where(eq(business.id, input.id))
       .limit(1);
 
+    const attachments = await ctx.db.query.surveyAttachments.findMany({
+      where: eq(surveyAttachments.dataId, input.id),
+    });
+
     if (!businessEntity[0]) {
       throw new TRPCError({
         code: "NOT_FOUND",
         message: "Business not found",
+      });
+    }
+
+    try {
+      // Process the attachments and create presigned URLs
+      for (const attachment of attachments) {
+        if (attachment.type === "business_image") {
+          console.log("Fetching business image");
+          businessEntity[0].buildingImage = await ctx.minio.presignedGetObject(
+            env.BUCKET_NAME,
+            attachment.name,
+            24 * 60 * 60, // 24 hours expiry
+          );
+        }
+        if (attachment.type === "business_selfie") {
+          businessEntity[0].enumeratorSelfie = await ctx.minio.presignedGetObject(
+            env.BUCKET_NAME,
+            attachment.name,
+            24 * 60 * 60,
+          );
+        }
+        if (attachment.type === "audio_monitoring") {
+          businessEntity[0].surveyAudioRecording = await ctx.minio.presignedGetObject(
+            env.BUCKET_NAME,
+            attachment.name,
+            24 * 60 * 60,
+          );
+        }
+      }
+    } catch (error) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to generate presigned URLs",
+        cause: error,
       });
     }
 

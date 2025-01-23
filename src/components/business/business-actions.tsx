@@ -349,13 +349,20 @@ export function BusinessActions({
 
         <Button
           size="sm"
-          variant="outline"
-          onClick={() => reject({ businessId, message })}
-          disabled={isRejecting || !message}
+          variant="destructive"
+          onClick={() =>
+            reject({
+              businessId,
+              message: "",
+            })
+          }
+          disabled={isRejecting}
         >
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          {isRejecting ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
-          <XCircle className="mr-2 h-4 w-4" />){"}"}
+            <XCircle className="mr-2 h-4 w-4" />
+          )}
           Reject
         </Button>
 

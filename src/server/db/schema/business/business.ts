@@ -160,6 +160,14 @@ export const business = pgTable("buddhashanti_business", {
   businessType: varchar("business_type", { length: 100 }),
   businessTypeOther: varchar("business_type_other", { length: 255 }),
 
+  // Media (audio & images stored as bucket keys)
+  surveyAudioRecording: varchar("survey_audio_recording", { length: 255 }),
+  gps: geometry("gps", { type: "Point" }),
+  altitude: decimal("altitude"),
+  gpsAccuracy: decimal("gps_accuracy"),
+  businessImage: varchar("business_image", { length: 255 }),
+  enumeratorSelfie: varchar("enumerator_selfie", { length: 255 }),
+
   // Registration and Legal Information
   registrationStatus: varchar("registration_status", { length: 100 }),
   registeredBodies: varchar("registered_bodies", { length: 255 }),
@@ -169,10 +177,10 @@ export const business = pgTable("buddhashanti_business", {
   panStatus: varchar("pan_status", { length: 100 }),
   panNumber: varchar("pan_number", { length: 50 }),
 
-  // Location Data
-  gps: geometry("gps", { type: "Point" }),
-  altitude: decimal("altitude"),
-  gpsAccuracy: decimal("gps_accuracy"),
+  // // Location Data
+  // gps: geometry("gps", { type: "Point" }),
+  // altitude: decimal("altitude"),
+  // gpsAccuracy: decimal("gps_accuracy"),
 
   // Financial and Property Information
   investmentAmount: decimal("investment_amount", { precision: 15, scale: 2 }),
@@ -272,6 +280,8 @@ export const businessEditRequests = pgTable(
     requestedAt: timestamp("requested_at").defaultNow(),
   },
 );
+
+
 
 export type BusinessEditRequest = typeof businessEditRequests.$inferSelect;
 

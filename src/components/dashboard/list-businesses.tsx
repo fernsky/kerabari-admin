@@ -25,7 +25,6 @@ export function ListBusinesses({ user }: ListBusinessesProps) {
   const [filters, setFilters] = useState({
     wardNo: undefined as number | undefined,
     businessNature: undefined as string | undefined,
-    businessType: undefined as string | undefined,
     status: undefined as
       | "pending"
       | "approved"
@@ -120,15 +119,37 @@ export function ListBusinesses({ user }: ListBusinessesProps) {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-wrap items-center gap-2">
                 {!isDesktop && (
-                  <FilterDrawer title="Filters">
-                    <BusinessFilters
-                      wardNumber={undefined}
-                      locality={undefined}
-                      mapStatus={undefined}
-                      {...filters}
-                      onFilterChange={handleFilterChange}
-                    />
-                  </FilterDrawer>
+                  <div className="flex items-center gap-2">
+                    <FilterDrawer title="Filters">
+                      <BusinessFilters
+                        wardNumber={filters.wardNo}
+                        {...filters}
+                        onFilterChange={handleFilterChange}
+                      />
+                    </FilterDrawer>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Search business nature..."
+                        className="w-full sm:w-[200px] h-9"
+                        value={filters.businessNature || ""}
+                        onChange={(e) =>
+                          handleFilterChange("businessNature", e.target.value)
+                        }
+                      />
+                      <Input
+                        placeholder="Ward no."
+                        type="number"
+                        className="w-full sm:w-[100px] h-9"
+                        value={filters.wardNo || ""}
+                        onChange={(e) =>
+                          handleFilterChange(
+                            "wardNo",
+                            Number(e.target.value) || undefined,
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
                 )}
                 <Input
                   placeholder="Search business nature..."
@@ -151,8 +172,6 @@ export function ListBusinesses({ user }: ListBusinessesProps) {
               <div className="rounded-lg border bg-muted/50 p-4">
                 <BusinessFilters
                   wardNumber={undefined}
-                  locality={undefined}
-                  mapStatus={undefined}
                   {...filters}
                   onFilterChange={handleFilterChange}
                 />
