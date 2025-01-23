@@ -3,7 +3,7 @@ import { family } from "./family";
 
 export const stagingBuddhashantiCrop = pgTable("staging_buddhashanti_crop", {
   id: varchar("id", { length: 48 }).primaryKey().notNull(),
-  familyId: varchar("familly_id", { length: 48 }).notNull(),
+  familyId: varchar("family_id", { length: 48 }).notNull(),
   wardNo: integer("ward_no").notNull(),
   cropType: varchar("crop_type", { length: 100 }),
   cropName: varchar("crop_name", { length: 100 }),
@@ -15,7 +15,7 @@ export const stagingBuddhashantiCrop = pgTable("staging_buddhashanti_crop", {
 
 export const buddhashantiCrop = pgTable("buddhashanti_crop", {
   id: varchar("id", { length: 48 }).primaryKey().notNull(),
-  familyId: varchar("familly_id", { length: 48 }).references(() => family.id),
+  familyId: varchar("family_id", { length: 48 }).references(() => family.id),
   wardNo: integer("ward_no").notNull(),
   cropType: varchar("crop_type", { length: 100 }),
   cropName: varchar("crop_name", { length: 100 }),

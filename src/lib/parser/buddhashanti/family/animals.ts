@@ -6,7 +6,7 @@ export async function parseAnimals(r: RawFamily, ctx: any) {
   for (const i of r.agri.animal_details) {
     const animal = {
       id: i.__id,
-      household_id: r.__id,
+      family_id: r.__id,
       ward_no: r.id.ward_no,
       animal_name: i.animal,
       animal_name_other: null as string | null,
@@ -32,7 +32,6 @@ export async function parseAnimals(r: RawFamily, ctx: any) {
     const animalStatement = jsonToPostgres(
       "staging_buddhashanti_animal",
       animal,
-      "ON CONFLICT(id) DO UPDATE SET",
     );
 
     if (animalStatement) {

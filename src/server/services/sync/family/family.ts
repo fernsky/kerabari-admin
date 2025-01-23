@@ -1,4 +1,4 @@
-import { parseAndInsertInStaging } from "@/lib/parser/buddhashanti/parse-family";
+import { parseAndInsertInStaging } from "@/lib/parser/buddhashanti/family/main";
 import { stagingToProduction } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { syncFamilySurvey } from "./sync";

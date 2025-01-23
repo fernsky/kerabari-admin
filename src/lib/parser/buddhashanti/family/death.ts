@@ -8,7 +8,7 @@ export async function parseDeaths(r: RawFamily, ctx: any) {
   for (const i of r.death.dno.death_details) {
     const death = {
       id: i.__id,
-      household_id: r.__id,
+      family_id: r.__id,
       ward_no: r.id.ward_no,
       deceased_name: i.death_name,
       deceased_gender: decodeSingleChoice(
@@ -26,11 +26,7 @@ export async function parseDeaths(r: RawFamily, ctx: any) {
       ),
     };
 
-    const deathStatement = jsonToPostgres(
-      "staging_buddhashanti_death",
-      death,
-      "ON CONFLICT(id) DO UPDATE SET",
-    );
+    const deathStatement = jsonToPostgres("staging_buddhashanti_death", death);
 
     if (deathStatement) {
       await ctx.db.execute(sql.raw(deathStatement));

@@ -5,7 +5,7 @@ import { sql } from "drizzle-orm";
 export async function parseCrops(r: RawFamily, ctx: any) {
   const parseBaseCrop = (i: any, cropType: string) => ({
     id: i.__id,
-    household_id: r.__id,
+    family_id: r.__id,
     ward_no: r.id.ward_no,
     crop_type: cropType,
     crop_name: i[cropType],
@@ -37,11 +37,7 @@ export async function parseCrops(r: RawFamily, ctx: any) {
   const processCropType = async (items: any[], cropType: string) => {
     for (const i of items) {
       const crop = parseBaseCrop(i, cropType);
-      const cropStatement = jsonToPostgres(
-        "staging_buddhashanti_crop",
-        crop,
-        "ON CONFLICT(id) DO UPDATE SET",
-      );
+      const cropStatement = jsonToPostgres("staging_buddhashanti_crop", crop);
       if (cropStatement) {
         await ctx.db.execute(sql.raw(cropStatement));
       }

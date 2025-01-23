@@ -12,7 +12,7 @@ export async function parseIndividuals(r: RawFamily, ctx: any) {
       // Initialize base individual object with primary keys and basic info
       const individual = {
         id: i.__id,
-        household_id: r.__id,
+        family_id: r.__id,
         ward_no: r.id.ward_no,
 
         // Personal Information
@@ -262,7 +262,6 @@ export async function parseIndividuals(r: RawFamily, ctx: any) {
         const individualStatement = jsonToPostgres(
           "staging_buddhashanti_individual",
           individual,
-          "ON CONFLICT(id) DO UPDATE SET",
         );
         if (individualStatement) {
           await ctx.db.execute(sql.raw(individualStatement));
