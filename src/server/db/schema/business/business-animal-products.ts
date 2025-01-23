@@ -1,10 +1,4 @@
-import {
-  pgTable,
-  varchar,
-  integer,
-  decimal,
-  primaryKey,
-} from "drizzle-orm/pg-core";
+import { pgTable, varchar, integer, decimal } from "drizzle-orm/pg-core";
 import { business } from "./business";
 
 export const stagingBusinessAnimalProducts = pgTable(
