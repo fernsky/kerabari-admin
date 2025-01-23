@@ -13,7 +13,14 @@ export const getAll = publicProcedure
     const { limit, offset, sortBy = "id", sortOrder = "desc", filters } = input;
 
     // Validate sortBy field exists in business table
-    const validSortColumns = ["id", "businessNature", "businessType", "wardNo", "status", "registrationNo"];
+    const validSortColumns = [
+      "id",
+      "businessNature",
+      "businessType",
+      "wardNo",
+      "status",
+      "registrationNo",
+    ];
     const actualSortBy = validSortColumns.includes(sortBy) ? sortBy : "id";
 
     let conditions = sql`TRUE`;
@@ -24,12 +31,12 @@ export const getAll = publicProcedure
       }
       if (filters.businessNature) {
         filterConditions.push(
-          ilike(business.businessNature, `%${filters.businessNature}%`)
+          ilike(business.businessNature, `%${filters.businessNature}%`),
         );
       }
       if (filters.businessType) {
         filterConditions.push(
-          ilike(business.businessType, `%${filters.businessType}%`)
+          ilike(business.businessType, `%${filters.businessType}%`),
         );
       }
       if (filters.enumeratorId) {
@@ -58,7 +65,7 @@ export const getAll = publicProcedure
         .where(conditions)
         .then((result) => result[0].count),
     ]);
-console.log(filters,data);
+    console.log(filters, data);
     return {
       data,
       pagination: {
@@ -68,8 +75,6 @@ console.log(filters,data);
       },
     };
   });
-
-
 
 export const getById = publicProcedure
   .input(z.object({ id: z.string() }))
@@ -96,25 +101,27 @@ export const getById = publicProcedure
       for (const attachment of attachments) {
         if (attachment.type === "business_image") {
           console.log("Fetching business image");
-          businessEntity[0].buildingImage = await ctx.minio.presignedGetObject(
+          businessEntity[0].businessImage = await ctx.minio.presignedGetObject(
             env.BUCKET_NAME,
             attachment.name,
             24 * 60 * 60, // 24 hours expiry
           );
         }
         if (attachment.type === "business_selfie") {
-          businessEntity[0].enumeratorSelfie = await ctx.minio.presignedGetObject(
-            env.BUCKET_NAME,
-            attachment.name,
-            24 * 60 * 60,
-          );
+          businessEntity[0].enumeratorSelfie =
+            await ctx.minio.presignedGetObject(
+              env.BUCKET_NAME,
+              attachment.name,
+              24 * 60 * 60,
+            );
         }
         if (attachment.type === "audio_monitoring") {
-          businessEntity[0].surveyAudioRecording = await ctx.minio.presignedGetObject(
-            env.BUCKET_NAME,
-            attachment.name,
-            24 * 60 * 60,
-          );
+          businessEntity[0].surveyAudioRecording =
+            await ctx.minio.presignedGetObject(
+              env.BUCKET_NAME,
+              attachment.name,
+              24 * 60 * 60,
+            );
         }
       }
     } catch (error) {
