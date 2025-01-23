@@ -6,6 +6,7 @@ import {
   varchar,
   pgEnum,
   decimal,
+  timestamp,
 } from "drizzle-orm/pg-core";
 import { geometry } from "../../geographical";
 import { areas, users, wards } from "../basic";
@@ -157,3 +158,13 @@ export const family = pgTable("buddhashanti_family", {
 
   status: familyStatusEnum("status").default("pending"),
 });
+
+export const familyEditRequests = pgTable("buddhashanti_family_edit_requests", {
+  id: varchar("id", { length: 48 }).primaryKey(),
+  familyId: varchar("family_id", { length: 48 }).references(() => family.id),
+  message: text("message").notNull(),
+  requestedAt: timestamp("requested_at").defaultNow(),
+});
+
+export type FamilyEditRequest = typeof familyEditRequests.$inferSelect;
+export type FamilySchema = typeof family.$inferSelect;
