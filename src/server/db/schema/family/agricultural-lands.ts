@@ -1,11 +1,10 @@
 import { pgTable, varchar, integer, decimal } from "drizzle-orm/pg-core";
+import { family } from "./family";
 
 const buddhashantiAgriculturalLand = pgTable("buddhashanti_agricultural_land", {
   id: varchar("id", { length: 48 }).primaryKey().notNull(),
-  parentId: varchar("parent_id", { length: 48 }).notNull(),
-  wardNo: integer("ward_no").notNull(),
-  tenantId: varchar("tenant_id", { length: 48 }).default("buddhashanti"),
-  deviceId: varchar("device_id", { length: 48 }).notNull(),
+  familyId: varchar("family_id", { length: 48 }).references(() => family.id),
+  wardNo: integer("ward_no"),
   landOwnershipType: varchar("land_ownership_type", { length: 100 }),
   landArea: decimal("land_area", { precision: 10, scale: 2 }),
   isLandIrrigated: varchar("is_land_irrigated", { length: 100 }),
@@ -21,10 +20,8 @@ export const stagingBuddhashantiAgriculturalLand = pgTable(
   "staging_buddhashanti_agricultural_land",
   {
     id: varchar("id", { length: 48 }).primaryKey().notNull(),
-    parentId: varchar("parent_id", { length: 48 }).notNull(),
-    wardNo: integer("ward_no").notNull(),
-    tenantId: varchar("tenant_id", { length: 48 }).default("buddhashanti"),
-    deviceId: varchar("device_id", { length: 48 }).notNull(),
+    familyId: varchar("family_id", { length: 48 }),
+    wardNo: integer("ward_no"),
     landOwnershipType: varchar("land_ownership_type", { length: 100 }),
     landArea: decimal("land_area", { precision: 10, scale: 2 }),
     isLandIrrigated: varchar("is_land_irrigated", { length: 100 }),

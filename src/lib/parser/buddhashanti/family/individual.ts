@@ -9,33 +9,43 @@ export async function parseIndividuals(r: RawFamily, ctx: any) {
 
   if (r.individual && r.individual.length > 0) {
     for (const i of r.individual) {
+      // Initialize base individual object with primary keys and basic info
       const individual = {
         id: i.__id,
         household_id: r.__id,
         ward_no: r.id.ward_no,
+
+        // Personal Information
         name: i.name,
         gender: decodeSingleChoice(i.gender, familyChoices.genders),
         age: i.age,
+
+        // Initialize Health Information fields
         has_chronic_disease: null as string | null,
         primary_chronic_disease: null as string | null,
         is_sanitized: null as string | null,
+
+        // Initialize Disability Information fields
         is_disabled: null as string | null,
         disability_type: null as string | null,
         disability_cause: null as string | null,
+
+        // Initialize Fertility and Birth Information fields
         gave_live_birth: null as string | null,
-        has_training: null as string | null,
-        primary_skill: null as string | null,
         alive_sons: null as number | null,
         alive_daughters: null as number | null,
         total_born_children: null as number | null,
         dead_sons: null as number | null,
         dead_daughters: null as number | null,
+
+        // Initialize Recent Birth Details fields
         recent_alive_sons: null as number | null,
         recent_alive_daughters: null as number | null,
         recent_birth_total: null as number | null,
         recent_birth_location: null as string | null,
         prenatal_checkup: null as string | null,
 
+        // Cultural and Demographic Information
         citizen_of: decodeSingleChoice(
           i.citizenof,
           familyChoices.local_countries,
@@ -76,6 +86,9 @@ export async function parseIndividuals(r: RawFamily, ctx: any) {
         ),
         religion_other: i.individual_history_info.religion_other_individual,
 
+        // Initialize Education and Work fields
+        has_training: null as string | null,
+        primary_skill: null as string | null,
         marital_status: null as string | null,
         married_age: null as number | null,
         literacy_status: null as string | null,
@@ -88,7 +101,7 @@ export async function parseIndividuals(r: RawFamily, ctx: any) {
         work_availability: null as string | null,
       };
 
-      // Add marriage details if applicable
+      // Process Marital Status
       if (i.age >= 10) {
         individual["marital_status"] = decodeSingleChoice(
           i.mrd.marital_status,
@@ -99,7 +112,7 @@ export async function parseIndividuals(r: RawFamily, ctx: any) {
         }
       }
 
-      // Add health details if available
+      // Process Health and Disability Information
       if (r.health?.length > 0) {
         const healthRecord = r.health.find(
           (j) => i.name === j.health_name && i.age === parseInt(j.health_age),
@@ -136,7 +149,7 @@ export async function parseIndividuals(r: RawFamily, ctx: any) {
         }
       }
 
-      // Add fertility details if applicable
+      // Process Fertility and Birth Information
       if (r.fertility?.length > 0) {
         const fertilityRecord = r.fertility.find(
           (j) =>
@@ -179,7 +192,7 @@ export async function parseIndividuals(r: RawFamily, ctx: any) {
         }
       }
 
-      // Add education details if applicable
+      // Process Education, Training and Skills Information
       if (r.education?.length > 0) {
         const educationRecord = r.education.find(
           (j) => j.edu_name === i.name && parseInt(j.edu_age) === i.age,
@@ -219,7 +232,7 @@ export async function parseIndividuals(r: RawFamily, ctx: any) {
             );
           }
 
-          // Add economy details if present
+          // Process Occupation and Work Information
           const economyRecord = r.economy?.find(
             (j) => j.eco_name === i.name && parseInt(j.eco_age) === i.age,
           );
@@ -244,7 +257,7 @@ export async function parseIndividuals(r: RawFamily, ctx: any) {
         }
       }
 
-      // Insert individual into staging
+      // Database Operations
       try {
         const individualStatement = jsonToPostgres(
           "staging_buddhashanti_individual",

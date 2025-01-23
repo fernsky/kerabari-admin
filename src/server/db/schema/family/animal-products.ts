@@ -5,10 +5,8 @@ export const stagingBuddhashantiAnimalProduct = pgTable(
   "staging_buddhashanti_animal_product",
   {
     id: varchar("id", { length: 48 }).primaryKey().notNull(),
-    parentId: varchar("parent_id", { length: 48 }).notNull(),
+    familyId: varchar("family_id", { length: 48 }),
     wardNo: integer("ward_no").notNull(),
-    tenantId: varchar("tenant_id", { length: 48 }).default("buddhashanti"),
-    deviceId: varchar("device_id", { length: 48 }).notNull(),
     animalProductName: varchar("animal_product_name", { length: 100 }),
     animalProductNameOther: varchar("animal_product_name_other", {
       length: 100,
@@ -37,10 +35,8 @@ export const buddhashantiAnimalProduct = pgTable(
   "buddhashanti_animal_product",
   {
     id: varchar("id", { length: 48 }).primaryKey().notNull(),
-    parentId: varchar("parent_id", { length: 48 }).references(() => family.id),
+    familyId: varchar("family_id", { length: 48 }).references(() => family.id),
     wardNo: integer("ward_no").notNull(),
-    tenantId: varchar("tenant_id", { length: 48 }).default("buddhashanti"),
-    deviceId: varchar("device_id", { length: 48 }).notNull(),
     animalProductName: varchar("animal_product_name", { length: 100 }),
     animalProductNameOther: varchar("animal_product_name_other", {
       length: 100,
