@@ -168,6 +168,8 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
           await ctx.db.execute(sql.raw(mainStatement));
         }
 
+        const areaAFamily = r.id.members.are_a_family == "छ";
+
         // Parse and insert individuals
         if (r.individual && r.individual.length > 0) {
           for (const i of r.individual) {
@@ -180,34 +182,69 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
               name: i.name,
               gender: decodeSingleChoice(i.gender, familyChoices.genders),
               age: i.age,
-              family_role: decodeSingleChoice(
-                i.fam_role,
-                familyChoices.family_role,
-              ),
+              has_chronic_disease: null as string | null,
+              primary_chronic_disease: null as string | null,
+              is_sanitized: null as string | null,
+              is_disabled: null as string | null,
+              disability_type: null as string | null,
+              disability_cause: null as string | null,
+              gave_live_birth: null as string | null,
+              alive_sons: null as number | null,
+              alive_daughters: null as number | null,
+              total_born_children: null as number | null,
+
               citizen_of: decodeSingleChoice(
                 i.citizenof,
                 familyChoices.local_countries,
               ),
               citizen_of_other: i.citizenof_oth,
-              caste: decodeSingleChoice(i.caste, familyChoices.castes),
-              caste_other: i.caste_oth,
+              caste: decodeSingleChoice(
+                areaAFamily
+                  ? r.family_history_info.caste
+                  : i.individual_history_info.caste_individual,
+                familyChoices.castes,
+              ),
+              caste_other: areaAFamily
+                ? r.family_history_info.caste_oth
+                : i.individual_history_info.caste_oth_individual,
               ancestor_language: decodeSingleChoice(
-                i.ancestrial_lang,
+                areaAFamily
+                  ? r.family_history_info.ancestrial_lang
+                  : i.individual_history_info.ancestrial_lang_individual,
                 familyChoices.languages,
               ),
-              ancestor_language_other: i.ancestrial_lang_oth,
+              ancestor_language_other: areaAFamily
+                ? r.family_history_info.ancestrial_lang_oth
+                : i.individual_history_info.ancestrial_lang_oth_individual,
               primary_mother_tongue: decodeSingleChoice(
-                i.mother_tounge_primary,
+                areaAFamily
+                  ? r.family_history_info.mother_tounge_primary
+                  : i.individual_history_info.mother_tounge_primary_individual,
                 familyChoices.languages,
               ),
-              primary_mother_tongue_other: i.mother_tounge_primary_oth,
-              religion: decodeSingleChoice(i.religion, familyChoices.religions),
-              religion_other: i.religion_other,
+              primary_mother_tongue_other: areaAFamily
+                ? r.family_history_info.mother_tounge_primary_oth
+                : i.individual_history_info
+                    .mother_tounge_primary_oth_individual,
+              religion: decodeSingleChoice(
+                areaAFamily
+                  ? r.family_history_info.religion
+                  : i.individual_history_info.religion_individual,
+                familyChoices.religions,
+              ),
+              religion_other:
+                i.individual_history_info.religion_other_individual,
+
+              marital_status: null as string | null,
+              married_age: null as number | null,
+              literacy_status: null as string | null,
+              educational_level: null as string | null,
+              goes_school: null as string | null,
             };
 
             // Add marriage details if applicable
             if (i.age >= 10) {
-              individual.marital_status = decodeSingleChoice(
+              individual["marital_status"] = decodeSingleChoice(
                 i.mrd.marital_status,
                 familyChoices.marital_status,
               );
@@ -234,7 +271,7 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
                   );
                 }
                 individual.is_sanitized = decodeSingleChoice(
-                  healthRecord.is_sanitized,
+                  r.id.members.is_sanitized,
                   familyChoices.true_false,
                 );
                 individual.is_disabled = decodeSingleChoice(
@@ -243,7 +280,7 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
                 );
                 if (healthRecord.is_disabled === "yes") {
                   individual.disability_type = decodeSingleChoice(
-                    healthRecord.disability.disability_type,
+                    healthRecord.disability.dsbltp,
                     familyChoices.disability_types,
                   );
                   individual.disability_cause = decodeSingleChoice(
@@ -309,6 +346,45 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
               }
             } catch (error) {
               console.error(`Error inserting individual ${i.name}:`, error);
+            }
+          }
+        }
+
+        // Parse and insert deaths
+        if (r.death.dno.death_details && r.death.dno.death_details.length > 0) {
+          for (const i of r.death.dno.death_details) {
+            const death = {
+              id: i.__id,
+              household_id: r.__id,
+              ward_no: r.id.ward_no,
+              tenant_id: "buddhashanti",
+              device_id: r.__system.deviceId,
+              deceased_gender: decodeSingleChoice(
+                i.death_gender,
+                familyChoices.genders,
+              ),
+              deceased_age: i.death_age,
+              deceased_death_cause: decodeSingleChoice(
+                i.death_cause,
+                familyChoices.death_causes,
+              ),
+              deceased_fertility_death_condition: decodeSingleChoice(
+                i.fertile_death_condition,
+                familyChoices.fertile_death_conditions,
+              ),
+            };
+
+            try {
+              const deathStatement = jsonToPostgres(
+                "staging_buddhashanti_death",
+                death,
+                "ON CONFLICT(id) DO UPDATE SET",
+              );
+              if (deathStatement) {
+                await ctx.db.execute(sql.raw(deathStatement));
+              }
+            } catch (error) {
+              console.error(`Error inserting death record:`, error);
             }
           }
         }

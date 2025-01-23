@@ -212,6 +212,140 @@ interface SystemInfo {
   formVersion: string;
 }
 
+interface HealthDetails {
+  dhlth: string;
+  health_ward_no: string;
+  health_name: string;
+  health_age: string;
+  health_enumerator: string;
+  health_house_head_name: string;
+  chronic: {
+    has_chronic_disease: string;
+    primary_chronic_disease: string;
+    other_chronic_disease: string | null;
+  };
+  is_disabled: string;
+  disability: {
+    dsbltp: string;
+    other_disability_type: string | null;
+    disability_cause: string;
+    other_disability_cause: string | null;
+  };
+  __id: string;
+}
+
+interface FertilityDetails {
+  fertility_ward_no: string;
+  fertility_name: string;
+  fertility_age: string;
+  fertility_gender: string;
+  fertility_marital_status: string;
+  fertility_enumerator: string;
+  fertility_house_head_name: string;
+  ftd: {
+    gave_live_birth: string | null;
+    alive_sons: number | null;
+    alive_daughters: number | null;
+    total_born_children: number | null;
+    NFTBRTH: string | null;
+    has_dead_children: string | null;
+    dead_sons: number | null;
+    dead_daughters: number | null;
+    total_dead_children: number | null;
+    NFTDEAD: string | null;
+    frcb: {
+      gave_recent_live_birth: string | null;
+      recent_alive_sons: number | null;
+      recent_alive_daughters: number | null;
+      total_recent_children: number | null;
+      NFTRBRTH: string | null;
+      recent_delivery_location: string | null;
+      prenatal_checkup: string | null;
+    };
+    delivery_age: number | null;
+  };
+  __id: string;
+}
+
+interface AbsenteeLocation {
+  abs_location: string;
+  abs_province?: string | null;
+  abs_district?: string | null;
+  abs_country?: string | null;
+  FOREIGN: string;
+}
+
+interface AbsenteeIdentification {
+  abs_age: number;
+  abs_edulvl: string;
+  ABSPRD: string;
+  absence_reason: string;
+  abl: AbsenteeLocation;
+  sent_cash: string;
+  cash: number;
+}
+
+interface Absentee {
+  dabs: string;
+  absentees_ward_no: string;
+  abs_name: string;
+  abs_gender: string;
+  abs_prior_edulvl: string;
+  abs_prior_age: string;
+  abs_enumerator: string;
+  abs_house_head_name: string;
+  is_absent: string;
+  abid: AbsenteeIdentification;
+  __id: string;
+}
+
+interface EconomyEducationDetails {
+  work_barrier: string;
+  work_availability: string;
+}
+
+interface EconomyDetails {
+  m_work: string;
+  primary_occu: string;
+  EA02: EconomyEducationDetails;
+}
+
+interface Economy {
+  deco: string;
+  economy_ward_no: string;
+  eco_age: string;
+  eco_name: string;
+  eco_enumerator: string;
+  eco_house_head_name: string;
+  ed: EconomyDetails;
+  __id: string;
+}
+
+interface EducationDetails {
+  is_literate: string;
+  edu_level: string;
+  primary_sub: string | null;
+}
+
+interface EducationTraining {
+  has_training: string;
+  primary_skill: string;
+}
+
+interface Education {
+  dedu: string;
+  education_ward_no: string;
+  edu_age: string;
+  edu_name: string;
+  edu_enumerator: string;
+  edu_house_head_name: string;
+  edd: EducationDetails;
+  goes_school: string;
+  school_barrier: string | null;
+  edt: EducationTraining;
+  __id: string;
+}
+
 export interface RawFamily {
   intro?: string | null;
   audio_monitoring: string;
@@ -225,14 +359,18 @@ export interface RawFamily {
   family_history_info: FamilyHistoryInfo;
   NED?: string | null;
   education_count: string;
+  education: Education[];
   NH?: string | null;
   health_count: string;
+  health: HealthDetails[];
   NFT?: string | null;
   fertility_count: string;
+  fertility: FertilityDetails[];
   NDD?: string | null;
   death: DeathInfo;
   NAR?: string | null;
   absentees_count: string;
+  absentees: Absentee[];
   has_remittance: string;
   remittance_expenses: string;
   NMG?: string | null;
@@ -240,6 +378,7 @@ export interface RawFamily {
   plocation: PriorLocationInfo;
   NEA?: string | null;
   economy_count: string;
+  economy: Economy[];
   B?: string | null;
   agri_count: string;
   agri: AgricultureInfo;
