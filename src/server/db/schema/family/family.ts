@@ -48,6 +48,14 @@ export const stagingFamily = pgTable("staging_buddhashanti_family", {
   solidWaste: text("solid_waste"),
   solidWasteOther: text("solid_waste_other"),
 
+    // Media (audio & images stored as bucket keys)
+  surveyAudioRecording: varchar("survey_audio_recording", { length: 255 }),
+  // gps: geometry("gps", { type: "Point" }),
+  // altitude: decimal("altitude"),
+  // gpsAccuracy: decimal("gps_accuracy"),
+  familyImage: varchar("family_image", { length: 255 }),
+  enumeratorSelfie: varchar("enumerator_selfie", { length: 255 }),
+
   // Energy and Facilities
   primaryCookingFuel: text("primary_cooking_fuel"),
   primaryEnergySource: text("primary_energy_source"),

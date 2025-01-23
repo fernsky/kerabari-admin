@@ -73,10 +73,47 @@ export const getById = publicProcedure
       .where(eq(family.id, input.id))
       .limit(1);
 
+    const attachments = await ctx.db.query.surveyAttachments.findMany({
+      where: eq(surveyAttachments.dataId, input.id),
+    });
+
     if (!familyEntity[0]) {
       throw new TRPCError({
         code: "NOT_FOUND",
         message: "Family not found",
+      });
+    }
+
+    try {
+      // Process the attachments and create presigned URLs
+      for (const attachment of attachments) {
+        if (attachment.type === "family_head_image") {
+          familyEntity[0].familyImage = await ctx.minio.presignedGetObject(
+            env.BUCKET_NAME,
+            attachment.name,
+            24 * 60 * 60, // 24 hours expiry
+          );
+        }
+        if (attachment.type === "family_selfie") {
+          familyEntity[0].enumeratorSelfie = await ctx.minio.presignedGetObject(
+            env.BUCKET_NAME,
+            attachment.name,
+            24 * 60 * 60,
+          );
+        }
+        if (attachment.type === "audio_monitoring") {
+          familyEntity[0].surveyAudioRecording = await ctx.minio.presignedGetObject(
+            env.BUCKET_NAME,
+            attachment.name,
+            24 * 60 * 60,
+          );
+        }
+      }
+    } catch (error) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to generate presigned URLs",
+        cause: error,
       });
     }
 

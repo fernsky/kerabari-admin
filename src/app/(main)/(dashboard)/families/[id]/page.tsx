@@ -12,6 +12,7 @@ import { FamilyLoadingState } from "@/components/family/family-loading-state";
 import { FamilyInfoGrid } from "@/components/family/family-info-grid";
 import { FamilyStatsGrid } from "@/components/family/family-stats-grid";
 import { LocationDetailsSection } from "@/components/family/location-details-section";
+import { FamilyMediaSection } from "@/components/family/family-media-section";
 
 const gpsSchema = z.object({
   type: z.literal("Point"),
@@ -66,16 +67,8 @@ export default function FamilyDetails({ params }: { params: { id: string } }) {
             headName={family?.headName ?? "N/A"}
           />
 
-          {/* <FamilyActions
-            familyId={family.id}
-            currentStatus={family.status ?? "pending"}
-            onStatusChange={familyRefetch}
-          /> */}
-
-          <FamilyInfoGrid family={family} />
-
-          {family?.geom && gpsSchema.safeParse(family.geom).success && (
-            <div className="grid gap-6">
+          <div className="grid lg:grid-cols-5 gap-6">
+            {family?.geom && gpsSchema.safeParse(family.geom).success && (
               <LocationDetailsSection
                 coordinates={[
                   family.geom.coordinates[1],
@@ -90,8 +83,34 @@ export default function FamilyDetails({ params }: { params: { id: string } }) {
                   family.altitude ? parseFloat(family.altitude) : undefined
                 }
               />
-            </div>
-          )}
+            )}
+
+            {(family?.enumeratorSelfie ||
+              family?.surveyAudioRecording ||
+              (family?.gps && gpsSchema.safeParse(business.gps).success)) && (
+              <div className="grid gap-6 lg:grid-cols-5">
+                <FamilyMediaSection
+                  selfieUrl={family.enumeratorSelfie ?? undefined}
+                  audioUrl={family.surveyAudioRecording ?? undefined}
+                />
+
+                {family?.gps && gpsSchema.safeParse(family.gps).success && (
+                  <LocationDetailsSection
+                    coordinates={[
+                      family.gps.coordinates[1],
+                      family.gps.coordinates[0],
+                    ]}
+                    gpsAccuracy={parseFloat(
+                      family.gpsAccuracy?.toString() ?? "0",
+                    )}
+                    altitude={parseFloat(family.altitude?.toString() ?? "0")}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+
+          <FamilyInfoGrid family={family} />
         </div>
       )}
     </ContentLayout>
