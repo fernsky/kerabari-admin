@@ -168,7 +168,7 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
           await ctx.db.execute(sql.raw(mainStatement));
         }
 
-        const areaAFamily = r.id.members.are_a_family == "छ";
+        const areaAFamily = r.id.members.are_a_family == "yes";
 
         // Parse and insert individuals
         if (r.individual && r.individual.length > 0) {
@@ -350,6 +350,353 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
           }
         }
 
+        // Parse and insert agricultural lands
+        if (r.agri?.agricultural_land && r.agri.agricultural_land.length > 0) {
+          for (const i of r.agri.agricultural_land) {
+            const agricultural_land = {
+              id: i.__id,
+              household_id: r.__id,
+              ward_no: r.id.ward_no,
+              tenant_id: "buddhashanti",
+              device_id: r.__system.deviceId,
+              land_ownernship_type: i.agland_oship,
+              land_area:
+                (i.land_area?.B02_3 ?? 0) * 6772.63 +
+                (i.land_area?.B02_5 ?? 0) * 338.63 +
+                (i.land_area?.B02_7 ?? 0) * 16.93,
+              irrigatino_source: decodeSingleChoice(
+                i.irrigation_src,
+                familyChoices.irrigation_source,
+              ),
+              irrigated_land_area:
+                i.irrigation_src === "no_irrigation"
+                  ? null
+                  : i.irrigation?.irrigated_area,
+            };
+
+            try {
+              const agricultureStatement = jsonToPostgres(
+                "staging_buddhashanti_agricultural_land",
+                agricultural_land,
+                "ON CONFLICT(id) DO UPDATE SET",
+              );
+              if (agricultureStatement) {
+                await ctx.db.execute(sql.raw(agricultureStatement));
+              }
+            } catch (error) {
+              console.error(`Error inserting agricultural land:`, error);
+            }
+          }
+        }
+
+        // Parse and insert crops
+        if (r.agri?.food) {
+          // Food crops
+          if (
+            r.agri.food.fcrop_details &&
+            r.agri.food.fcrop_details.length > 0
+          ) {
+            for (const i of r.agri.food.fcrop_details) {
+              const crop = {
+                id: i.__id,
+                household_id: r.__id,
+                ward_no: r.id.ward_no,
+                tenant_id: "buddhashanti",
+                device_id: r.__system.deviceId,
+                crop_type: "food",
+                crop_name: decodeSingleChoice(
+                  i.fcrop,
+                  familyChoices.food_crops,
+                ),
+                area:
+                  (i.fcrop_area_description.fcrop_bigha ?? 0) * 6772.63 +
+                  (i.fcrop_area_description.fcrop_kattha ?? 0) * 338.63 +
+                  (i.fcrop_area_description.fcrop_dhur ?? 0) * 16.93,
+                production: i.fp.fcrop_prod,
+              };
+
+              try {
+                const cropStatement = jsonToPostgres(
+                  "staging_buddhashanti_crop",
+                  crop,
+                  "ON CONFLICT(id) DO UPDATE SET",
+                );
+                if (cropStatement) {
+                  await ctx.db.execute(sql.raw(cropStatement));
+                }
+              } catch (error) {
+                console.error(`Error inserting food crop:`, error);
+              }
+            }
+          }
+
+          // Pulses
+          if (
+            r.agri.food.pulse_details &&
+            r.agri.food.pulse_details.length > 0
+          ) {
+            for (const i of r.agri.food.pulse_details) {
+              const crop = {
+                id: i.__id,
+                household_id: r.__id,
+                ward_no: r.id.ward_no,
+                tenant_id: "buddhashanti",
+                device_id: r.__system.deviceId,
+                crop_type: "pulse",
+                crop_name: i.pulse,
+                area:
+                  (i.pulse_area_description.pulse_bigha ?? 0) * 6772.63 +
+                  (i.pulse_area_description.pulse_kattha ?? 0) * 338.63 +
+                  (i.pulse_area_description.pulse_dhur ?? 0) * 16.93,
+                production: i.pp.pulse_prod,
+              };
+
+              try {
+                const cropStatement = jsonToPostgres(
+                  "staging_buddhashanti_crop",
+                  crop,
+                  "ON CONFLICT(id) DO UPDATE SET",
+                );
+                if (cropStatement) {
+                  await ctx.db.execute(sql.raw(cropStatement));
+                }
+              } catch (error) {
+                console.error(`Error inserting pulse crop:`, error);
+              }
+            }
+          }
+
+          // Vegetables
+          if (
+            r.agri.food.vtable_details &&
+            r.agri.food.vtable_details.length > 0
+          ) {
+            for (const i of r.agri.food.vtable_details) {
+              const crop = {
+                id: i.__id,
+                household_id: r.__id,
+                ward_no: r.id.ward_no,
+                tenant_id: "buddhashanti",
+                device_id: r.__system.deviceId,
+                crop_type: "vegetable",
+                crop_name: i.vtable,
+                area:
+                  (i.vtables_area_description.vtables_bigha ?? 0) * 6772.63 +
+                  (i.vtables_area_description.vtables_kattha ?? 0) * 338.63 +
+                  (i.vtables_area_description.vtables_dhur ?? 0) * 16.93,
+                production: i.vp.vtable_prod,
+              };
+
+              try {
+                const cropStatement = jsonToPostgres(
+                  "staging_buddhashanti_crop",
+                  crop,
+                  "ON CONFLICT(id) DO UPDATE SET",
+                );
+                if (cropStatement) {
+                  await ctx.db.execute(sql.raw(cropStatement));
+                }
+              } catch (error) {
+                console.error(`Error inserting vegetable crop:`, error);
+              }
+            }
+          }
+        }
+
+        // Oil seeds
+        if (r.agri.food.oseed_details && r.agri.food.oseed_details.length > 0) {
+          for (const i of r.agri.food.oseed_details) {
+            const crop = {
+              id: i.__id,
+              household_id: r.__id,
+              ward_no: r.id.ward_no,
+              tenant_id: "buddhashanti",
+              device_id: r.__system.deviceId,
+              crop_type: "oilseed",
+              crop_name: i.oseed,
+              area:
+                (i.oseed_area_description.oseed_bigha ?? 0) * 6772.63 +
+                (i.oseed_area_description.oseed_kattha ?? 0) * 338.63 +
+                (i.oseed_area_description.oseed_dhur ?? 0) * 16.93,
+              production: i.oslp.oseed_prod,
+            };
+
+            try {
+              const cropStatement = jsonToPostgres(
+                "staging_buddhashanti_crop",
+                crop,
+                "ON CONFLICT(id) DO UPDATE SET",
+              );
+              if (cropStatement) {
+                await ctx.db.execute(sql.raw(cropStatement));
+              }
+            } catch (error) {
+              console.error(`Error inserting oilseed crop:`, error);
+            }
+          }
+        }
+
+        // Fruits
+        if (r.agri.food.fruit_details && r.agri.food.fruit_details.length > 0) {
+          for (const i of r.agri.food.fruit_details) {
+            const crop = {
+              id: i.__id,
+              household_id: r.__id,
+              ward_no: r.id.ward_no,
+              tenant_id: "buddhashanti",
+              device_id: r.__system.deviceId,
+              crop_type: "fruit",
+              crop_name: i.fruit,
+              area:
+                (i.fruits_area_description.fruits_bigha ?? 0) * 6772.63 +
+                (i.fruits_area_description.fruits_kattha ?? 0) * 338.63 +
+                (i.fruits_area_description.fruits_dhur ?? 0) * 16.93,
+              production: i.frp.fruit_prod,
+            };
+
+            try {
+              const cropStatement = jsonToPostgres(
+                "staging_buddhashanti_crop",
+                crop,
+                "ON CONFLICT(id) DO UPDATE SET",
+              );
+              if (cropStatement) {
+                await ctx.db.execute(sql.raw(cropStatement));
+              }
+            } catch (error) {
+              console.error(`Error inserting fruit crop:`, error);
+            }
+          }
+        }
+
+        // Spices
+        if (r.agri.food.spice_details && r.agri.food.spice_details.length > 0) {
+          for (const i of r.agri.food.spice_details) {
+            const crop = {
+              id: i.__id,
+              household_id: r.__id,
+              ward_no: r.id.ward_no,
+              tenant_id: "buddhashanti",
+              device_id: r.__system.deviceId,
+              crop_type: "spice",
+              crop_name: i.spice,
+              area:
+                (i.spice_area_description.spice_bigha ?? 0) * 6772.63 +
+                (i.spice_area_description.spice_kattha ?? 0) * 338.63 +
+                (i.spice_area_description.spice_dhur ?? 0) * 16.93,
+              production: i.sp.spice_prod,
+            };
+
+            try {
+              const cropStatement = jsonToPostgres(
+                "staging_buddhashanti_crop",
+                crop,
+                "ON CONFLICT(id) DO UPDATE SET",
+              );
+              if (cropStatement) {
+                await ctx.db.execute(sql.raw(cropStatement));
+              }
+            } catch (error) {
+              console.error(`Error inserting spice crop:`, error);
+            }
+          }
+        }
+
+        // Cash crops
+        if (r.agri.food.ccrop_details && r.agri.food.ccrop_details.length > 0) {
+          for (const i of r.agri.food.ccrop_details) {
+            const crop = {
+              id: i.__id,
+              household_id: r.__id,
+              ward_no: r.id.ward_no,
+              tenant_id: "buddhashanti",
+              device_id: r.__system.deviceId,
+              crop_type: "cash",
+              crop_name: i.ccrop,
+              area:
+                (i.ccrop_area_description.ccrop_bigha ?? 0) * 6772.63 +
+                (i.ccrop_area_description.ccrop_kattha ?? 0) * 338.63 +
+                (i.ccrop_area_description.ccrop_dhur ?? 0) * 16.93,
+              production: i.cp.ccrop_prod,
+            };
+
+            try {
+              const cropStatement = jsonToPostgres(
+                "staging_buddhashanti_crop",
+                crop,
+                "ON CONFLICT(id) DO UPDATE SET",
+              );
+              if (cropStatement) {
+                await ctx.db.execute(sql.raw(cropStatement));
+              }
+            } catch (error) {
+              console.error(`Error inserting cash crop:`, error);
+            }
+          }
+        }
+
+        // Parse and insert animals
+        if (r.agri.animal_details && r.agri.animal_details.length > 0) {
+          for (const i of r.agri.animal_details) {
+            const animal = {
+              id: i.__id,
+              household_id: r.__id,
+              ward_no: r.id.ward_no,
+              tenant_id: "buddhashanti",
+              device_id: r.__system.deviceId,
+              animal_type: i.animal,
+              animal_other: i.anim.animal_oth,
+              total_count: i.animn.total_animals,
+              sales_count: i.anim.oth_total_animals,
+              revenue: i.anim.oth_animal_revenue,
+            };
+
+            try {
+              const animalStatement = jsonToPostgres(
+                "staging_buddhashanti_animal",
+                animal,
+                "ON CONFLICT(id) DO UPDATE SET",
+              );
+              if (animalStatement) {
+                await ctx.db.execute(sql.raw(animalStatement));
+              }
+            } catch (error) {
+              console.error(`Error inserting animal:`, error);
+            }
+          }
+        }
+
+        // Parse and insert animal products
+        if (r.agri.aprod_details && r.agri.aprod_details.length > 0) {
+          for (const i of r.agri.aprod_details) {
+            const animalProduct = {
+              id: i.__id,
+              household_id: r.__id,
+              ward_no: r.id.ward_no,
+              tenant_id: "buddhashanti",
+              device_id: r.__system.deviceId,
+              product_type: i.aprod,
+              product_type_other: i.apo.aprod_oth,
+              unit: i.apon.aprod_unit,
+              unit_other: i.apon.aprod_unit_oth,
+              production: i.apon.aprod_prod,
+            };
+
+            try {
+              const animalProductStatement = jsonToPostgres(
+                "staging_buddhashanti_animal_product",
+                animalProduct,
+                "ON CONFLICT(id) DO UPDATE SET",
+              );
+              if (animalProductStatement) {
+                await ctx.db.execute(sql.raw(animalProductStatement));
+              }
+            } catch (error) {
+              console.error(`Error inserting animal product:`, error);
+            }
+          }
+        }
+
         // Parse and insert deaths
         if (r.death.dno.death_details && r.death.dno.death_details.length > 0) {
           for (const i of r.death.dno.death_details) {
@@ -388,8 +735,6 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
             }
           }
         }
-
-        // ... continue with other data insertions ...
       } catch (error) {
         console.error("Error processing family data:", error);
         throw new Error(`Failed to process family data: ${error}`);

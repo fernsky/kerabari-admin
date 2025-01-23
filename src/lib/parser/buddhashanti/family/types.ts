@@ -326,6 +326,96 @@ interface CashCropDetails {
   __id: string;
 }
 
+interface AgricultureLandArea {
+  B02_3: number;
+  B02_5: number;
+  B02_7: number;
+  agland_area: string;
+  B02_10: string | null;
+}
+
+interface AgricultureIrrigation {
+  B02_13: number;
+  B02_15: number;
+  B02_17: number;
+  irrigated_area: string;
+  B02_20: string | null;
+}
+
+interface AgriculturalLand {
+  agland_ward_no: string;
+  agland_oship: string;
+  agland_enumerator: string;
+  agland_house_head_name: string;
+  land_area: AgricultureLandArea;
+  irrigation_src: string;
+  irrigation_time: string;
+  irrigation: AgricultureIrrigation;
+  __id: string;
+}
+
+interface AnimalDetails {
+  danim: string;
+  animal_ward_no: string;
+  animal: string;
+  animal_enumerator: string;
+  animal_house_head_name: string;
+  anim: {
+    animal_oth: string | null;
+    oth_total_animals: number | null;
+    oth_animal_sales: number | null;
+    oth_animal_revenue: number | null;
+  };
+  animn: {
+    total_animals: number;
+  };
+  __id: string;
+}
+
+interface AnimalProduct {
+  daprod: string;
+  aprod_ward_no: string;
+  aprod: string;
+  aprod_enumerator: string;
+  aprod_house_head_name: string;
+  apo: {
+    aprod_oth: string | null;
+    oth_aprod_unit: string | null;
+    oth_aprod_unit_oth: string | null;
+    oth_aprod_prod: number | null;
+  };
+  apon: {
+    aprod_unit: string;
+    aprod_unit_oth: string | null;
+    aprod_prod: number;
+  };
+  __id: string;
+}
+
+interface AnimalProductOutput {
+  aprod_oth: string | null;
+  oth_aprod_unit: string | null;
+  oth_aprod_unit_oth: string | null;
+  oth_aprod_prod: number | null;
+}
+
+interface AnimalProductNumber {
+  aprod_unit: string;
+  aprod_unit_oth: string | null;
+  aprod_prod: number;
+}
+
+interface AnimalProductItem {
+  daprod: string;
+  aprod_ward_no: string;
+  aprod: string;
+  aprod_enumerator: string;
+  aprod_house_head_name: string;
+  apo: AnimalProductOutput;
+  apon: AnimalProductNumber;
+  __id: string;
+}
+
 interface AgricultureInfo {
   has_agland: string;
   aglands_oship: string;
@@ -358,11 +448,14 @@ interface AgricultureInfo {
   months_sustained_from_agriculture: string;
   has_husbandry: string;
   animals: string;
+  animal_details: AnimalDetails[];
   aprods: string;
+  aprod_details: AnimalProductItem[];
   has_aquacultured: string;
   has_apicultured: string;
   months_involved_in_agriculture: string;
   agri_machines: string;
+  agricultural_land: AgriculturalLand[];
 }
 
 interface IndividualInfo {
