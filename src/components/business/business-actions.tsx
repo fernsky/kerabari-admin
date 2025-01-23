@@ -18,11 +18,12 @@ import {
   XCircle,
   Edit,
   Clock,
-  AlertTriangle,
   CheckCircle,
+  Loader2,
 } from "lucide-react";
 import { api } from "@/trpc/react";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 type BuildingStatus =
   | "pending"
@@ -247,6 +248,129 @@ export function BuildingActions({
             Waiting for enumerator to edit the building data
           </p>
         )}
+      </div>
+    </div>
+  );
+}
+
+type Status = "approved" | "pending" | "requested_for_edit" | "rejected";
+
+export function BusinessActions({
+  businessId,
+  currentStatus,
+  onStatusChange,
+}: {
+  businessId: string;
+  currentStatus: Status;
+  onStatusChange: () => void;
+}) {
+  const [message, setMessage] = useState("");
+  const [open, setOpen] = useState(false);
+
+  const { mutate: requestEdit, isLoading: isRequesting } =
+    api.business.requestEdit.useMutation({
+      onSuccess: () => {
+        toast.success("Edit request sent successfully");
+        setOpen(false);
+        onStatusChange();
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    });
+
+  const { mutate: approve, isLoading: isApproving } =
+    api.business.approve.useMutation({
+      onSuccess: () => {
+        toast.success("Business approved successfully");
+        onStatusChange();
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    });
+
+  const { mutate: reject, isLoading: isRejecting } =
+    api.business.reject.useMutation({
+      onSuccess: () => {
+        toast.success("Business rejected successfully");
+        onStatusChange();
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    });
+
+  return (
+    <div className="flex items-center justify-between rounded-lg border bg-card p-4">
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-medium">Status:</span>
+        <Badge>{currentStatus}</Badge>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm">
+              Request Edit
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Request Edit</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <Textarea
+                placeholder="Enter your message..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setOpen(false)}
+                disabled={isRequesting}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => requestEdit({ businessId, message })}
+                disabled={isRequesting}
+              >
+                {isRequesting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Send Request
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => reject({ businessId, message })}
+          disabled={isRejecting || !message}
+        >
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+          <XCircle className="mr-2 h-4 w-4" />){"}"}
+          Reject
+        </Button>
+
+        <Button
+          size="sm"
+          onClick={() => approve({ businessId })}
+          disabled={isApproving}
+        >
+          {isApproving ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Check className="mr-2 h-4 w-4" />
+          )}
+          Approve
+        </Button>
       </div>
     </div>
   );

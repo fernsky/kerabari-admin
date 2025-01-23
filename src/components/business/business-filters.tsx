@@ -20,7 +20,7 @@ import {
   Edit,
 } from "lucide-react";
 
-interface BuildingFiltersProps {
+interface BusinessFiltersProps {
   wardNumber: number | undefined;
   locality: string | undefined;
   mapStatus: string | undefined;
@@ -29,14 +29,14 @@ interface BuildingFiltersProps {
   onFilterChange: (key: string, value: any) => void;
 }
 
-export function BuildingFilters({
+export function BusinessFilters({
   wardNumber,
   locality,
   mapStatus,
   enumeratorId,
   status,
   onFilterChange,
-}: BuildingFiltersProps) {
+}: BusinessFiltersProps) {
   const { data: enumerators } = api.admin.getEnumerators.useQuery();
 
   const enumeratorOptions = [

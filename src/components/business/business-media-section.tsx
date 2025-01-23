@@ -2,15 +2,15 @@ import Image from "next/image";
 import AudioPlayer, { RHAP_UI } from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 
-interface BuildingMediaSectionProps {
+interface BusinessMediaSectionProps {
   selfieUrl?: string;
   audioUrl?: string;
 }
 
-export function BuildingMediaSection({
+export function BusinessMediaSection({
   selfieUrl,
   audioUrl,
-}: BuildingMediaSectionProps) {
+}: BusinessMediaSectionProps) {
   return (
     <div className="lg:col-span-2 space-y-6">
       {selfieUrl && (

@@ -1,76 +1,76 @@
-import { publicProcedure } from "@/server/api/trpc";
-import { updateBuildingSchema } from "../building.schema";
-import { buildings, buildingTokens } from "@/server/db/schema/building";
-import { and, eq, sql } from "drizzle-orm";
-import { z } from "zod";
-import { TRPCError } from "@trpc/server";
+// import { publicProcedure } from "@/server/api/trpc";
+// import { updateBusinessSchema } from "../business.schema";
+// import { business, businessEditRequests } from "@/server/db/schema/business/business";
+// import { buildingTokens } from "@/server/db/schema/building";
+// import { and, eq, sql } from "drizzle-orm";
+// import { z } from "zod";
+// import { TRPCError } from "@trpc/server";
 
-export const update = publicProcedure
-  .input(z.object({ id: z.string(), data: updateBuildingSchema }))
-  .mutation(async ({ ctx, input }) => {
-    const { id, data } = input;
+// export const update = publicProcedure
+//   .input(z.object({ id: z.string(), data: updateBusinessSchema }))
+//   .mutation(async ({ ctx, input }) => {
+//     const { id, data } = input;
 
-    // Prevent setting building token without area ID
-    if (data.buildingToken && !data.areaId) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Cannot set building token without a valid area ID",
-      });
-    }
+//     // Prevent setting building token without area ID
+//     if (data.buildingToken && !data.areaId) {
+//       throw new TRPCError({
+//         code: "BAD_REQUEST",
+//         message: "Cannot set building token without a valid area ID",
+//       });
+//     }
 
-    // If buildingToken is being updated, validate it belongs to the area
-    if (data.buildingToken && data.areaId) {
-      const validToken = await ctx.db
-        .select()
-        .from(buildingTokens)
-        .where(
-          and(
-            eq(buildingTokens.areaId, data.areaId),
-            eq(buildingTokens.token, data.buildingToken),
-          ),
-        )
-        .limit(1);
+//     // If buildingToken is being updated, validate it belongs to the area
+//     if (data.buildingToken && data.areaId) {
+//       const validToken = await ctx.db
+//         .select()
+//         .from(buildingTokens)
+//         .where(
+//           and(
+//             eq(buildingTokens.areaId, data.areaId),
+//             eq(buildingTokens.token, data.buildingToken),
+//           ),
+//         )
+//         .limit(1);
 
-      if (validToken.length === 0) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: `Building token ${data.buildingToken} does not belong to area ${data.areaId}`,
-        });
-      }
+//       if (validToken.length === 0) {
+//         throw new TRPCError({
+//           code: "BAD_REQUEST",
+//           message: `Building token ${data.buildingToken} does not belong to area ${data.areaId}`,
+//         });
+//       }
+//     }
 
-      // Mark the token as allocated
-      await ctx.db
-        .update(buildingTokens)
-        .set({ status: "allocated" })
-        .where(eq(buildingTokens.token, data.buildingToken));
-    }
+//     const { gps, registeredBodies, ...restData } = data;
+//     const transformedData = {
+//       ...restData,
+//       gps: gps ? sql`ST_GeomFromText(${gps})` : undefined,
+//       registeredBodies: registeredBodies
+//         ? Array.isArray(registeredBodies)
+//           ? registeredBodies
+//           : [registeredBodies]
+//         : undefined,
+//     };
 
-    const { gps, ...restData } = data;
-    const transformedData = {
-      ...restData,
-      surveyDate: restData.surveyDate
-        ? new Date(restData.surveyDate)
-        : undefined,
-      gps: gps ? sql`ST_GeomFromText(${gps})` : undefined,
-      naturalDisasters: restData.naturalDisasters
-        ? Array.isArray(restData.naturalDisasters)
-          ? restData.naturalDisasters
-          : [restData.naturalDisasters]
-        : undefined,
-    };
+//     await ctx.db
+//       .update(business)
+//       .set(transformedData)
+//       .where(eq(business.id, id));
 
-    await ctx.db
-      .update(buildings)
-      .set(transformedData)
-      .where(eq(buildings.id, id));
+//     return { success: true };
+//   });
 
-    return { success: true };
-  });
+// export const deleteBusiness = publicProcedure
+//   .input(z.object({ id: z.string() }))
+//   .mutation(async ({ ctx, input }) => {
+//     // First delete any edit requests for this business
+//     await ctx.db
+//       .delete(businessEditRequests)
+//       .where(eq(businessEditRequests.businessId, input.id));
 
-export const deleteBuilding = publicProcedure
-  .input(z.object({ id: z.string() }))
-  .mutation(async ({ ctx, input }) => {
-    await ctx.db.delete(buildings).where(eq(buildings.id, input.id));
+//     // Then delete the business
+//     await ctx.db
+//       .delete(business)
+//       .where(eq(business.id, input.id));
 
-    return { success: true };
-  });
+//     return { success: true };
+//   });

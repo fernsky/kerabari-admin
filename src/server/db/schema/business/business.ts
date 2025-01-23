@@ -135,6 +135,7 @@ export const businessStatusEnum = pgEnum("business_status_enum", [
 
 export const business = pgTable("buddhashanti_business", {
   id: varchar("id", { length: 48 }).primaryKey(),
+  //  id: text("id").primaryKey(),
   // Enumerator Information
   enumeratorName: varchar("enumerator_name", { length: 255 }),
   phone: varchar("phone", { length: 20 }),
