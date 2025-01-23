@@ -417,6 +417,7 @@ async function performBusinessSync(ctx: any, recordId: string) {
         .insert(businessCrops)
         .values(
           crops.map((crop: StagingBusinessCrop) => ({
+            id: crop.id,
             businessId: crop.businessId,
             wardNo: crop.wardNo,
             cropType: crop.cropType,
@@ -437,6 +438,7 @@ async function performBusinessSync(ctx: any, recordId: string) {
         .insert(businessAnimalProducts)
         .values(
           animalProducts.map((product: StagingBusinessAnimalProduct) => ({
+            id: product.id,
             businessId: product.businessId,
             wardNo: product.wardNo,
             animalProduct: product.animalProduct,
