@@ -52,3 +52,30 @@ VALUES
         720000,
         '2025-01-22 06:27:58.231'
     );
+
+INSERT INTO
+    public.acme_odk_survey_forms (
+        id,
+        name,
+        url,
+        odk_project_id,
+        odk_form_id,
+        username,
+        "password",
+        attachment_paths,
+        update_interval,
+        last_fetched
+    )
+VALUES
+    (
+        'buddhashanti_family_survey',
+        'Buddhashanti Family Survey',
+        '"\"https://survey.digprofile.com\""',
+        2,
+        'household',
+        '"\"supervisor@likhupike.com\""',
+        '"\"supervisor\""',
+        '{"{\"path\":\"audio_monitoring\",\"type\":\"audio_monitoring\"}","{\"path\":\"himg\",\"type\":\"family_head_image\"}","{\"path\":\"himg_selfie\",\"type\":\"family_head_selfie\"}"}',
+        36000,
+        '2025-01-23 02:42:24.505'
+    );

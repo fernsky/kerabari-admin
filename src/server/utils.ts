@@ -6,6 +6,7 @@ import { handleAttachment } from "./services/attachment/handler";
 import { ODKConfig } from "./services/types";
 import { handleBuildingFlow } from "./services/sync/building/building";
 import { handleBusinessFlow } from "./services/sync/business/business";
+import { handleFamilyFlow } from "./services/sync/family/family";
 
 export const fetchSurveySubmissions = async (
   {
@@ -103,6 +104,8 @@ export const fetchSurveySubmissions = async (
         case "buddhashanti_business_survey":
           handleBusinessFlow(submission, ctx);
           break;
+        case "buddhashanti_family_survey":
+          handleFamilyFlow(submission, ctx);
         default:
           console.log("No handler found for form ID:", formId);
       }

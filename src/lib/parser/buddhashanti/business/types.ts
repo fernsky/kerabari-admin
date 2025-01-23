@@ -248,6 +248,7 @@ export interface NormalBAnimalDetail {
 }
 
 export interface BAnimalDetail {
+  __id: string;
   animal_ward_no: string;
   b_animal: string;
   banim: OtherBAnimalDetail;
@@ -277,6 +278,7 @@ export interface BAprodDetail {
   aprod_ward_no: string;
   baprd: OtherBAprodProdDetail;
   baprdn: NormalBAprodProdDetail;
+  __id: string;
 }
 
 interface EnumeratorIntroduction {
