@@ -11,6 +11,8 @@ import { Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { BusinessActions } from "@/components/business/business-actions";
 import { z } from "zod";
+import { BusinessMediaSection } from "@/components/business/business-media-section";
+import Image from "next/image";
 
 const gpsSchema = z.object({
   type: z.literal("Point"),
@@ -78,24 +80,42 @@ export default function BusinessDetails({
             onStatusChange={businessRefetch}
           />
 
+          {business?.businessImage && (
+            <div className="overflow-hidden rounded-xl border bg-card">
+              <div className="aspect-video relative">
+                <Image
+                  src={business.businessImage}
+                  alt="Business"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            </div>
+          )}
+
           <BusinessInfoGrid business={business} />
 
-          {business?.gps && gpsSchema.safeParse(business.gps).success && (
+          {(business?.enumeratorSelfie ||
+            business?.surveyAudioRecording ||
+            (business?.gps && gpsSchema.safeParse(business.gps).success)) && (
             <div className="grid gap-6 lg:grid-cols-5">
-              <LocationDetailsSection
-                coordinates={[
-                  business.gps.coordinates[1],
-                  business.gps.coordinates[0],
-                ]}
-                gpsAccuracy={
-                  business.gpsAccuracy
-                    ? parseFloat(business.gpsAccuracy)
-                    : undefined
-                }
-                altitude={
-                  business.altitude ? parseFloat(business.altitude) : undefined
-                }
+              <BusinessMediaSection
+                selfieUrl={business.enumeratorSelfie ?? undefined}
+                audioUrl={business.surveyAudioRecording ?? undefined}
               />
+
+              {business?.gps && gpsSchema.safeParse(business.gps).success && (
+                <LocationDetailsSection
+                  coordinates={[
+                    business.gps.coordinates[1],
+                    business.gps.coordinates[0],
+                  ]}
+                  gpsAccuracy={parseFloat(
+                    business.gpsAccuracy?.toString() ?? "0",
+                  )}
+                  altitude={parseFloat(business.altitude?.toString() ?? "0")}
+                />
+              )}
             </div>
           )}
         </div>

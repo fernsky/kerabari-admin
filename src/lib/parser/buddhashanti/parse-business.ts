@@ -168,6 +168,7 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
         if ((r.bag?.bagd?.fcrop_details?.length ?? 0) > 0) {
           for (const fcrop of r.bag?.bagd?.fcrop_details ?? []) {
             foodCrops.push({
+              id: fcrop.__id,
               crop_type: "अन्नबाली",
               crop_name: fcrop.fcrop,
               crop_area:

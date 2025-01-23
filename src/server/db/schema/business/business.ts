@@ -281,8 +281,6 @@ export const businessEditRequests = pgTable(
   },
 );
 
-
-
 export type BusinessEditRequest = typeof businessEditRequests.$inferSelect;
 
 export type StagingBusiness = typeof stagingBusiness.$inferSelect;
