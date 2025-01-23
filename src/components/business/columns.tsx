@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import Link from "next/link";
 
-export const buildingColumns: ColumnDef<BuildingSchema>[] = [
+export const businessColumns: ColumnDef<BuildingSchema>[] = [
   {
     accessorKey: "wardNumber",
     header: "Ward",

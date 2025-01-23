@@ -122,6 +122,9 @@ export function ListBusinesses({ user }: ListBusinessesProps) {
                 {!isDesktop && (
                   <FilterDrawer title="Filters">
                     <BusinessFilters
+                      wardNumber={undefined}
+                      locality={undefined}
+                      mapStatus={undefined}
                       {...filters}
                       onFilterChange={handleFilterChange}
                     />
@@ -147,6 +150,9 @@ export function ListBusinesses({ user }: ListBusinessesProps) {
             {isDesktop && (
               <div className="rounded-lg border bg-muted/50 p-4">
                 <BusinessFilters
+                  wardNumber={undefined}
+                  locality={undefined}
+                  mapStatus={undefined}
                   {...filters}
                   onFilterChange={handleFilterChange}
                 />
@@ -162,6 +168,7 @@ export function ListBusinesses({ user }: ListBusinessesProps) {
               <div className="rounded-lg border">
                 <DataTable
                   columns={businessColumns}
+                  //@ts-ignore
                   data={data?.data || []}
                   isLoading={isLoading}
                 />
