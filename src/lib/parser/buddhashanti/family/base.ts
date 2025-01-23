@@ -13,11 +13,15 @@ export async function parseFamilyBase(r: RawFamily, ctx: any) {
 
   const mainFamilyTable = {
     id: r.__id,
+
+    // Enumerator Information
     enumerator_name: r.enumerator_introduction.enumerator_name,
     enumerator_phone: r.enumerator_introduction.enumerator_phone,
     enumerator_id: r.enumerator_introduction.enumerator_id,
     building_token: r.enumerator_introduction.building_token,
     survey_date: r.id.doi,
+
+    // Location Details
     ward_no: r.id.ward_no,
     area_code: r.id.area_code,
     locality: r.id.locality,
@@ -25,10 +29,14 @@ export async function parseFamilyBase(r: RawFamily, ctx: any) {
     gps: gpsData.gps,
     altitude: gpsData.altitude,
     gps_accuracy: gpsData.gpsAccuracy,
+
+    // Family Details
     head_name: r.id.head_name,
     head_phone: r.id.head_ph,
     total_members: r.id.members.total_mem,
     is_sanitized: r.id.members.is_sanitized,
+
+    // House Details
     house_ownership: decodeSingleChoice(
       r.hh.h_oship,
       familyChoices.house_ownership,
@@ -53,6 +61,8 @@ export async function parseFamilyBase(r: RawFamily, ctx: any) {
       familyChoices.solid_waste,
     ),
     solid_waste_other: r.hh.solid_waste_oth,
+
+    // Energy and Facilities
     primary_cooking_fuel: decodeSingleChoice(
       r.hh.primary_cf,
       familyChoices.cooking_fuel,
@@ -66,6 +76,8 @@ export async function parseFamilyBase(r: RawFamily, ctx: any) {
       r.hh.facilitites,
       familyChoices.facilities,
     ),
+
+    // Economic Details
     female_properties: decodeSingleChoice(
       r.hh.fem_prop,
       familyChoices.elsewhere_properties,
@@ -94,6 +106,8 @@ export async function parseFamilyBase(r: RawFamily, ctx: any) {
       familyChoices.municipal_suggestions,
     ),
     municipal_suggestions_other: r.hh.municipal_suggestions_oth,
+
+    // Additional Data
     has_remittance: r.has_remittance === "yes",
     remittance_expenses: decodeMultipleChoices(
       r.remittance_expenses,

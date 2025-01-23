@@ -12,8 +12,6 @@ import { buildingTokens } from "../building";
 
 export const stagingFamily = pgTable("staging_buddhashanti_family", {
   id: text("id").primaryKey().notNull(),
-  tenantId: text("tenant_id").default("buddhashanti"),
-  deviceId: text("device_id"),
 
   // Enumerator Information
   enumeratorName: text("enumerator_name"),
