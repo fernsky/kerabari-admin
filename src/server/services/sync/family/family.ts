@@ -1,16 +1,16 @@
-import { parseAndInsertInStaging } from "@/lib/parser/buddhashanti/parse-business";
+import { parseAndInsertInStaging } from "@/lib/parser/buddhashanti/parse-family";
 import { stagingToProduction } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { syncBusinessSurvey } from "./sync";
 
-export const handleFamilyFlow = async (businessSubmission: any, ctx: any) => {
+export const handleFamilyFlow = async (familySubmission: any, ctx: any) => {
   // First regardless of the status, store it in the staging database
   // Generate and execute any form-specific database operations
   // Steps:
   // 1. Parse the business data.
   // 2. Insert the business data into the staging database.
   // 3. Check if the business data is already in the production database.
-  // await parseAndInsertInStaging(businessSubmission, ctx);
+  await parseAndInsertInStaging(familySubmission, ctx);
   //   const productionInsert = await ctx.db
   //     .select()
   //     .from(stagingToProduction)
