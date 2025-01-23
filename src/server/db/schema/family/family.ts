@@ -1,115 +1,156 @@
 import {
   pgTable,
-  varchar,
+  text,
   integer,
-  timestamp,
-  decimal,
+  boolean,
+  varchar,
+  pgEnum,
 } from "drizzle-orm/pg-core";
+import { geometry } from "../../geographical";
+import { areas, users, wards } from "../basic";
+import { buildingTokens } from "../building";
 
-const buddhashantiHousehold = pgTable("buddhashanti_household", {
-  id: varchar("id", { length: 48 }).primaryKey().notNull(),
-  tenantId: varchar("tenant_id", { length: 48 }).default("khajura"),
-  province: varchar("province", { length: 100 }),
-  district: varchar("district", { length: 100 }),
-  localLevel: varchar("local_level", { length: 100 }),
-  wardNo: integer("ward_no"),
-  houseSymbolNo: varchar("house_symbol_no", { length: 100 }),
-  familySymbolNo: varchar("family_symbol_no", { length: 100 }),
-  dateOfInterview: timestamp("date_of_interview"),
+export const stagingFamily = pgTable("staging_buddhashanti_family", {
+  id: text("id").primaryKey().notNull(),
+  tenantId: text("tenant_id").default("buddhashanti"),
+  deviceId: text("device_id"),
 
-  locality: varchar("locality", { length: 255 }),
-  developmentOrganization: varchar("development_organization", { length: 255 }),
-  familyHeadName: varchar("family_head_name", { length: 255 }),
-  familyHeadPhoneNo: varchar("family_head_phone_no", { length: 20 }),
+  // Enumerator Information
+  enumeratorName: text("enumerator_name"),
+  enumeratorPhone: text("enumerator_phone"),
+
+  // Location Details
+  wardNo: integer("ward_no").notNull(),
+  areaCode: text("area_code"),
+  houseTokenNumber: text("house_token_number"),
+  familySymbolNo: text("family_symbol_no"),
+  locality: text("locality"),
+  devOrg: text("dev_org"),
+  location: text("location"),
+  geom: geometry("geom", { type: "Point" }),
+  altitude: integer("altitude"),
+  gpsAccuracy: integer("gps_accuracy"),
+
+  // Family Details
+  headName: text("head_name"),
+  headPhone: text("head_phone"),
   totalMembers: integer("total_members"),
-  areMembersElsewhere: varchar("are_members_elsewhere", { length: 100 }),
-  totalElsewhereMembers: integer("total_elsewhere_members"),
-  houseOwnership: varchar("house_ownership", { length: 100 }),
-  houseOwnershipOther: varchar("house_ownership_other", { length: 255 }),
-  landOwnership: varchar("land_ownership", { length: 100 }),
-  landOwnershipOther: varchar("land_ownership_other", { length: 255 }),
-  houseBase: varchar("house_base", { length: 100 }),
-  houseBaseOther: varchar("house_base_other", { length: 255 }),
-  houseOuterWall: varchar("house_outer_wall", { length: 100 }),
-  houseOuterWallOther: varchar("house_outer_wall_other", { length: 255 }),
-  houseRoof: varchar("house_roof", { length: 100 }),
-  houseRoofOther: varchar("house_roof_other", { length: 255 }),
-  houseFloor: varchar("house_floor", { length: 100 }),
-  houseFloorOther: varchar("house_floor_other", { length: 255 }),
-  isHousePassed: varchar("is_house_passed", { length: 100 }),
-  isMapArchived: varchar("is_map_archived", { length: 100 }),
-  naturalDisasters: varchar("natural_disasters", { length: 255 }).array(),
-  isSafe: varchar("is_safe", { length: 100 }),
-  waterSource: varchar("water_source", { length: 100 }),
-  waterPurificationMethods: varchar("water_purification_methods", {
-    length: 255,
-  }).array(),
-  toiletType: varchar("toilet_type", { length: 100 }),
-  solidWasteManagement: varchar("solid_waste_management", { length: 100 }),
-  primaryCookingFuel: varchar("primary_cooking_fuel", { length: 100 }),
-  primaryEnergySource: varchar("primary_energy_source", { length: 100 }),
-  roadStatus: varchar("road_status", { length: 100 }),
-  timeToPublicBus: varchar("time_to_public_bus", { length: 100 }),
-  timeToMarket: varchar("time_to_market", { length: 100 }),
-  distanceToActiveRoad: varchar("distance_to_active_road", { length: 100 }),
-  facilities: varchar("facilities", { length: 255 }).array(),
-  hasPropertiesElsewhere: varchar("has_properties_elsewhere", { length: 100 }),
-  hasFemaleNamedProperties: varchar("has_female_named_properties", {
-    length: 100,
-  }),
-  organizationsLoanedFrom: varchar("organizations_loaned_from", {
-    length: 255,
-  }).array(),
-  loanUses: varchar("loan_uses", { length: 255 }).array(),
-  timeToBank: varchar("time_to_bank", { length: 100 }),
-  financialAccounts: varchar("financial_accounts", { length: 255 }).array(),
-  haveHealthInsurance: varchar("have_health_insurance", { length: 100 }),
-  consultingHealthOrganization: varchar("consulting_health_organization", {
-    length: 255,
-  }),
-  timeToHealthOrganization: varchar("time_to_health_organization", {
-    length: 100,
-  }),
-  incomeSources: varchar("income_sources", { length: 255 }).array(),
-  municipalSuggestions: varchar("municipal_suggestions", {
-    length: 255,
-  }).array(),
-  haveAgriculturalLand: varchar("have_agricultural_land", { length: 100 }),
-  agriculturalLands: varchar("agricultural_lands", { length: 255 }).array(),
-  areInvolvedInAgriculture: varchar("are_involved_in_agriculture", {
-    length: 100,
-  }),
-  foodCrops: varchar("food_crops", { length: 255 }).array(),
-  pulses: varchar("pulses", { length: 255 }).array(),
-  oilSeeds: varchar("oil_seeds", { length: 255 }).array(),
-  vegetables: varchar("vegetables", { length: 255 }).array(),
-  fruits: varchar("fruits", { length: 255 }).array(),
-  spices: varchar("spices", { length: 255 }).array(),
-  cashCrops: varchar("cash_crops", { length: 255 }).array(),
-  areInvolvedInHusbandry: varchar("are_involved_in_husbandry", { length: 100 }),
-  animals: varchar("animals", { length: 255 }).array(),
-  animalProducts: varchar("animal_products", { length: 255 }).array(),
-  haveAquaculture: varchar("have_aquaculture", { length: 100 }),
-  pondNumber: integer("pond_number"),
-  pondArea: decimal("pond_area", { precision: 10, scale: 2 }),
-  fishProduction: decimal("fish_production", { precision: 10, scale: 2 }),
-  haveApiary: varchar("have_apiary", { length: 100 }),
-  hiveNumber: integer("hive_number"),
-  honeyProduction: decimal("honey_production", { precision: 10, scale: 2 }),
-  honeySales: decimal("honey_sales", { precision: 10, scale: 2 }),
-  honeyRevenue: decimal("honey_revenue", { precision: 10, scale: 2 }),
-  hasAgriculturalInsurance: varchar("has_agricultural_insurance", {
-    length: 100,
-  }),
-  monthsInvolvedInAgriculture: varchar("months_involved_in_agriculture", {
-    length: 100,
-  }),
-  agriculturalMachines: varchar("agricultural_machines", {
-    length: 255,
-  }).array(),
-  haveRemittance: varchar("have_remittance", { length: 100 }),
-  remittanceExpenses: varchar("remittance_expenses", { length: 255 }).array(),
-  deviceId: varchar("device_id", { length: 48 }),
+  isSanitized: boolean("is_sanitized"),
+
+  // House Details
+  houseOwnership: text("house_ownership"),
+  houseOwnershipOther: text("house_ownership_other"),
+  isHouseSafe: boolean("is_house_safe"),
+  waterSource: text("water_source"),
+  waterSourceOther: text("water_source_other"),
+  waterPurificationMethods: text("water_purification_methods"),
+  toiletType: text("toilet_type"),
+  solidWaste: text("solid_waste"),
+  solidWasteOther: text("solid_waste_other"),
+
+  // Energy and Facilities
+  primaryCookingFuel: text("primary_cooking_fuel"),
+  primaryEnergySource: text("primary_energy_source"),
+  primaryEnergySourceOther: text("primary_energy_source_other"),
+  facilities: text("facilities"),
+
+  // Economic Details
+  femaleProperties: text("female_properties"),
+  loanedOrganizations: text("loaned_organizations"),
+  loanUse: text("loan_use"),
+  hasBank: text("has_bank"),
+  hasInsurance: text("has_insurance"),
+  healthOrg: text("health_org"),
+  healthOrgOther: text("health_org_other"),
+  incomeSources: text("income_sources"),
+  municipalSuggestions: text("municipal_suggestions"),
+  municipalSuggestionsOther: text("municipal_suggestions_other"),
+
+  // Additional Data
+  hasRemittance: boolean("has_remittance"),
+  remittanceExpenses: text("remittance_expenses"),
 });
 
-export default buddhashantiHousehold;
+export const familyStatusEnum = pgEnum("family_status_enum", [
+  "approved",
+  "pending",
+  "requested_for_edit",
+  "rejected",
+]);
+
+export const family = pgTable("buddhashanti_family", {
+  id: text("id").primaryKey().notNull(),
+  tenantId: text("tenant_id").default("buddhashanti"),
+  deviceId: text("device_id"),
+
+  // Enumerator Information
+  enumeratorName: text("enumerator_name"),
+  enumeratorPhone: text("enumerator_phone"),
+
+  // Location Details
+  wardNo: integer("ward_no").notNull(),
+  areaCode: text("area_code"),
+  houseTokenNumber: text("house_token_number"),
+  familySymbolNo: text("family_symbol_no"),
+  locality: text("locality"),
+  devOrg: text("dev_org"),
+  location: text("location"),
+  geom: geometry("geom", { type: "Point" }),
+  altitude: integer("altitude"),
+  gpsAccuracy: integer("gps_accuracy"),
+
+  // Family Details
+  headName: text("head_name"),
+  headPhone: text("head_phone"),
+  totalMembers: integer("total_members"),
+  isSanitized: boolean("is_sanitized"),
+
+  // House Details
+  houseOwnership: text("house_ownership"),
+  houseOwnershipOther: text("house_ownership_other"),
+  isHouseSafe: boolean("is_house_safe"),
+  waterSource: text("water_source"),
+  waterSourceOther: text("water_source_other"),
+  waterPurificationMethods: text("water_purification_methods"),
+  toiletType: text("toilet_type"),
+  solidWaste: text("solid_waste"),
+  solidWasteOther: text("solid_waste_other"),
+
+  // Energy and Facilities
+  primaryCookingFuel: text("primary_cooking_fuel"),
+  primaryEnergySource: text("primary_energy_source"),
+  primaryEnergySourceOther: text("primary_energy_source_other"),
+  facilities: text("facilities"),
+
+  // Economic Details
+  femaleProperties: text("female_properties"),
+  loanedOrganizations: text("loaned_organizations"),
+  loanUse: text("loan_use"),
+  hasBank: text("has_bank"),
+  hasInsurance: text("has_insurance"),
+  healthOrg: text("health_org"),
+  healthOrgOther: text("health_org_other"),
+  incomeSources: text("income_sources"),
+  municipalSuggestions: text("municipal_suggestions"),
+  municipalSuggestionsOther: text("municipal_suggestions_other"),
+
+  // Additional Data
+  hasRemittance: boolean("has_remittance"),
+  remittanceExpenses: text("remittance_expenses"),
+
+  // Foreign keys that satisfy the building constraints
+  areaId: varchar("area_id", { length: 255 }).references(() => areas.id),
+  enumeratorId: varchar("user_id", { length: 21 }).references(() => users.id),
+  wardId: integer("ward_id").references(() => wards.wardNumber),
+  buildingToken: varchar("building_token", { length: 255 }).references(
+    () => buildingTokens.token,
+  ),
+
+  // Flags to identify the correctness of given input data
+  isAreaValid: boolean("is_area_invalid").default(false),
+  isWardValid: boolean("is_ward_invalid").default(false),
+  isBuildingTokenValid: boolean("is_building_token_invalid").default(false),
+  isEnumeratorValid: boolean("is_enumerator_invalid").default(false),
+
+  status: familyStatusEnum("status").default("pending"),
+});

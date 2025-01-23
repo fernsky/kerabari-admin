@@ -29,12 +29,12 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
         enumerator_phone: r.enumerator_introduction.enumerator_phone,
         enumerator_id: r.enumerator_introduction.enumerator_id,
         building_token: r.enumerator_introduction.building_token,
+        survey_date: r.id.doi,
 
         // Location Details
         ward_no: r.id.ward_no,
         area_code: r.id.area_code,
-        house_token_number: r.id.house_token_number,
-        family_symbol_no: r.id.fam_symno,
+
         locality: r.id.locality,
         dev_org: r.id.dev_org,
         gps: gpsData.gps,
@@ -45,7 +45,7 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
         head_name: r.id.head_name,
         head_phone: r.id.head_ph,
         total_members: r.id.members.total_mem,
-        is_sanitized: r.id.members.is_sanitized === "yes",
+        is_sanitized: r.id.members.is_sanitized,
 
         // House Details
         house_ownership: decodeSingleChoice(
@@ -53,7 +53,7 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
           familyChoices.house_ownership,
         ),
         house_ownership_other: r.hh.h_oship_oth,
-        is_house_safe: r.hh.is_safe === "yes",
+        is_house_safe: r.hh.is_safe,
         water_source: decodeMultipleChoices(
           r.hh.wsrc,
           familyChoices.drinking_water_source,
@@ -118,45 +118,12 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
         ),
         municipal_suggestions_other: r.hh.municipal_suggestions_oth,
 
-        // History Information
-        caste: decodeSingleChoice(
-          r.family_history_info.caste,
-          familyChoices.castes,
-        ),
-        caste_other: r.family_history_info.caste_oth,
-        ancestrial_language: decodeSingleChoice(
-          r.family_history_info.ancestrial_lang,
-          familyChoices.languages,
-        ),
-        ancestrial_language_other: r.family_history_info.ancestrial_lang_oth,
-        mother_tongue_primary: decodeSingleChoice(
-          r.family_history_info.mother_tounge_primary,
-          familyChoices.languages,
-        ),
-        mother_tongue_primary_other:
-          r.family_history_info.mother_tounge_primary_oth,
-        religion: decodeSingleChoice(
-          r.family_history_info.religion,
-          familyChoices.religions,
-        ),
-        religion_other: r.family_history_info.religion_other,
-
         // Additional Data
         has_remittance: r.has_remittance === "yes",
         remittance_expenses: decodeMultipleChoices(
           r.remittance_expenses,
           familyChoices.remittance_expenses,
         ),
-
-        // System Fields
-        submission_date: r.__system.submissionDate,
-        submitter_id: r.__system.submitterId,
-        submitter_name: r.__system.submitterName,
-        attachments_present: r.__system.attachmentsPresent,
-        attachments_expected: r.__system.attachmentsExpected,
-        status: r.__system.status,
-        review_state: r.__system.reviewState,
-        form_version: r.__system.formVersion,
       };
 
       try {
@@ -175,10 +142,8 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
           for (const i of r.individual) {
             const individual = {
               id: i.__id,
-              parent_id: r.__id,
+              household_id: r.__id,
               ward_no: r.id.ward_no,
-              tenant_id: "buddhashanti",
-              device_id: r.__system.deviceId,
               name: i.name,
               gender: decodeSingleChoice(i.gender, familyChoices.genders),
               age: i.age,
@@ -189,9 +154,18 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
               disability_type: null as string | null,
               disability_cause: null as string | null,
               gave_live_birth: null as string | null,
+              has_training: null as string | null,
+              primary_skill: null as string | null,
               alive_sons: null as number | null,
               alive_daughters: null as number | null,
               total_born_children: null as number | null,
+              dead_sons: null as number | null,
+              dead_daughters: null as number | null,
+              recent_alive_sons: null as number | null,
+              recent_alive_daughters: null as number | null,
+              recent_birth_total: null as number | null,
+              recent_birth_location: null as string | null,
+              prenatal_checkup: null as string | null,
 
               citizen_of: decodeSingleChoice(
                 i.citizenof,
@@ -240,6 +214,11 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
               literacy_status: null as string | null,
               educational_level: null as string | null,
               goes_school: null as string | null,
+              work_barrier: null as string | null,
+              school_barrier: null as string | null,
+              months_worked: null as string | null,
+              primary_occupation: null as string | null,
+              work_availability: null as string | null,
             };
 
             // Add marriage details if applicable
@@ -310,6 +289,32 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
                   individual.total_born_children =
                     fertilityRecord.ftd.total_born_children;
                 }
+                // Add deceased children details if available
+                if (fertilityRecord.ftd.has_dead_children === "yes") {
+                  individual.dead_sons = fertilityRecord.ftd.dead_sons;
+                  individual.dead_daughters =
+                    fertilityRecord.ftd.dead_daughters;
+                }
+
+                // Add recent birth details if available
+                if (
+                  fertilityRecord.ftd.frcb?.gave_recent_live_birth === "yes"
+                ) {
+                  individual.recent_alive_sons =
+                    fertilityRecord.ftd.frcb.recent_alive_sons;
+                  individual.recent_alive_daughters =
+                    fertilityRecord.ftd.frcb.recent_alive_daughters;
+                  individual.recent_birth_total =
+                    fertilityRecord.ftd.frcb.total_recent_children;
+                  individual.recent_birth_location = decodeSingleChoice(
+                    fertilityRecord.ftd.frcb.recent_delivery_location,
+                    familyChoices.delivery_locations,
+                  );
+                  individual.prenatal_checkup = decodeSingleChoice(
+                    fertilityRecord.ftd.frcb.prenatal_checkup,
+                    familyChoices.true_false,
+                  );
+                }
               }
             }
 
@@ -331,6 +336,50 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
                   educationRecord.goes_school,
                   familyChoices.true_false,
                 );
+                // Add education training details
+                if (educationRecord.edt) {
+                  individual.has_training = decodeSingleChoice(
+                    educationRecord.edt.has_training,
+                    familyChoices.true_false,
+                  );
+                  if (educationRecord.edt.has_training === "yes") {
+                    individual.primary_skill = decodeSingleChoice(
+                      educationRecord.edt.primary_skill,
+                      familyChoices.skills,
+                    );
+                  }
+                }
+
+                // Add school barrier if applicable
+                if (educationRecord.goes_school === "no") {
+                  individual.school_barrier = decodeSingleChoice(
+                    educationRecord.school_barrier,
+                    familyChoices.school_barriers,
+                  );
+                }
+
+                // Add economy details if present
+                const economyRecord = r.economy?.find(
+                  (j) => j.eco_name === i.name && parseInt(j.eco_age) === i.age,
+                );
+                if (economyRecord) {
+                  individual.months_worked = decodeSingleChoice(
+                    economyRecord.ed.m_work,
+                    familyChoices.financial_work_duration,
+                  );
+                  individual.primary_occupation = decodeSingleChoice(
+                    economyRecord.ed.primary_occu,
+                    familyChoices.occupations,
+                  );
+                  individual.work_barrier = decodeSingleChoice(
+                    economyRecord.ed.EA02.work_barrier,
+                    familyChoices.work_barriers,
+                  );
+                  individual.work_availability = decodeSingleChoice(
+                    economyRecord.ed.EA02.work_availability,
+                    familyChoices.work_availability,
+                  );
+                }
               }
             }
 
@@ -357,8 +406,6 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
               id: i.__id,
               household_id: r.__id,
               ward_no: r.id.ward_no,
-              tenant_id: "buddhashanti",
-              device_id: r.__system.deviceId,
               land_ownernship_type: i.agland_oship,
               land_area:
                 (i.land_area?.B02_3 ?? 0) * 6772.63 +
@@ -401,8 +448,6 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
                 id: i.__id,
                 household_id: r.__id,
                 ward_no: r.id.ward_no,
-                tenant_id: "buddhashanti",
-                device_id: r.__system.deviceId,
                 crop_type: "food",
                 crop_name: decodeSingleChoice(
                   i.fcrop,
@@ -440,8 +485,6 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
                 id: i.__id,
                 household_id: r.__id,
                 ward_no: r.id.ward_no,
-                tenant_id: "buddhashanti",
-                device_id: r.__system.deviceId,
                 crop_type: "pulse",
                 crop_name: i.pulse,
                 area:
@@ -476,8 +519,6 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
                 id: i.__id,
                 household_id: r.__id,
                 ward_no: r.id.ward_no,
-                tenant_id: "buddhashanti",
-                device_id: r.__system.deviceId,
                 crop_type: "vegetable",
                 crop_name: i.vtable,
                 area:
@@ -510,8 +551,6 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
               id: i.__id,
               household_id: r.__id,
               ward_no: r.id.ward_no,
-              tenant_id: "buddhashanti",
-              device_id: r.__system.deviceId,
               crop_type: "oilseed",
               crop_name: i.oseed,
               area:
@@ -543,8 +582,6 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
               id: i.__id,
               household_id: r.__id,
               ward_no: r.id.ward_no,
-              tenant_id: "buddhashanti",
-              device_id: r.__system.deviceId,
               crop_type: "fruit",
               crop_name: i.fruit,
               area:
@@ -576,8 +613,6 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
               id: i.__id,
               household_id: r.__id,
               ward_no: r.id.ward_no,
-              tenant_id: "buddhashanti",
-              device_id: r.__system.deviceId,
               crop_type: "spice",
               crop_name: i.spice,
               area:
@@ -609,8 +644,6 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
               id: i.__id,
               household_id: r.__id,
               ward_no: r.id.ward_no,
-              tenant_id: "buddhashanti",
-              device_id: r.__system.deviceId,
               crop_type: "cash",
               crop_name: i.ccrop,
               area:
@@ -642,14 +675,40 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
               id: i.__id,
               household_id: r.__id,
               ward_no: r.id.ward_no,
-              tenant_id: "buddhashanti",
-              device_id: r.__system.deviceId,
-              animal_type: i.animal,
-              animal_other: i.anim.animal_oth,
-              total_count: i.animn.total_animals,
-              sales_count: i.anim.oth_total_animals,
-              revenue: i.anim.oth_animal_revenue,
+              animal_name: i.animal,
+              animal_name_other: null as string | null,
+              total_animals: null as number | null,
+              animal_sales: null as number | null,
+              animal_revenue: null as number | null,
             };
+
+            if (
+              (i.animal && i.animal == "अन्य पशु") ||
+              i.animal == "अन्य पन्छी"
+            ) {
+              if (i.anim.animal_oth) {
+                animal.animal_name_other = i.anim.animal_oth;
+              }
+              if (i.anim.oth_total_animals) {
+                animal.total_animals = i.anim.oth_total_animals;
+              }
+              if (i.anim.oth_animal_sales) {
+                animal.animal_sales = i.anim.oth_animal_sales;
+              }
+              if (i.anim.oth_animal_revenue) {
+                animal.animal_revenue = i.anim.oth_animal_revenue;
+              }
+            }
+
+            if (
+              i.animal &&
+              i.animal != "अन्य पशु" &&
+              i.animal != "अन्य पन्छी"
+            ) {
+              if (i.animn.total_animals) {
+                animal.total_animals = i.animn.total_animals;
+              }
+            }
 
             try {
               const animalStatement = jsonToPostgres(
@@ -673,10 +732,8 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
               id: i.__id,
               household_id: r.__id,
               ward_no: r.id.ward_no,
-              tenant_id: "buddhashanti",
-              device_id: r.__system.deviceId,
-              product_type: i.aprod,
-              product_type_other: i.apo.aprod_oth,
+              product_name: i.aprod,
+              product_name_other: i.apo.aprod_oth,
               unit: i.apon.aprod_unit,
               unit_other: i.apon.aprod_unit_oth,
               production: i.apon.aprod_prod,
@@ -704,8 +761,7 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
               id: i.__id,
               household_id: r.__id,
               ward_no: r.id.ward_no,
-              tenant_id: "buddhashanti",
-              device_id: r.__system.deviceId,
+              deceased_name: i.death_name,
               deceased_gender: decodeSingleChoice(
                 i.death_gender,
                 familyChoices.genders,

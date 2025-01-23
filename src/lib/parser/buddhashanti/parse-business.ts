@@ -188,6 +188,7 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
         if ((r.bag?.bagd?.pulse_details?.length ?? 0) > 0) {
           for (const pulse of r.bag?.bagd?.pulse_details ?? []) {
             pulses.push({
+              id: pulse.__id,
               crop_type: "दलहन",
               crop_name: pulse.pulse,
               crop_area:
@@ -208,6 +209,7 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
         if ((r.bag?.bagd?.oseed_details?.length ?? 0) > 0) {
           for (const oseed of r.bag?.bagd?.oseed_details ?? []) {
             oilSeeds.push({
+              id: oseed.__id,
               crop_type: "तेलहन",
               crop_name: oseed.oseed,
               crop_area:
@@ -228,6 +230,7 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
         if ((r.bag?.bagd?.vtable_detail?.length ?? 0) > 0) {
           for (const veg of r.bag?.bagd?.vtable_detail ?? []) {
             vegetables.push({
+              id: veg.__id,
               crop_type: "तरकारी",
               crop_name: veg.vtable,
               crop_area:
@@ -248,6 +251,7 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
         if (r.bag?.bagd?.fruit_details?.length ?? 0 > 0) {
           for (const fruit of r.bag.bagd.fruit_details ?? []) {
             fruits.push({
+              id: fruit.__id,
               crop_type: "फलफूल",
               crop_name: fruit.fruit,
               crop_area:
@@ -270,6 +274,7 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
         if (spiceDetails.length > 0) {
           for (const spice of spiceDetails) {
             spices.push({
+              id: spice.__id,
               crop_type: "मसला",
               crop_name: spice.spice,
               crop_area:
@@ -291,6 +296,7 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
         if (ccropDetails.length > 0) {
           for (const ccrop of ccropDetails) {
             cashCrops.push({
+              id: ccrop.__id,
               crop_type: "नगदेबाली",
               crop_name: ccrop.ccrop,
               crop_area:
@@ -314,6 +320,7 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
             if (animal.banim?.b_animal_oth) {
               // Handle other animal types
               animals.push({
+                id: animal.__id,
                 animal_name: animal.banim.b_animal_oth,
                 animal_ward: animal.animal_ward_no,
                 total_count: animal.banim.othtotal_b_animals,
@@ -323,6 +330,7 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
             } else {
               // Handle normal animal types
               animals.push({
+                id: animal.__id,
                 animal_name: animal.b_animal,
                 animal_ward: animal.animal_ward_no,
                 total_count: animal.banimn.total_b_animals,
@@ -343,6 +351,7 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
             if (product.baprd?.baprod_oth) {
               // Handle other animal product types
               animalProducts.push({
+                id: product.__id,
                 product_name: product.baprd.baprod_oth,
                 ward_no: product.aprod_ward_no,
                 unit: decodeSingleChoice(
@@ -357,6 +366,7 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
             } else {
               // Handle normal animal product types
               animalProducts.push({
+                id: product.__id,
                 product_name: product.b_aprod,
                 ward_no: product.aprod_ward_no,
                 unit:
