@@ -149,6 +149,183 @@ interface FoodCropDetails {
   __id: string;
 }
 
+interface PulseAreaDescription {
+  pulse_note?: string | null;
+  pulse_bigha: number;
+  pulse_kattha: number;
+  pulse_dhur: number;
+  pulse_area: string;
+  pulse_area_note?: string | null;
+}
+
+interface PulseProduction {
+  pulses_note_prod?: string | null;
+  BA02_11: number;
+  BA02_12: number;
+  BA02_13: number;
+  BA02_14: number;
+  pulse_prod: string;
+}
+
+interface PulseDetails {
+  dpl: string;
+  pulse_ward_no: string;
+  pulse: string;
+  pulse_enumerator: string;
+  pulse_house_head_name: string;
+  pulse_area_description: PulseAreaDescription;
+  pp: PulseProduction;
+  __id: string;
+}
+
+interface OilSeedAreaDescription {
+  oseed_note?: string | null;
+  oseed_bigha: number;
+  oseed_kattha: number;
+  oseed_dhur: number;
+  oseed_area: string;
+  oseed_area_note?: string | null;
+}
+
+interface OilSeedProduction {
+  oseed_note_prod?: string | null;
+  BA03_11: number;
+  BA03_12: number;
+  BA03_13: number;
+  BA03_14: number;
+  oseed_prod: string;
+}
+
+interface OilSeedDetails {
+  dos: string;
+  oseed_ward_no: string;
+  oseed: string;
+  oseed_enumerator: string;
+  oseed_house_head_name: string;
+  oseed_area_description: OilSeedAreaDescription;
+  oslp: OilSeedProduction;
+  __id: string;
+}
+
+interface VegetableAreaDescription {
+  vtables_note?: string | null;
+  vtables_bigha: number;
+  vtables_kattha: number;
+  vtables_dhur: number;
+  vtables_area: string;
+  vtables_area_note?: string | null;
+}
+
+interface VegetableProduction {
+  vtables_note_prod?: string | null;
+  BA04_11: number;
+  BA04_12: number;
+  BA04_13: number;
+  BA04_14: number;
+  vtable_prod: string;
+}
+
+interface VegetableDetails {
+  dvt: string;
+  vtable_ward_no: string;
+  vtable: string;
+  vtable_enumerator: string;
+  vtable_house_head_name: string;
+  vtables_area_description: VegetableAreaDescription;
+  vp: VegetableProduction;
+  __id: string;
+}
+
+interface FruitAreaDescription {
+  fruits_note?: string | null;
+  fruits_bigha: number;
+  fruits_kattha: number;
+  fruits_dhur: number;
+  fruits_area: string;
+  fruits_area_note?: string | null;
+}
+
+interface FruitProduction {
+  fruits_note_prod?: string | null;
+  BA05_11: number;
+  BA05_12: number;
+  BA05_13: number;
+  BA05_14: number;
+  fruit_prod: string;
+}
+
+interface FruitDetails {
+  dfr: string;
+  fruit_ward_no: string;
+  fruit: string;
+  fruit_enumerator: string;
+  fruit_house_head_name: string;
+  fruits_trees_count: number;
+  fruits_area_description: FruitAreaDescription;
+  frp: FruitProduction;
+  __id: string;
+}
+
+interface SpiceAreaDescription {
+  spice_note?: string | null;
+  spice_bigha: number;
+  spice_kattha: number;
+  spice_dhur: number;
+  spice_area: string;
+  spice_area_note?: string | null;
+}
+
+interface SpiceProduction {
+  spice_note_prod?: string | null;
+  BA06_11: number;
+  BA06_12: number;
+  BA06_13: number;
+  BA06_14: number;
+  spice_prod: string;
+}
+
+interface SpiceDetails {
+  dsp: string;
+  spice_ward_no: string;
+  spice: string;
+  spice_enumerator: string;
+  spice_house_head_name: string;
+  spice_area_description: SpiceAreaDescription;
+  sp: SpiceProduction;
+  __id: string;
+}
+
+interface CashCropAreaDescription {
+  cash_note?: string | null;
+  ccrop_bigha: number;
+  ccrop_kattha: number;
+  ccrop_dhur: number;
+  ccrop_area: string;
+  ccrop_area_note?: string | null;
+}
+
+interface CashCropProduction {
+  cash_note_prod?: string | null;
+  BA07_11: number;
+  BA07_12: number;
+  BA07_13: number;
+  BA07_14: number;
+  ccrop_prod: string;
+}
+
+interface CashCropDetails {
+  dcc: string;
+  ccrop_ward_no: string;
+  ccrop: string;
+  ccrop_enumerator: string;
+  ccrop_house_head_name: string;
+  isBetel: string;
+  betel_tree_count: number;
+  ccrop_area_description: CashCropAreaDescription;
+  cp: CashCropProduction;
+  __id: string;
+}
+
 interface AgricultureInfo {
   has_agland: string;
   aglands_oship: string;
@@ -159,7 +336,24 @@ interface AgricultureInfo {
   food: {
     fcrops: string;
     fcrop_details: FoodCropDetails[];
-    // ... similar structures for pulses, oil seeds, vegetables, etc.
+    pulses: string;
+    pulse_details: PulseDetails[];
+    oseeds: string;
+    oseed_details: OilSeedDetails[];
+    vtables: string;
+    vtable_details: VegetableDetails[];
+    fruits: string;
+    fruit_details: FruitDetails[];
+    grasses: string;
+    dsp: string;
+    grasses_ward_no: string;
+    grasses_calc: string;
+    grasses_enumerator: string;
+    grass_area_description: GrassAreaDescription;
+    spices: string;
+    spice_details: SpiceDetails[];
+    ccrops: string;
+    ccrop_details: CashCropDetails[];
   };
   months_sustained_from_agriculture: string;
   has_husbandry: string;
