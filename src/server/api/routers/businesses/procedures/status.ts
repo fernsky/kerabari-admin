@@ -1,42 +1,42 @@
 import { protectedProcedure } from "@/server/api/trpc";
-import { buildings, buildingEditRequests } from "@/server/db/schema/building";
+import { business, businessEditRequests } from "@/server/db/schema/business/business";
 import { eq, desc } from "drizzle-orm";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { v4 as uuidv4 } from "uuid";
 
 export const approve = protectedProcedure
-  .input(z.object({ buildingId: z.string() }))
+  .input(z.object({ businessId: z.string() }))
   .mutation(async ({ ctx, input }) => {
     if (ctx.user.role !== "superadmin") {
       throw new TRPCError({
         code: "UNAUTHORIZED",
-        message: "Only admins can approve buildings",
+        message: "Only admins can approve businesses",
       });
     }
 
-    const building = await ctx.db.query.buildings.findFirst({
-      where: eq(buildings.id, input.buildingId),
+    const businessEntity = await ctx.db.query.business.findFirst({
+      where: eq(business.id, input.businessId),
       columns: { status: true },
     });
 
-    if (!building || building.status !== "pending") {
+    if (!businessEntity || businessEntity.status !== "pending") {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "Only pending buildings can be approved",
+        message: "Only pending businesses can be approved",
       });
     }
 
     await ctx.db
-      .update(buildings)
+      .update(business)
       .set({ status: "approved" })
-      .where(eq(buildings.id, input.buildingId));
+      .where(eq(business.id, input.businessId));
 
     return { success: true };
   });
 
 export const requestEdit = protectedProcedure
-  .input(z.object({ buildingId: z.string(), message: z.string() }))
+  .input(z.object({ businessId: z.string(), message: z.string() }))
   .mutation(async ({ ctx, input }) => {
     if (!ctx.user?.role || ctx.user.role !== "superadmin") {
       throw new TRPCError({
@@ -45,27 +45,27 @@ export const requestEdit = protectedProcedure
       });
     }
 
-    const building = await ctx.db.query.buildings.findFirst({
-      where: eq(buildings.id, input.buildingId),
+    const businessEntity = await ctx.db.query.business.findFirst({
+      where: eq(business.id, input.businessId),
       columns: { status: true },
     });
 
-    if (!building || building.status !== "pending") {
+    if (!businessEntity || businessEntity.status !== "pending") {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "Only pending buildings can be requested for edit",
+        message: "Only pending businesses can be requested for edit",
       });
     }
 
     await ctx.db.transaction(async (tx) => {
       await tx
-        .update(buildings)
+        .update(business)
         .set({ status: "requested_for_edit" })
-        .where(eq(buildings.id, input.buildingId));
+        .where(eq(business.id, input.businessId));
 
-      await tx.insert(buildingEditRequests).values({
+      await tx.insert(businessEditRequests).values({
         id: uuidv4(),
-        buildingId: input.buildingId,
+        businessId: input.businessId,
         message: input.message,
       });
     });
@@ -74,35 +74,35 @@ export const requestEdit = protectedProcedure
   });
 
 export const reject = protectedProcedure
-  .input(z.object({ buildingId: z.string(), message: z.string() }))
+  .input(z.object({ businessId: z.string(), message: z.string() }))
   .mutation(async ({ ctx, input }) => {
     if (ctx.user.role !== "superadmin") {
       throw new TRPCError({
         code: "UNAUTHORIZED",
-        message: "Only admins can reject buildings",
+        message: "Only admins can reject businesses",
       });
     }
 
-    const building = await ctx.db.query.buildings.findFirst({
-      where: eq(buildings.id, input.buildingId),
+    const businessEntity = await ctx.db.query.business.findFirst({
+      where: eq(business.id, input.businessId),
       columns: { status: true },
     });
 
-    if (!building || building.status !== "pending") {
+    if (!businessEntity || businessEntity.status !== "pending") {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "Only pending buildings can be rejected",
+        message: "Only pending businesses can be rejected",
       });
     }
 
     await ctx.db
-      .update(buildings)
+      .update(business)
       .set({ status: "rejected" })
-      .where(eq(buildings.id, input.buildingId));
+      .where(eq(business.id, input.businessId));
 
-    await ctx.db.insert(buildingEditRequests).values({
+    await ctx.db.insert(businessEditRequests).values({
       id: uuidv4(),
-      buildingId: input.buildingId,
+      businessId: input.businessId,
       message: input.message,
     });
 
@@ -110,13 +110,13 @@ export const reject = protectedProcedure
   });
 
 export const getStatusHistory = protectedProcedure
-  .input(z.object({ buildingId: z.string() }))
+  .input(z.object({ businessId: z.string() }))
   .query(async ({ ctx, input }) => {
     const history = await ctx.db
       .select()
-      .from(buildingEditRequests)
-      .where(eq(buildingEditRequests.buildingId, input.buildingId))
-      .orderBy(desc(buildingEditRequests.requestedAt));
+      .from(businessEditRequests)
+      .where(eq(businessEditRequests.businessId, input.businessId))
+      .orderBy(desc(businessEditRequests.requestedAt));
 
     return history;
   });

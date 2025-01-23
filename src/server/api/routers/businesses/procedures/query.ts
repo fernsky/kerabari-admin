@@ -1,6 +1,6 @@
 import { publicProcedure } from "@/server/api/trpc";
-import { buildingQuerySchema } from "../building.schema";
-import { buildings } from "@/server/db/schema/building";
+import { businessQuerySchema } from "../business.schema";
+import { business } from "@/server/db/schema/business/business";
 import { surveyAttachments } from "@/server/db/schema";
 import { and, eq, ilike, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -8,31 +8,31 @@ import { TRPCError } from "@trpc/server";
 import { env } from "@/env";
 
 export const getAll = publicProcedure
-  .input(buildingQuerySchema)
+  .input(businessQuerySchema)
   .query(async ({ ctx, input }) => {
     const { limit, offset, sortBy, sortOrder, filters } = input;
 
     let conditions = sql`TRUE`;
     if (filters) {
       const filterConditions = [];
-      if (filters.wardNumber) {
-        filterConditions.push(eq(buildings.tmpWardNumber, filters.wardNumber));
+      if (filters.wardNo) {
+        filterConditions.push(eq(business.wardNo, filters.wardNo));
       }
-      if (filters.locality) {
+      if (filters.businessNature) {
         filterConditions.push(
-          ilike(buildings.locality, `%${filters.locality}%`),
+          ilike(business.businessNature, `%${filters.businessNature}%`)
         );
       }
-      if (filters.mapStatus) {
-        filterConditions.push(eq(buildings.mapStatus, filters.mapStatus));
+      if (filters.businessType) {
+        filterConditions.push(
+          ilike(business.businessType, `%${filters.businessType}%`)
+        );
       }
-      // Add enumerator filter
       if (filters.enumeratorId) {
-        filterConditions.push(eq(buildings.enumeratorId, filters.enumeratorId));
+        filterConditions.push(eq(business.enumeratorId, filters.enumeratorId));
       }
-      // Add status filter
       if (filters.status) {
-        filterConditions.push(eq(buildings.status, filters.status));
+        filterConditions.push(eq(business.status, filters.status));
       }
       if (filterConditions.length > 0) {
         const andCondition = and(...filterConditions);
@@ -43,14 +43,14 @@ export const getAll = publicProcedure
     const [data, totalCount] = await Promise.all([
       ctx.db
         .select()
-        .from(buildings)
+        .from(business)
         .where(conditions)
         .orderBy(sql`${sql.identifier(sortBy)} ${sql.raw(sortOrder)}`)
         .limit(limit)
         .offset(offset),
       ctx.db
         .select({ count: sql<number>`count(*)` })
-        .from(buildings)
+        .from(business)
         .where(conditions)
         .then((result) => result[0].count),
     ]);
@@ -68,68 +68,36 @@ export const getAll = publicProcedure
 export const getById = publicProcedure
   .input(z.object({ id: z.string() }))
   .query(async ({ ctx, input }) => {
-    const building = await ctx.db
+    const businessEntity = await ctx.db
       .select()
-      .from(buildings)
-      .where(eq(buildings.id, input.id))
+      .from(business)
+      .where(eq(business.id, input.id))
       .limit(1);
 
-    const attachments = await ctx.db.query.surveyAttachments.findMany({
-      where: eq(surveyAttachments.dataId, `uuid:${input.id}`),
-    });
-
-    if (!building[0]) {
+    if (!businessEntity[0]) {
       throw new TRPCError({
         code: "NOT_FOUND",
-        message: "Building not found",
+        message: "Business not found",
       });
     }
 
-    try {
-      // Process the attachments and create presigned URLs
-      for (const attachment of attachments) {
-        if (attachment.type === "building_image") {
-          console.log("Fetching building image");
-          building[0].buildingImage = await ctx.minio.presignedGetObject(
-            env.BUCKET_NAME,
-            attachment.name,
-            24 * 60 * 60, // 24 hours expiry
-          );
-        }
-        if (attachment.type === "building_selfie") {
-          building[0].enumeratorSelfie = await ctx.minio.presignedGetObject(
-            env.BUCKET_NAME,
-            attachment.name,
-            24 * 60 * 60,
-          );
-        }
-        if (attachment.type === "audio_monitoring") {
-          building[0].surveyAudioRecording = await ctx.minio.presignedGetObject(
-            env.BUCKET_NAME,
-            attachment.name,
-            24 * 60 * 60,
-          );
-        }
-      }
-    } catch (error) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to generate presigned URLs",
-        cause: error,
-      });
-    }
-
-    return building[0];
+    return businessEntity[0];
   });
 
 export const getStats = publicProcedure.query(async ({ ctx }) => {
   const stats = await ctx.db
     .select({
-      totalBuildings: sql<number>`count(*)`,
-      totalFamilies: sql<number>`sum(${buildings.totalFamilies})`,
-      avgBusinesses: sql<number>`avg(${buildings.totalBusinesses})`,
+      totalBusinesses: sql<number>`count(*)`,
+      avgInvestmentAmount: sql<number>`avg(${business.investmentAmount})`,
+      totalEmployees: sql<number>`
+        sum(
+          coalesce(${business.totalPermanentEmployees}, 0) + 
+          coalesce(${business.totalTemporaryEmployees}, 0)
+        )
+      `,
+      totalPartners: sql<number>`sum(coalesce(${business.totalPartners}, 0))`,
     })
-    .from(buildings);
+    .from(business);
 
   return stats[0];
 });

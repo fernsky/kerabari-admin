@@ -1,21 +1,21 @@
 import { protectedProcedure } from "@/server/api/trpc";
-import { buildings } from "@/server/db/schema/building";
+import { business } from "@/server/db/schema/business/business";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { users } from "@/server/db/schema";
 
 export const assignToEnumerator = protectedProcedure
-  .input(z.object({ buildingId: z.string(), enumeratorId: z.string() }))
+  .input(z.object({ businessId: z.string(), enumeratorId: z.string() }))
   .mutation(async ({ ctx, input }) => {
-    const building = await ctx.db.query.buildings.findFirst({
-      where: eq(buildings.id, input.buildingId),
+    const businessEntity = await ctx.db.query.business.findFirst({
+      where: eq(business.id, input.businessId),
     });
 
-    if (!building) {
+    if (!businessEntity) {
       throw new TRPCError({
         code: "NOT_FOUND",
-        message: "Building not found",
+        message: "Business not found",
       });
     }
 
@@ -31,12 +31,13 @@ export const assignToEnumerator = protectedProcedure
     }
 
     await ctx.db
-      .update(buildings)
+      .update(business)
       .set({
         enumeratorId: input.enumeratorId,
         enumeratorName: enumerator.name,
+        isEnumeratorValid: true, // Set the enumerator validation flag
       })
-      .where(eq(buildings.id, input.buildingId));
+      .where(eq(business.id, input.businessId));
 
     return { success: true };
   });

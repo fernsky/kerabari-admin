@@ -2,17 +2,15 @@
 
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { api } from "@/trpc/react";
-import { BuildingLoadingState } from "@/components/building/building-loading-state";
-import { BuildingStatsGrid } from "@/components/building/building-stats-grid";
-import { BuildingInfoGrid } from "@/components/building/building-info-grid";
-import { BuildingMediaSection } from "@/components/building/building-media-section";
-import { LocationDetailsSection } from "@/components/building/location-details-section";
+import { BusinessLoadingState } from "@/components/business/business-loading-state";
+import { BusinessStatsGrid } from "@/components/business/business-stats-grid";
+import { BusinessInfoGrid } from "@/components/business/business-info-grid";
+import { LocationDetailsSection } from "@/components/business/location-details-section";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
-import { BuildingActions } from "@/components/building/building-actions";
+import { BusinessActions } from "@/components/business/business-actions";
 import { z } from "zod";
 
 const gpsSchema = z.object({
@@ -23,18 +21,18 @@ const gpsSchema = z.object({
   ]),
 });
 
-export default function BuildingDetails({
+export default function BusinessDetails({
   params,
 }: {
   params: { id: string };
 }) {
   const decodedId = decodeURIComponent(params.id);
   const {
-    data: building,
+    data: business,
     isLoading,
     error,
-    refetch: buildingRefetch,
-  } = api.building.getById.useQuery({ id: decodedId });
+    refetch: businessRefetch,
+  } = api.business.getById.useQuery({ id: decodedId });
 
   if (error) {
     return (
@@ -48,10 +46,10 @@ export default function BuildingDetails({
 
   return (
     <ContentLayout
-      title="Businesses Details"
+      title="Business Details"
       actions={
         <div className="flex gap-2">
-          <Link href={`/buildings/edit/${params.id}`}>
+          <Link href={`/businesses/edit/${params.id}`}>
             <Button size="sm" variant="outline">
               <Edit className="mr-2 h-4 w-4" /> Edit
             </Button>
@@ -63,56 +61,42 @@ export default function BuildingDetails({
       }
     >
       {isLoading ? (
-        <BuildingLoadingState />
+        <BusinessLoadingState />
       ) : (
         <div className="space-y-6 lg:px-10 px-2">
-          <BuildingStatsGrid
-            totalFamilies={building?.totalFamilies ?? 0}
-            totalBusinesses={building?.totalBusinesses ?? 0}
-            //@ts-ignore
-            wardNumber={building?.wardNumber ?? 0}
+          <BusinessStatsGrid
+            totalEmployees={
+              (business?.totalPermanentEmployees ?? 0) +
+              (business?.totalTemporaryEmployees ?? 0)
+            }
+            totalPartners={business?.totalPartners ?? 0}
+            wardNumber={business?.wardNo ?? 0}
           />
 
-          <BuildingActions
-            buildingId={building.id}
-            currentStatus={building.status ?? "pending"}
-            onStatusChange={buildingRefetch}
+          <BusinessActions
+            businessId={business.id}
+            currentStatus={business.status ?? "pending"}
+            onStatusChange={businessRefetch}
           />
 
-          {building?.buildingImage && (
-            <div className="overflow-hidden rounded-xl border bg-card">
-              <div className="aspect-video relative">
-                <Image
-                  src={building.buildingImage}
-                  alt="Building"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            </div>
-          )}
+          <BusinessInfoGrid business={business} />
 
-          <BuildingInfoGrid building={building} />
-
-          {(building?.enumeratorSelfie ||
-            building?.surveyAudioRecording ||
-            (building?.gps && gpsSchema.safeParse(building.gps).success)) && (
+          {business?.gps && gpsSchema.safeParse(business.gps).success && (
             <div className="grid gap-6 lg:grid-cols-5">
-              <BuildingMediaSection
-                selfieUrl={building.enumeratorSelfie ?? undefined}
-                audioUrl={building.surveyAudioRecording ?? undefined}
+              <LocationDetailsSection
+                coordinates={[
+                  business.gps.coordinates[1],
+                  business.gps.coordinates[0],
+                ]}
+                gpsAccuracy={
+                  business.gpsAccuracy
+                    ? parseFloat(business.gpsAccuracy)
+                    : undefined
+                }
+                altitude={
+                  business.altitude ? parseFloat(business.altitude) : undefined
+                }
               />
-
-              {building?.gps && gpsSchema.safeParse(building.gps).success && (
-                <LocationDetailsSection
-                  coordinates={[
-                    building.gps.coordinates[1],
-                    building.gps.coordinates[0],
-                  ]}
-                  gpsAccuracy={building.gpsAccuracy ?? undefined}
-                  altitude={building.altitude ?? undefined}
-                />
-              )}
             </div>
           )}
         </div>

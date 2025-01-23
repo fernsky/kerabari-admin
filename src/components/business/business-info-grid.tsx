@@ -10,10 +10,12 @@ import {
   Clock,
   Construction,
 } from "lucide-react";
-import { Card } from "./card";
+import { Card as CustomCard } from "./card";
 import { DetailRow } from "../shared/detail-row";
 import { MultipleDetailRow } from "../shared/multiple-detail-row";
 import { BuildingSchema } from "@/server/db/schema";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { BusinessSchema } from "@/server/db/schema/business/business";
 
 interface BuildingInfoGridProps {
   building: BuildingSchema;
@@ -22,7 +24,7 @@ interface BuildingInfoGridProps {
 export function BuildingInfoGrid({ building }: BuildingInfoGridProps) {
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      <Card title="Survey Information" icon={Users}>
+      <CustomCard title="Survey Information" icon={Users}>
         <DetailRow
           icon={Calendar}
           label="Survey Date"
@@ -38,9 +40,9 @@ export function BuildingInfoGrid({ building }: BuildingInfoGridProps) {
           label="Enumerator ID"
           value={building?.enumeratorId}
         />
-      </Card>
+      </CustomCard>
 
-      <Card title="Location Details" icon={MapPin}>
+      <CustomCard title="Location Details" icon={MapPin}>
         <DetailRow
           icon={MapPin}
           label="Ward Number"
@@ -52,9 +54,9 @@ export function BuildingInfoGrid({ building }: BuildingInfoGridProps) {
           label="Area Code"
           value={building?.tmpAreaCode}
         />
-      </Card>
+      </CustomCard>
 
-      <Card title="Building Details" icon={Building2}>
+      <CustomCard title="Building Details" icon={Building2}>
         <DetailRow
           icon={Home}
           label="Land Ownership"
@@ -78,9 +80,9 @@ export function BuildingInfoGrid({ building }: BuildingInfoGridProps) {
           label="Natural Disasters"
           values={building?.naturalDisasters}
         />
-      </Card>
+      </CustomCard>
 
-      <Card title="Accessibility Information" icon={Clock}>
+      <CustomCard title="Accessibility Information" icon={Clock}>
         <DetailRow
           icon={Clock}
           label="Time to Market"
@@ -111,7 +113,63 @@ export function BuildingInfoGrid({ building }: BuildingInfoGridProps) {
           label="Road Status"
           value={building?.roadStatus}
         />
+      </CustomCard>
+    </div>
+  );
+}
+
+export function BusinessInfoGrid({ business }: { business: BusinessSchema }) {
+  return (
+    <div className="grid gap-6 lg:grid-cols-2">
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-medium">Basic Information</h3>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <InfoItem label="Business Name" value={business.businessName} />
+          <InfoItem label="Business Type" value={business.businessType} />
+          <InfoItem label="Business Nature" value={business.businessNature} />
+          <InfoItem label="Location" value={business.locality} />
+          <InfoItem label="Ward No" value={business.wardNo?.toString()} />
+        </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-medium">Operator Details</h3>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <InfoItem label="Name" value={business.operatorName} />
+          <InfoItem label="Phone" value={business.operatorPhone} />
+          <InfoItem label="Gender" value={business.operatorGender} />
+          <InfoItem label="Age" value={business.operatorAge?.toString()} />
+          <InfoItem label="Education" value={business.operatorEducation} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-medium">Registration Details</h3>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <InfoItem
+            label="Registration Status"
+            value={business.registrationStatus}
+          />
+          <InfoItem label="PAN Status" value={business.panStatus} />
+          <InfoItem label="PAN Number" value={business.panNumber} />
+          <InfoItem label="Statutory Status" value={business.statutoryStatus} />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function InfoItem({ label, value }: { label: string; value?: string | null }) {
+  return (
+    <div>
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className="font-medium">{value || "—"}</p>
     </div>
   );
 }
