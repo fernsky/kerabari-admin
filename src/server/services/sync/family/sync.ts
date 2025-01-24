@@ -28,6 +28,10 @@ import {
   buddhashantiAnimalProduct,
 } from "@/server/db/schema/family/animal-products";
 
+import {
+  StagingBuddhashantiDeath,
+} from "@/server/db/schema/family/deaths";
+
 export async function syncFamilySurvey(recordId: string, data: any, ctx: any) {
   try {
     await performFamilySync(ctx, recordId);
@@ -318,9 +322,23 @@ async function performFamilySync(ctx: any, recordId: string) {
           .onConflictDoNothing();
       }
 
-      // Insert deaths
+      // Insert deaths data into production table
       if (deaths.length > 0) {
-        await tx.insert(buddhashantiDeath).values(deaths).onConflictDoNothing();
+        await tx
+          .insert(buddhashantiDeath)
+          .values(
+        deaths.map((death: StagingBuddhashantiDeath) => ({
+          id: death.id,
+          famliyId: death.familyId,
+          wardNo: death.wardNo,
+          deceasedName: death.deceasedName,
+          deceasedAge: death.deceasedAge,
+          deceasedDeathCause: death.deceasedDeathCause,
+          deceasedGender: death.deceasedGender,
+          deceasedFertilityDeathCondition: death.deceasedFertilityDeathCondition,
+        })),
+          )
+          .onConflictDoNothing();
       }
 
       // Insert crops

@@ -9,6 +9,8 @@ import { buildingRouter } from "./routers/building/building.procedure";
 import { areaManagementRouter } from "./routers/area-management/area-management.procedure";
 import { businessRouter } from "./routers/businesses/business.procedure";
 import { familyRouter } from "./routers/famillies/families.procedure";
+import { individualRouter } from "./routers/individuals/individuals.procedure";
+import { deathRouter } from "./routers/deaths/deaths.procedure";
 
 export const appRouter = createTRPCRouter({
   user: userRouter,
@@ -20,7 +22,9 @@ export const appRouter = createTRPCRouter({
   areaManagement: areaManagementRouter,
   building: buildingRouter,
   business:businessRouter,
-  family:familyRouter
+  family:familyRouter,
+  individual: individualRouter,
+  death: deathRouter,
 });
 
 export type AppRouter = typeof appRouter;
