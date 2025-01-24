@@ -56,11 +56,10 @@ const menuConfig: Menu[] = [
   },
   {
     href: "/account",
-    label: "User Account",
+    label: "User Account", 
     icon: User2Icon,
     roles: ["enumerator"],
   },
-
   {
     href: "/ward",
     label: "Wards",
@@ -69,7 +68,7 @@ const menuConfig: Menu[] = [
     submenus: [],
   },
   {
-    href: "/area",
+    href: "/area", 
     label: "Areas",
     icon: LandPlot,
     roles: ["admin", "superadmin"],
@@ -83,20 +82,32 @@ const menuConfig: Menu[] = [
   },
   {
     href: "/businesses",
-    label: "Businesses",
+    label: "Businesses", 
     icon: Store,
     roles: ["admin", "superadmin"],
   },
   {
     href: "/families",
     label: "Families",
+    icon: UsersRound,
+    roles: ["admin", "superadmin"],
+  },
+  {
+    href: "/individuals",
+    label: "Individuals",
     icon: User2Icon,
+    roles: ["admin", "superadmin"],
+  },
+  {
+    href: "/deaths",
+    label: "Deaths",
+    icon: GitPullRequest,
     roles: ["admin", "superadmin"],
   },
   {
     href: "/enumerators",
     label: "Enumerators",
-    icon: UsersRound,
+    icon: UsersRound, 
     roles: ["admin", "superadmin"],
     submenus: [],
   },
