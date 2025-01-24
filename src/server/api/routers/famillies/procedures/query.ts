@@ -13,7 +13,13 @@ export const getAll = publicProcedure
     const { limit, offset, sortBy = "id", sortOrder = "desc", filters } = input;
 
     // Validate sortBy field exists in family table
-    const validSortColumns = ["id", "head_name", "wardNo", "totalMembers", "status"];
+    const validSortColumns = [
+      "id",
+      "head_name",
+      "wardNo",
+      "totalMembers",
+      "status",
+    ];
     const actualSortBy = validSortColumns.includes(sortBy) ? sortBy : "id";
 
     let conditions = sql`TRUE`;
@@ -23,9 +29,7 @@ export const getAll = publicProcedure
         filterConditions.push(eq(family.wardNo, filters.wardNo));
       }
       if (filters.locality) {
-        filterConditions.push(
-          ilike(family.locality, `%${filters.locality}%`),
-        );
+        filterConditions.push(ilike(family.locality, `%${filters.locality}%`));
       }
       if (filters.enumeratorId) {
         filterConditions.push(eq(family.enumeratorId, filters.enumeratorId));
@@ -94,7 +98,7 @@ export const getById = publicProcedure
             24 * 60 * 60, // 24 hours expiry
           );
         }
-        if (attachment.type === "family_selfie") {
+        if (attachment.type === "family_head_selfie") {
           familyEntity[0].enumeratorSelfie = await ctx.minio.presignedGetObject(
             env.BUCKET_NAME,
             attachment.name,
@@ -102,11 +106,12 @@ export const getById = publicProcedure
           );
         }
         if (attachment.type === "audio_monitoring") {
-          familyEntity[0].surveyAudioRecording = await ctx.minio.presignedGetObject(
-            env.BUCKET_NAME,
-            attachment.name,
-            24 * 60 * 60,
-          );
+          familyEntity[0].surveyAudioRecording =
+            await ctx.minio.presignedGetObject(
+              env.BUCKET_NAME,
+              attachment.name,
+              24 * 60 * 60,
+            );
         }
       }
     } catch (error) {
