@@ -98,7 +98,7 @@ export function ListFamilies({ user }: ListFamiliesProps) {
         <div className="rounded-lg border bg-card shadow-sm">
           <div className="border-b p-4 flex justify-between items-center">
             <h2 className="text-lg font-medium">Families Overview</h2>
-            <Link href="/businesses/odk-settings">
+            <Link href="/families/odk-settings">
               <Button size="sm" className="w-full sm:w-auto">
                 <Settings className="mr-1 h-4 w-4" /> Go To ODK Settings
               </Button>
