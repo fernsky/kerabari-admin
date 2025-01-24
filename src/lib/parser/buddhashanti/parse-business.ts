@@ -319,14 +319,17 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
 
       const animals = [];
       try {
-        if (Array.isArray(r.bag?.b_animals) && r.bag.b_animals.length > 0) {
-          for (const animal of r.bag.b_animals) {
+        if (
+          Array.isArray(r.bag?.banimal_details) &&
+          r.bag.banimal_details.length > 0
+        ) {
+          for (const animal of r.bag.banimal_details) {
             if (animal.banim?.b_animal_oth) {
               // Handle other animal types
               animals.push({
                 id: animal.__id,
                 animal_name: animal.banim.b_animal_oth,
-                animal_ward: animal.animal_ward_no,
+                ward_no: animal.animal_ward_no,
                 total_count: animal.banim.othtotal_b_animals,
                 sales_count: animal.banim.othb_animal_sales,
                 revenue: animal.banim.othb_animal_revenue,
@@ -336,7 +339,7 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
               animals.push({
                 id: animal.__id,
                 animal_name: animal.b_animal,
-                animal_ward: animal.animal_ward_no,
+                ward_no: animal.animal_ward_no,
                 total_count: animal.banimn.total_b_animals,
                 sales_count: animal.banimn.b_animal_sales,
                 revenue: animal.banimn.b_animal_revenue,
@@ -350,8 +353,11 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
 
       const animalProducts = [];
       try {
-        if (Array.isArray(r.bag?.b_aprods) && r.bag.b_aprods.length > 0) {
-          for (const product of r.bag.b_aprods) {
+        if (
+          Array.isArray(r.bag?.baprod_details) &&
+          r.bag.baprod_details.length > 0
+        ) {
+          for (const product of r.bag.baprod_details) {
             if (product.baprd?.baprod_oth) {
               // Handle other animal product types
               animalProducts.push({
@@ -471,7 +477,7 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
               {
                 business_id: r.__id,
                 ...animal,
-                ward_no: animal.animal_ward || r.b_addr.ward_no,
+                ward_no: animal.ward_no || r.b_addr.ward_no,
                 animal_type: "livestock", // Default type since not specified in input
               },
             );

@@ -21,6 +21,11 @@ import {
   StagingBusinessAnimalProduct,
   stagingBusinessAnimalProducts,
 } from "@/server/db/schema/business/business-animal-products";
+import {
+  businessAnimals,
+  StagingBusinessAnimal,
+  stagingBusinessAnimals,
+} from "@/server/db/schema/business/business-animals";
 
 export async function syncBusinessSurvey(
   recordId: string,
@@ -280,14 +285,15 @@ async function performBusinessSync(ctx: any, recordId: string) {
 
     const animals = await ctx.db
       .select()
-      .from(stagingBusinessCrops)
-      .where(eq(stagingBusinessCrops.businessId, recordId));
+      .from(stagingBusinessAnimals) // Fixed: changed from stagingBusinessCrops to stagingBusinessAnimals
+      .where(eq(stagingBusinessAnimals.businessId, recordId));
 
-    const animalProducts = ctx.db
+    const animalProducts = await ctx.db // Added: await keyword
       .select()
       .from(stagingBusinessAnimalProducts)
       .where(eq(stagingBusinessAnimalProducts.businessId, recordId));
 
+    console.log(animals.length, animalProducts.length);
     const stagingData = result[0];
 
     // Insert validated data into production buildings table
@@ -427,6 +433,24 @@ async function performBusinessSync(ctx: any, recordId: string) {
             cropSales: crop.cropSales,
             cropRevenue: crop.cropRevenue,
             cropCount: crop.cropCount,
+          })),
+        )
+        .onConflictDoNothing();
+    }
+
+    // Insert animals data into production table
+    if (animals.length > 0) {
+      await ctx.db
+        .insert(businessAnimals)
+        .values(
+          animals.map((animal: StagingBusinessAnimal) => ({
+            id: animal.id,
+            businessId: animal.businessId,
+            wardNo: animal.wardNo,
+            animalName: animal.animalName,
+            totalCount: animal.totalCount,
+            salesCount: animal.salesCount,
+            revenue: animal.revenue,
           })),
         )
         .onConflictDoNothing();

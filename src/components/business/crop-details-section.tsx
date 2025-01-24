@@ -18,16 +18,6 @@ interface CropDetailsSectionProps {
   crops?: BusinessCrop[] | null;
 }
 
-const cropTypeLabels: Record<string, string> = {
-  fcrop: "Food Crops",
-  pulse: "Pulses",
-  oseed: "Oil Seeds",
-  vtable: "Vegetables",
-  fruit: "Fruits",
-  spice: "Spices",
-  ccrop: "Cash Crops",
-};
-
 const cropIcons: Record<string, any> = {
   fcrop: Wheat,
   pulse: Sprout,
@@ -36,6 +26,28 @@ const cropIcons: Record<string, any> = {
   fruit: Apple,
   spice: Coffee,
   ccrop: Grape,
+};
+
+const getCropTypeLabel = (type: string): string => {
+  console.log(type);
+  switch (type.toLowerCase()) {
+    case "अन्नबाली":
+      return "Food Crops";
+    case "दलहन":
+      return "Pulses";
+    case "तेलहन":
+      return "Oil Seeds";
+    case "फलफूल":
+      return "Vegetables";
+    case "मसला":
+      return "Fruits";
+    case "मसला":
+      return "Spices";
+    case "नगदेबाली":
+      return "Cash Crops";
+    default:
+      return "Other Crops";
+  }
 };
 
 function CropCard({ crop }: { crop: BusinessCrop }) {
@@ -122,11 +134,7 @@ export function CropDetailsSection({ crops }: CropDetailsSectionProps) {
       {Object.entries(groupedCrops).map(([type, crops]) => {
         const IconComponent = cropIcons[type] || Wheat; // Provide Wheat as fallback icon
         return (
-          <Card
-            key={type}
-            title={cropTypeLabels[type] || "Other Crops"}
-            icon={IconComponent}
-          >
+          <Card key={type} title={getCropTypeLabel(type)} icon={IconComponent}>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {crops.map((crop) => (
                 <CropCard key={crop.id} crop={crop} />

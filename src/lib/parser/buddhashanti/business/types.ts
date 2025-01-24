@@ -337,9 +337,9 @@ interface AgriculturalDetails {
     spice_details?: SpiceDetail[];
     ccrop_details?: CCropDetail[];
   };
-  b_animals?: BAnimalDetail[];
+  banimal_details?: BAnimalDetail[];
   banimal_details_count: string;
-  b_aprods?: BAprodDetail[];
+  baprod_details?: BAprodDetail[];
   baprod_details_count: string;
   aquaculture_details: {
     aquaculture_ward_no: string | null;

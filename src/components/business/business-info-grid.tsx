@@ -129,7 +129,7 @@ interface BusinessInfoGridProps {
 export function BusinessInfoGrid({ business }: BusinessInfoGridProps) {
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      <Card title="Basic Information" icon={Building2}>
+      <Card title="Basic Information">
         <DetailRow
           icon={Building2}
           label="Business Name"
@@ -218,15 +218,6 @@ export function BusinessInfoGrid({ business }: BusinessInfoGridProps) {
           value={business?.totalPartners?.toString()}
         />
       </Card>
-    </div>
-  );
-}
-
-function InfoItem({ label, value }: { label: string; value?: string | null }) {
-  return (
-    <div>
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="font-medium">{value || "—"}</p>
     </div>
   );
 }
