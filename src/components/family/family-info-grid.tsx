@@ -25,10 +25,12 @@ export function FamilyInfoGrid({ family }: FamilyInfoGridProps) {
           (item) =>
             item.value && (
               <div key={item.label} className="space-y-1">
-                <div className="text-sm text-muted-foreground">{item.label}</div>
+                <div className="text-sm text-muted-foreground">
+                  {item.label}
+                </div>
                 <div className="font-medium">{item.value}</div>
               </div>
-            )
+            ),
         )}
       </div>
     </div>

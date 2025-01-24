@@ -118,7 +118,7 @@ export default function ListBuildings({ user }: { user: User }) {
       <div className="mx-auto max-w-7xl space-y-6 p-4">
         <div className="rounded-lg border bg-card shadow-sm">
           <div className="border-b p-4 flex justify-between items-center">
-            <h2 className="text-lg font-medium">Overview</h2>
+            <h2 className="text-lg font-medium">Buildings Overview</h2>
             <Link href="/buildings/odk-settings">
               <Button size="sm" className="w-full sm:w-auto">
                 <Settings className="mr-1 h-4 w-4" /> Go to ODK Settings

@@ -11,7 +11,13 @@ import { FilterDrawer } from "@/components/shared/filters/filter-drawer";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/lib/hooks/use-debounce";
-import { ChevronLeft, ChevronRight, Loader2, Plus } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Plus,
+  Settings,
+} from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useMediaQuery } from "react-responsive";
 import { FamilyCard } from "@/components/family/family-card";
@@ -90,11 +96,13 @@ export function ListFamilies({ user }: ListFamiliesProps) {
     <ContentLayout title="Families">
       <div className="mx-auto max-w-7xl space-y-6 p-4">
         <div className="rounded-lg border bg-card shadow-sm">
-          <div className="border-b p-4">
-            <h2 className="text-lg font-medium">Overview</h2>
-            <p className="text-sm text-muted-foreground">
-              Manage and monitor all families information
-            </p>
+          <div className="border-b p-4 flex justify-between items-center">
+            <h2 className="text-lg font-medium">Families Overview</h2>
+            <Link href="/businesses/odk-settings">
+              <Button size="sm" className="w-full sm:w-auto">
+                <Settings className="mr-1 h-4 w-4" /> Go To ODK Settings
+              </Button>
+            </Link>
           </div>
 
           <div className="p-6 space-y-6">

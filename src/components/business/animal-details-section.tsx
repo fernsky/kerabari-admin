@@ -37,7 +37,7 @@ const getAnimalTypeLabel = (type: string): string => {
     case "fish":
       return "Fish & Aquatic";
     default:
-      return "Other Animals";
+      return "Animals";
   }
 };
 

@@ -36,7 +36,7 @@ const getProductTypeLabel = (type: string): string => {
     case "meat":
       return "Meat Products";
     default:
-      return "Other Products";
+      return "Products";
   }
 };
 
@@ -77,11 +77,9 @@ function ProductCard({ product }: { product: BusinessAnimalProduct }) {
               <div className="flex items-center justify-between border-b pb-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Clock className="h-4 w-4" />
-                  <span>Monthly</span>
+                  <span>Production Months per Year</span>
                 </div>
-                <span>
-                  {product.monthlyProduction.toString()} {product.unit}
-                </span>
+                <span>{product.monthlyProduction.toString()} Months</span>
               </div>
             )}
 
