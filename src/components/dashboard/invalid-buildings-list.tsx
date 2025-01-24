@@ -9,6 +9,7 @@ import { InvalidBuildingsFilters } from "./invalid-buildings/filters";
 import { PaginationControls } from "./invalid-buildings/pagination";
 import { BuildingCard } from "./invalid-buildings/building-card";
 import { SortingState } from "@tanstack/react-table";
+import { SummaryStats } from "./invalid-buildings/summary-stats";
 
 interface Filters {
   wardNumber?: number;
@@ -89,15 +90,7 @@ export function InvalidBuildingsList() {
         <p className="text-sm text-muted-foreground">
           View and manage buildings with validation issues
         </p>
-        {data?.summary && (
-          <div className="mt-2 flex flex-wrap gap-2 text-sm text-muted-foreground">
-            <span>Total Invalid: {data.summary.totalInvalid}</span>
-            <span>Invalid Ward: {data.summary.invalidWard}</span>
-            <span>Invalid Area: {data.summary.invalidArea}</span>
-            <span>Invalid Enumerator: {data.summary.invalidEnumerator}</span>
-            <span>Invalid Token: {data.summary.invalidToken}</span>
-          </div>
-        )}
+        {data?.summary && <SummaryStats summary={data.summary} />}
       </div>
       <div className="p-6 space-y-6">
         <InvalidBuildingsFilters
