@@ -15,18 +15,6 @@ export const approve = protectedProcedure
       });
     }
 
-    const building = await ctx.db.query.buildings.findFirst({
-      where: eq(buildings.id, input.buildingId),
-      columns: { status: true },
-    });
-
-    if (!building || building.status !== "pending") {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Only pending buildings can be approved",
-      });
-    }
-
     await ctx.db
       .update(buildings)
       .set({ status: "approved" })
@@ -42,18 +30,6 @@ export const requestEdit = protectedProcedure
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: "Only admins can request edits",
-      });
-    }
-
-    const building = await ctx.db.query.buildings.findFirst({
-      where: eq(buildings.id, input.buildingId),
-      columns: { status: true },
-    });
-
-    if (!building || building.status !== "pending") {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Only pending buildings can be requested for edit",
       });
     }
 
@@ -83,27 +59,17 @@ export const reject = protectedProcedure
       });
     }
 
-    const building = await ctx.db.query.buildings.findFirst({
-      where: eq(buildings.id, input.buildingId),
-      columns: { status: true },
-    });
+    await ctx.db.transaction(async (tx) => {
+      await tx
+        .update(buildings)
+        .set({ status: "rejected" })
+        .where(eq(buildings.id, input.buildingId));
 
-    if (!building || building.status !== "pending") {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Only pending buildings can be rejected",
+      await tx.insert(buildingEditRequests).values({
+        id: uuidv4(),
+        buildingId: input.buildingId,
+        message: input.message,
       });
-    }
-
-    await ctx.db
-      .update(buildings)
-      .set({ status: "rejected" })
-      .where(eq(buildings.id, input.buildingId));
-
-    await ctx.db.insert(buildingEditRequests).values({
-      id: uuidv4(),
-      buildingId: input.buildingId,
-      message: input.message,
     });
 
     return { success: true };

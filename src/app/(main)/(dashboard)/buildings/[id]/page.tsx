@@ -14,6 +14,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { BuildingActions } from "@/components/building/building-actions";
 import { z } from "zod";
+import { AudioPlayer } from "@/components/ui/audio-player";
+import { BuildingInvalidSection } from "@/components/building/building-invalid-section";
 
 const gpsSchema = z.object({
   type: z.literal("Point"),
@@ -66,55 +68,89 @@ export default function BuildingDetails({
         <BuildingLoadingState />
       ) : (
         <div className="space-y-6 lg:px-10 px-2">
-          <BuildingStatsGrid
-            totalFamilies={building?.totalFamilies ?? 0}
-            totalBusinesses={building?.totalBusinesses ?? 0}
-            //@ts-ignore
-            wardNumber={building?.wardNumber ?? 0}
-          />
+          {/* Main Grid Layout */}
+          <div className="grid gap-4 md:grid-cols-[2fr,1fr]">
+            {/* Left Column - Audio and Stats */}
+            <div className="space-y-4">
+              {building?.surveyAudioRecording && (
+                <div className="rounded-lg border bg-card shadow-sm overflow-hidden">
+                  <div className="border-b bg-muted/50 px-4 py-3">
+                    <h3 className="text-sm font-medium">Audio Monitoring</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Survey recording for verification
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <AudioPlayer src={building.surveyAudioRecording} />
+                  </div>
+                </div>
+              )}
 
-          <BuildingActions
-            buildingId={building.id}
-            currentStatus={building.status ?? "pending"}
-            onStatusChange={buildingRefetch}
-          />
-
-          {building?.buildingImage && (
-            <div className="overflow-hidden rounded-xl border bg-card">
-              <div className="aspect-video relative">
-                <Image
-                  src={building.buildingImage}
-                  alt="Building"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            </div>
-          )}
-
-          <BuildingInfoGrid building={building} />
-
-          {(building?.enumeratorSelfie ||
-            building?.surveyAudioRecording ||
-            (building?.gps && gpsSchema.safeParse(building.gps).success)) && (
-            <div className="grid gap-6 lg:grid-cols-5">
-              <BuildingMediaSection
-                selfieUrl={building.enumeratorSelfie ?? undefined}
-                audioUrl={building.surveyAudioRecording ?? undefined}
+              <BuildingStatsGrid
+                totalFamilies={building?.totalFamilies ?? 0}
+                totalBusinesses={building?.totalBusinesses ?? 0}
+                wardNumber={building?.wardNumber ?? 0}
               />
+            </div>
 
-              {building?.gps && gpsSchema.safeParse(building.gps).success && (
-                <LocationDetailsSection
-                  coordinates={[
-                    building.gps.coordinates[1],
-                    building.gps.coordinates[0],
-                  ]}
-                  gpsAccuracy={building.gpsAccuracy ?? undefined}
-                  altitude={building.altitude ?? undefined}
+            {/* Right Column - Verification Status */}
+            <div className="h-full">
+              <BuildingActions
+                buildingId={building.id}
+                currentStatus={building.status ?? "pending"}
+                onStatusChange={buildingRefetch}
+              />
+            </div>
+          </div>
+
+          <BuildingInvalidSection building={building} />
+
+          {/* Media Section */}
+          {(building?.buildingImage || building?.enumeratorSelfie) && (
+            <div className="grid grid-cols-1 lg:grid-cols-[3fr,1fr] gap-6">
+              {building?.buildingImage && (
+                <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+                  <div className="border-b bg-muted/50 p-4">
+                    <h3 className="font-semibold">Building Photo</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Main photo of the surveyed building
+                    </p>
+                  </div>
+                  <div className="aspect-video relative">
+                    <Image
+                      src={building.buildingImage}
+                      alt="Building"
+                      fill
+                      className="object-cover transition-all hover:scale-105"
+                    />
+                  </div>
+                </div>
+              )}
+              {building?.enumeratorSelfie && (
+                <BuildingMediaSection
+                  selfieUrl={building.enumeratorSelfie}
+                  compact
                 />
               )}
             </div>
           )}
+
+          {/* Combined Info Grid and Location */}
+          <BuildingInfoGrid
+            building={building}
+            locationDetails={
+              building?.gps && gpsSchema.safeParse(building.gps).success
+                ? {
+                    coordinates: [
+                      building.gps.coordinates[1],
+                      building.gps.coordinates[0],
+                    ],
+                    gpsAccuracy: building.gpsAccuracy ?? undefined,
+                    altitude: building.altitude ?? undefined,
+                  }
+                : undefined
+            }
+          />
         </div>
       )}
     </ContentLayout>

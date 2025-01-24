@@ -53,6 +53,7 @@ export function AssignmentDialog({
 
   const assignWard = api.building.assignWard.useMutation({
     onSuccess: () => {
+      utils.building.getById.invalidate({ id: buildingId });
       toast.success("Ward assigned successfully");
       utils.building.getInvalidBuildings.invalidate();
       onClose();
@@ -61,6 +62,7 @@ export function AssignmentDialog({
 
   const assignArea = api.building.assignArea.useMutation({
     onSuccess: () => {
+      utils.building.getById.invalidate({ id: buildingId });
       toast.success("Area assigned successfully");
       utils.building.getInvalidBuildings.invalidate();
       onClose();
@@ -69,6 +71,7 @@ export function AssignmentDialog({
 
   const assignEnumerator = api.building.assignEnumerator.useMutation({
     onSuccess: () => {
+      utils.building.getById.invalidate({ id: buildingId });
       toast.success("Enumerator assigned successfully");
       utils.building.getInvalidBuildings.invalidate();
       onClose();
@@ -77,6 +80,7 @@ export function AssignmentDialog({
 
   const assignToken = api.building.assignBuildingToken.useMutation({
     onSuccess: () => {
+      utils.building.getById.invalidate({ id: buildingId });
       toast.success("Building token assigned successfully");
       utils.building.getInvalidBuildings.invalidate();
       onClose();

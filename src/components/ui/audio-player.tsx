@@ -34,8 +34,8 @@ const SpeedControl = ({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <div className="flex items-center rounded-lg border bg-muted/30 p-1">
+    <div className="flex items-center gap-2">
+      <div className="flex items-center rounded-md border p-1">
         <Button
           variant="ghost"
           size="icon"
@@ -44,7 +44,7 @@ const SpeedControl = ({
         >
           <Minus className="h-3 w-3" />
         </Button>
-        <span className="min-w-[44px] text-center text-sm tabular-nums">
+        <span className="min-w-[44px] text-center text-sm font-medium tabular-nums">
           {speed.toFixed(1)}x
         </span>
         <Button
@@ -56,13 +56,16 @@ const SpeedControl = ({
           <Plus className="h-3 w-3" />
         </Button>
       </div>
-      <div className="flex flex-wrap gap-1">
+      <div className="flex gap-1">
         {presetSpeeds.map((presetSpeed) => (
           <Button
             key={presetSpeed}
             variant={speed === presetSpeed ? "secondary" : "ghost"}
             size="sm"
-            className="h-6 w-8 px-0 text-xs"
+            className={cn(
+              "h-6 w-8 px-0 text-xs",
+              speed === presetSpeed && "bg-secondary text-secondary-foreground",
+            )}
             onClick={() => onSpeedChange(presetSpeed)}
           >
             {presetSpeed}x
@@ -146,7 +149,7 @@ export const AudioPlayer = ({ src }: { src: string }) => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="w-full rounded-lg border bg-card p-4">
       <audio
         ref={audioRef}
         src={src}
@@ -162,17 +165,16 @@ export const AudioPlayer = ({ src }: { src: string }) => {
           max={duration}
           step={1}
           onValueChange={handleSeek}
-          className="mt-4"
         />
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>{formatTime(currentTime)}</span>
-          <span>{formatTime(duration)}</span>
+          <span className="tabular-nums">{formatTime(currentTime)}</span>
+          <span className="tabular-nums">{formatTime(duration)}</span>
         </div>
       </div>
 
       {/* Controls */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap items-center gap-4">
+      <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
@@ -187,12 +189,12 @@ export const AudioPlayer = ({ src }: { src: string }) => {
               variant="secondary"
               size="icon"
               onClick={togglePlay}
-              className="h-10 w-10"
+              className="h-10 w-10 rounded-full"
             >
               {isPlaying ? (
-                <Pause className="h-5 w-5" />
+                <Pause className="h-4 w-4" />
               ) : (
-                <Play className="h-5 w-5 pl-0.5" />
+                <Play className="h-4 w-4 pl-0.5" />
               )}
             </Button>
 

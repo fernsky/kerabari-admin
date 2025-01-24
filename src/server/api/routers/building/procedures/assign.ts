@@ -105,6 +105,7 @@ export const assignEnumerator = protectedProcedure
     await ctx.db
       .update(buildings)
       .set({
+        enumeratorName: enumerator[0].name,
         enumeratorId: enumerator[0].id,
         isEnumeratorValid: true,
         tmpEnumeratorId: input.enumeratorId,

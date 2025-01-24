@@ -310,7 +310,9 @@ export default function EditBuilding({ params }: { params: { id: string } }) {
                     <FormItem>
                       <FormLabel>Ward Number</FormLabel>
                       <Select
-                        onValueChange={field.onChange}
+                        onValueChange={(value) =>
+                          field.onChange(parseInt(value))
+                        }
                         value={field.value?.toString()}
                       >
                         <FormControl>
