@@ -1,6 +1,6 @@
 import { publicProcedure } from "@/server/api/trpc";
-import { buildingQuerySchema } from "../building.schema";
-import { buildings } from "@/server/db/schema/building";
+import { familyQuerySchema } from "../families.schema";
+import { family } from "@/server/db/schema/family/family";
 import { surveyAttachments } from "@/server/db/schema";
 import { and, eq, ilike, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -8,33 +8,34 @@ import { TRPCError } from "@trpc/server";
 import { env } from "@/env";
 
 export const getAll = publicProcedure
-  .input(buildingQuerySchema)
+  .input(familyQuerySchema)
   .query(async ({ ctx, input }) => {
-    const { limit, offset, sortBy, sortOrder, filters } = input;
+    const { limit, offset, sortBy = "id", sortOrder = "desc", filters } = input;
+
+    // Validate sortBy field exists in family table
+    const validSortColumns = [
+      "id",
+      "head_name",
+      "wardNo",
+      "totalMembers",
+      "status",
+    ];
+    const actualSortBy = validSortColumns.includes(sortBy) ? sortBy : "id";
 
     let conditions = sql`TRUE`;
     if (filters) {
       const filterConditions = [];
-      if (filters.wardNumber) {
-        filterConditions.push(eq(buildings.tmpWardNumber, filters.wardNumber));
+      if (filters.wardNo) {
+        filterConditions.push(eq(family.wardNo, filters.wardNo));
       }
       if (filters.locality) {
-        filterConditions.push(
-          ilike(buildings.locality, `%${filters.locality}%`),
-        );
+        filterConditions.push(ilike(family.locality, `%${filters.locality}%`));
       }
-      if (filters.mapStatus) {
-        filterConditions.push(eq(buildings.mapStatus, filters.mapStatus));
-      }
-      // Add enumerator filter
       if (filters.enumeratorId) {
-        filterConditions.push(
-          eq(buildings.tmpEnumeratorId, filters.enumeratorId),
-        );
+        filterConditions.push(eq(family.enumeratorId, filters.enumeratorId));
       }
-      // Add status filter
       if (filters.status) {
-        filterConditions.push(eq(buildings.status, filters.status));
+        filterConditions.push(eq(family.status, filters.status));
       }
       if (filterConditions.length > 0) {
         const andCondition = and(...filterConditions);
@@ -45,14 +46,14 @@ export const getAll = publicProcedure
     const [data, totalCount] = await Promise.all([
       ctx.db
         .select()
-        .from(buildings)
+        .from(family)
         .where(conditions)
-        .orderBy(sql`${sql.identifier(sortBy)} ${sql.raw(sortOrder)}`)
+        .orderBy(sql`${sql.identifier(actualSortBy)} ${sql.raw(sortOrder)}`)
         .limit(limit)
         .offset(offset),
       ctx.db
         .select({ count: sql<number>`count(*)` })
-        .from(buildings)
+        .from(family)
         .where(conditions)
         .then((result) => result[0].count),
     ]);
@@ -70,47 +71,47 @@ export const getAll = publicProcedure
 export const getById = publicProcedure
   .input(z.object({ id: z.string() }))
   .query(async ({ ctx, input }) => {
-    const building = await ctx.db
+    const familyEntity = await ctx.db
       .select()
-      .from(buildings)
-      .where(eq(buildings.id, input.id))
+      .from(family)
+      .where(eq(family.id, input.id))
       .limit(1);
 
     const attachments = await ctx.db.query.surveyAttachments.findMany({
-      where: eq(surveyAttachments.dataId, `uuid:${input.id}`),
+      where: eq(surveyAttachments.dataId, input.id),
     });
 
-    if (!building[0]) {
+    if (!familyEntity[0]) {
       throw new TRPCError({
         code: "NOT_FOUND",
-        message: "Building not found",
+        message: "Family not found",
       });
     }
 
     try {
       // Process the attachments and create presigned URLs
       for (const attachment of attachments) {
-        if (attachment.type === "building_image") {
-          console.log("Fetching building image");
-          building[0].buildingImage = await ctx.minio.presignedGetObject(
+        if (attachment.type === "family_head_image") {
+          familyEntity[0].familyImage = await ctx.minio.presignedGetObject(
             env.BUCKET_NAME,
             attachment.name,
             24 * 60 * 60, // 24 hours expiry
           );
         }
-        if (attachment.type === "building_selfie") {
-          building[0].enumeratorSelfie = await ctx.minio.presignedGetObject(
+        if (attachment.type === "family_head_selfie") {
+          familyEntity[0].enumeratorSelfie = await ctx.minio.presignedGetObject(
             env.BUCKET_NAME,
             attachment.name,
             24 * 60 * 60,
           );
         }
         if (attachment.type === "audio_monitoring") {
-          building[0].surveyAudioRecording = await ctx.minio.presignedGetObject(
-            env.BUCKET_NAME,
-            attachment.name,
-            24 * 60 * 60,
-          );
+          familyEntity[0].surveyAudioRecording =
+            await ctx.minio.presignedGetObject(
+              env.BUCKET_NAME,
+              attachment.name,
+              24 * 60 * 60,
+            );
         }
       }
     } catch (error) {
@@ -121,17 +122,17 @@ export const getById = publicProcedure
       });
     }
 
-    return building[0];
+    return familyEntity[0];
   });
 
 export const getStats = publicProcedure.query(async ({ ctx }) => {
   const stats = await ctx.db
     .select({
-      totalBuildings: sql<number>`count(*)`,
-      totalFamilies: sql<number>`sum(${buildings.totalFamilies})`,
-      avgBusinesses: sql<number>`avg(${buildings.totalBusinesses})`,
+      totalFamilies: sql<number>`count(*)`,
+      totalMembers: sql<number>`sum(${family.totalMembers})`,
+      avgMembersPerFamily: sql<number>`avg(${family.totalMembers})`,
     })
-    .from(buildings);
+    .from(family);
 
   return stats[0];
 });

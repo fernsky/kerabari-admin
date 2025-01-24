@@ -6,6 +6,7 @@ import {
   varchar,
   pgEnum,
   decimal,
+  timestamp,
 } from "drizzle-orm/pg-core";
 import { geometry } from "../../geographical";
 import { areas, users, wards } from "../basic";
@@ -92,7 +93,7 @@ export const family = pgTable("buddhashanti_family", {
   locality: text("locality"),
   devOrg: text("dev_org"),
   location: text("location"),
-  geom: geometry("geom", { type: "Point" }),
+  gps: geometry("gps", { type: "Point" }),
   altitude: decimal("altitude"),
   gpsAccuracy: decimal("gps_accuracy"),
 
@@ -101,6 +102,11 @@ export const family = pgTable("buddhashanti_family", {
   headPhone: text("head_phone"),
   totalMembers: integer("total_members"),
   isSanitized: boolean("is_sanitized"),
+
+  // Media (audio & images stored as bucket keys)
+  surveyAudioRecording: varchar("survey_audio_recording", { length: 255 }),
+  familyImage: varchar("family_image", { length: 255 }),
+  enumeratorSelfie: varchar("enumerator_selfie", { length: 255 }),
 
   // House Details
   houseOwnership: text("house_ownership"),
@@ -157,3 +163,13 @@ export const family = pgTable("buddhashanti_family", {
 
   status: familyStatusEnum("status").default("pending"),
 });
+
+export const familyEditRequests = pgTable("buddhashanti_family_edit_requests", {
+  id: varchar("id", { length: 48 }).primaryKey(),
+  familyId: varchar("family_id", { length: 48 }).references(() => family.id),
+  message: text("message").notNull(),
+  requestedAt: timestamp("requested_at").defaultNow(),
+});
+
+export type FamilyEditRequest = typeof familyEditRequests.$inferSelect;
+export type FamilySchema = typeof family.$inferSelect;

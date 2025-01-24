@@ -8,6 +8,7 @@ import { enumeratorRouter } from "./routers/enumerators/enumerators.procedure";
 import { buildingRouter } from "./routers/building/building.procedure";
 import { areaManagementRouter } from "./routers/area-management/area-management.procedure";
 import { businessRouter } from "./routers/businesses/business.procedure";
+import { familyRouter } from "./routers/famillies/families.procedure";
 
 export const appRouter = createTRPCRouter({
   user: userRouter,
@@ -18,7 +19,8 @@ export const appRouter = createTRPCRouter({
   enumerator: enumeratorRouter,
   areaManagement: areaManagementRouter,
   building: buildingRouter,
-  business:businessRouter
+  business:businessRouter,
+  family:familyRouter
 });
 
 export type AppRouter = typeof appRouter;
