@@ -4,16 +4,16 @@ import { api } from "@/trpc/react";
 import { BusinessLoadingState } from "@/components/business/business-loading-state";
 import { BusinessStatsGrid } from "@/components/business/business-stats-grid";
 import { BusinessInfoGrid } from "@/components/business/business-info-grid";
-import { LocationDetailsSection } from "@/components/business/location-details-section";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Edit, Trash2 } from "lucide-react";
+import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { BusinessActions } from "@/components/business/business-actions";
 import { z } from "zod";
-import { BusinessMediaSection } from "@/components/business/business-media-section";
 import Image from "next/image";
 import { BusinessDetailsSection } from "@/components/business/business-details-section";
+import { AudioPlayer } from "@/components/ui/audio-player";
+import { BusinessInvalidSection } from "@/components/business/business-invalid-section";
 
 const gpsSchema = z.object({
   type: z.literal("Point"),
@@ -51,6 +51,11 @@ export default function BusinessDetails({
       title="Business Details"
       actions={
         <div className="flex gap-2">
+          <Link href={`/businesses`}>
+            <Button size="sm" variant="outline">
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Businesses
+            </Button>
+          </Link>
           <Link href={`/businesses/edit/${params.id}`}>
             <Button size="sm" variant="outline">
               <Edit className="mr-2 h-4 w-4" /> Edit
@@ -66,65 +71,116 @@ export default function BusinessDetails({
         <BusinessLoadingState />
       ) : (
         <div className="space-y-6 lg:px-10 px-2">
-          <BusinessStatsGrid
-            totalEmployees={
-              (business?.totalPermanentEmployees ?? 0) +
-              (business?.totalTemporaryEmployees ?? 0)
-            }
-            totalPartners={business?.totalPartners ?? 0}
-            wardNumber={business?.wardNo ?? 0}
-          />
+          {/* Main Grid Layout */}
+          <div className="grid gap-4 md:grid-cols-[2fr,1fr]">
+            {/* Left Column - Audio and Stats */}
+            <div className="space-y-4">
+              {business?.surveyAudioRecording && (
+                <div className="rounded-lg border bg-card shadow-sm overflow-hidden">
+                  <div className="border-b bg-muted/50 px-4 py-3">
+                    <h3 className="text-sm font-medium">Audio Monitoring</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Survey recording for verification
+                    </p>
+                  </div>
+                  <div className="p-4">
+                    <AudioPlayer src={business.surveyAudioRecording} />
+                  </div>
+                </div>
+              )}
 
-          <BusinessActions
-            businessId={business.id}
-            currentStatus={business.status ?? "pending"}
-            onStatusChange={businessRefetch}
-          />
+              <BusinessStatsGrid
+                totalEmployees={
+                  (business?.totalPermanentEmployees ?? 0) +
+                  (business?.totalTemporaryEmployees ?? 0)
+                }
+                totalPartners={business?.totalPartners ?? 0}
+                wardNumber={business?.wardNo ?? 0}
+              />
+            </div>
 
-          {business?.businessImage && (
-            <div className="overflow-hidden rounded-xl border bg-card">
-              <div className="aspect-video relative">
-                <Image
-                  src={business.businessImage}
-                  alt="Business"
-                  fill
-                  className="object-cover"
-                />
-              </div>
+            {/* Right Column - Verification Status */}
+            <div className="h-full">
+              <BusinessActions
+                businessId={business.id}
+                currentStatus={business.status ?? "pending"}
+                onStatusChange={businessRefetch}
+              />
+            </div>
+          </div>
+
+          {/* @ts-ignore */}
+          <BusinessInvalidSection business={business} />
+
+          {/* Media Section */}
+          {(business?.businessImage || business?.enumeratorSelfie) && (
+            <div className="grid grid-cols-1 lg:grid-cols-[3fr,1fr] gap-6">
+              {business?.businessImage && (
+                <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+                  <div className="border-b bg-muted/50 p-4">
+                    <h3 className="font-semibold">Business Photo</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Main photo of the surveyed business
+                    </p>
+                  </div>
+                  <div className="aspect-video relative">
+                    <Image
+                      src={business.businessImage}
+                      alt="Business"
+                      fill
+                      className="object-cover transition-all hover:scale-105"
+                    />
+                  </div>
+                </div>
+              )}
+              {business?.enumeratorSelfie && (
+                <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+                  <div className="border-b bg-muted/50 p-4">
+                    <h3 className="font-semibold">Enumerator Selfie</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Photo verification of surveyor
+                    </p>
+                  </div>
+                  <div className="aspect-square relative">
+                    <Image
+                      src={business.enumeratorSelfie}
+                      alt="Enumerator Selfie"
+                      fill
+                      className="object-cover transition-all hover:scale-105"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          <BusinessInfoGrid business={business} />
+          {/* Info Grid with Location */}
+          <BusinessInfoGrid
+            business={business}
+            locationDetails={
+              business?.gps && gpsSchema.safeParse(business.gps).success
+                ? {
+                    coordinates: [
+                      business.gps.coordinates[1],
+                      business.gps.coordinates[0],
+                    ],
+                    gpsAccuracy: business.gpsAccuracy
+                      ? Number(business.gpsAccuracy)
+                      : undefined,
+                    altitude: business.altitude
+                      ? Number(business.altitude)
+                      : undefined,
+                  }
+                : undefined
+            }
+          />
 
+          {/* Animal and Crop Details */}
           <BusinessDetailsSection
             animals={business?.animals}
             animalProducts={business?.animalProducts}
             crops={business?.crops}
           />
-
-          {(business?.enumeratorSelfie ||
-            business?.surveyAudioRecording ||
-            (business?.gps && gpsSchema.safeParse(business.gps).success)) && (
-            <div className="grid gap-6 lg:grid-cols-5">
-              <BusinessMediaSection
-                selfieUrl={business.enumeratorSelfie ?? undefined}
-                audioUrl={business.surveyAudioRecording ?? undefined}
-              />
-
-              {business?.gps && gpsSchema.safeParse(business.gps).success && (
-                <LocationDetailsSection
-                  coordinates={[
-                    business.gps.coordinates[1],
-                    business.gps.coordinates[0],
-                  ]}
-                  gpsAccuracy={parseFloat(
-                    business.gpsAccuracy?.toString() ?? "0",
-                  )}
-                  altitude={parseFloat(business.altitude?.toString() ?? "0")}
-                />
-              )}
-            </div>
-          )}
         </div>
       )}
     </ContentLayout>

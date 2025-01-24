@@ -18,18 +18,6 @@ export const approve = protectedProcedure
       });
     }
 
-    const businessEntity = await ctx.db.query.business.findFirst({
-      where: eq(business.id, input.businessId),
-      columns: { status: true },
-    });
-
-    if (!businessEntity || businessEntity.status !== "pending") {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Only pending businesses can be approved",
-      });
-    }
-
     await ctx.db
       .update(business)
       .set({ status: "approved" })
@@ -45,18 +33,6 @@ export const requestEdit = protectedProcedure
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: "Only admins can request edits",
-      });
-    }
-
-    const businessEntity = await ctx.db.query.business.findFirst({
-      where: eq(business.id, input.businessId),
-      columns: { status: true },
-    });
-
-    if (!businessEntity || businessEntity.status !== "pending") {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Only pending businesses can be requested for edit",
       });
     }
 
@@ -86,27 +62,17 @@ export const reject = protectedProcedure
       });
     }
 
-    const businessEntity = await ctx.db.query.business.findFirst({
-      where: eq(business.id, input.businessId),
-      columns: { status: true },
-    });
+    await ctx.db.transaction(async (tx) => {
+      await tx
+        .update(business)
+        .set({ status: "rejected" })
+        .where(eq(business.id, input.businessId));
 
-    if (!businessEntity || businessEntity.status !== "pending") {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Only pending businesses can be rejected",
+      await tx.insert(businessEditRequests).values({
+        id: uuidv4(),
+        businessId: input.businessId,
+        message: input.message,
       });
-    }
-
-    await ctx.db
-      .update(business)
-      .set({ status: "rejected" })
-      .where(eq(business.id, input.businessId));
-
-    await ctx.db.insert(businessEditRequests).values({
-      id: uuidv4(),
-      businessId: input.businessId,
-      message: input.message,
     });
 
     return { success: true };

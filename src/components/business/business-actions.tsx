@@ -20,10 +20,14 @@ import {
   Clock,
   CheckCircle,
   Loader2,
+  AlertCircle,
+  Shield,
+  Info,
 } from "lucide-react";
 import { api } from "@/trpc/react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 type BuildingStatus =
   | "pending"
@@ -253,132 +257,217 @@ export function BuildingActions({
   );
 }
 
-type Status = "approved" | "pending" | "requested_for_edit" | "rejected";
+type BusinessStatus =
+  | "pending"
+  | "approved"
+  | "requested_for_edit"
+  | "rejected";
+
+interface BusinessActionsProps {
+  businessId: string;
+  currentStatus: BusinessStatus;
+  onStatusChange?: () => void;
+}
 
 export function BusinessActions({
   businessId,
   currentStatus,
   onStatusChange,
-}: {
-  businessId: string;
-  currentStatus: Status;
-  onStatusChange: () => void;
-}) {
+}: BusinessActionsProps) {
   const [message, setMessage] = useState("");
-  const [open, setOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
 
-  const { mutate: requestEdit, isLoading: isRequesting } =
-    api.business.requestEdit.useMutation({
-      onSuccess: () => {
-        toast.success("Edit request sent successfully");
-        setOpen(false);
-        onStatusChange();
-      },
-      onError: (error) => {
-        toast.error(error.message);
-      },
-    });
+  const approve = api.business.approve.useMutation({
+    onSuccess: () => {
+      toast.success("Business approved successfully");
+      onStatusChange?.();
+    },
+  });
 
-  const { mutate: approve, isLoading: isApproving } =
-    api.business.approve.useMutation({
-      onSuccess: () => {
-        toast.success("Business approved successfully");
-        onStatusChange();
-      },
-      onError: (error) => {
-        toast.error(error.message);
-      },
-    });
+  const requestEdit = api.business.requestEdit.useMutation({
+    onSuccess: () => {
+      toast.success("Edit requested successfully");
+      setIsEditDialogOpen(false);
+      setMessage("");
+      onStatusChange?.();
+    },
+  });
 
-  const { mutate: reject, isLoading: isRejecting } =
-    api.business.reject.useMutation({
-      onSuccess: () => {
-        toast.success("Business rejected successfully");
-        onStatusChange();
-      },
-      onError: (error) => {
-        toast.error(error.message);
-      },
-    });
+  const reject = api.business.reject.useMutation({
+    onSuccess: () => {
+      toast.success("Business rejected successfully");
+      setIsRejectDialogOpen(false);
+      setMessage("");
+      onStatusChange?.();
+    },
+  });
+
+  const handleApprove = async () => {
+    try {
+      await approve.mutateAsync({ businessId });
+    } catch (error) {
+      toast.error("Failed to approve business");
+    }
+  };
+
+  const handleRequestEdit = async () => {
+    if (!message) {
+      toast.error("Please provide a reason for the edit request");
+      return;
+    }
+    try {
+      await requestEdit.mutateAsync({ businessId, message });
+    } catch (error) {
+      toast.error("Failed to request edit");
+    }
+  };
+
+  const handleReject = async () => {
+    if (!message) {
+      toast.error("Please provide a reason for rejection");
+      return;
+    }
+    try {
+      await reject.mutateAsync({ businessId, message });
+    } catch (error) {
+      toast.error("Failed to reject business");
+    }
+  };
 
   return (
-    <div className="flex items-center justify-between rounded-lg border bg-card p-4">
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium">Status:</span>
-        <Badge>{currentStatus}</Badge>
-      </div>
+    <Card className="h-full">
+      <CardHeader className="border-b bg-muted/50 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Shield className="h-4 w-4 text-primary" />
+            <h3 className="font-medium">Verification Status</h3>
+          </div>
+          <StatusBadge status={currentStatus} />
+        </div>
+        <div className="mt-2 flex items-start gap-2 text-xs text-muted-foreground">
+          <Info className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+          <p>Change business status to manage survey verification workflow</p>
+        </div>
+      </CardHeader>
 
-      <div className="flex items-center gap-2">
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
-              Request Edit
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Request Edit</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <Textarea
-                placeholder="Enter your message..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-              />
+      <CardContent className="p-4">
+        <div className="space-y-4">
+          {/* Status Info Box */}
+          <div className="rounded-lg border bg-muted/50 p-3">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <AlertCircle className="h-4 w-4 text-muted-foreground" />
+              Current Status
             </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setOpen(false)}
-                disabled={isRequesting}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={() => requestEdit({ businessId, message })}
-                disabled={isRequesting}
-              >
-                {isRequesting && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                Send Request
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+              <div className="rounded-md bg-background p-2">
+                <span className="text-muted-foreground">Last Updated</span>
+                <p className="mt-1 font-medium">Today, 2:30 PM</p>
+              </div>
+              <div className="rounded-md bg-background p-2">
+                <span className="text-muted-foreground">Modified By</span>
+                <p className="mt-1 font-medium">Admin User</p>
+              </div>
+            </div>
+          </div>
 
-        <Button
-          size="sm"
-          variant="destructive"
-          onClick={() =>
-            reject({
-              businessId,
-              message: "",
-            })
-          }
-          disabled={isRejecting}
-        >
-          {isRejecting ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <XCircle className="mr-2 h-4 w-4" />
-          )}
-          Reject
-        </Button>
+          {/* Action Buttons */}
+          <div className="flex gap-2">
+            {currentStatus !== "approved" && (
+              <Button
+                size="sm"
+                variant="default"
+                onClick={handleApprove}
+                disabled={approve.isLoading}
+                className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
+              >
+                <div className="flex items-center gap-1.5">
+                  <div className="rounded-full bg-white/20 p-1">
+                    <Check className="h-3 w-3" />
+                  </div>
+                  <span>Approve</span>
+                </div>
+              </Button>
+            )}
 
-        <Button
-          size="sm"
-          onClick={() => approve({ businessId })}
-          disabled={isApproving}
-        >
-          {isApproving ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Check className="mr-2 h-4 w-4" />
-          )}
-          Approve
-        </Button>
-      </div>
-    </div>
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" variant="outline">
+                  <Edit className="mr-2 h-4 w-4" />
+                  Request Edit
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Request Business Edit</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <Textarea
+                    placeholder="Provide details about what needs to be edited..."
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    rows={4}
+                  />
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setIsEditDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <LoadingButton
+                    onClick={handleRequestEdit}
+                    loading={requestEdit.isLoading}
+                  >
+                    Submit Request
+                  </LoadingButton>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog
+              open={isRejectDialogOpen}
+              onOpenChange={setIsRejectDialogOpen}
+            >
+              <DialogTrigger asChild>
+                <Button size="sm" variant="destructive">
+                  <XCircle className="mr-2 h-4 w-4" />
+                  Reject
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Reject Business</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <Textarea
+                    placeholder="Provide reason for rejection..."
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    rows={4}
+                  />
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setIsRejectDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <LoadingButton
+                    variant="destructive"
+                    onClick={handleReject}
+                    loading={reject.isLoading}
+                  >
+                    Reject Business
+                  </LoadingButton>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
