@@ -47,7 +47,7 @@ export function InvalidBuildingsFilters({
   ];
 
   return (
-    <div className="flex flex-wrap gap-4">
+    <div className="flex flex-col sm:flex-row gap-4">
       <div className="w-full sm:w-auto space-y-1.5">
         <Label className="text-xs font-medium">
           <div className="flex items-center gap-2">
@@ -65,7 +65,7 @@ export function InvalidBuildingsFilters({
             )
           }
           placeholder="Search ward..."
-          className="w-[200px]"
+          className="w-full sm:w-[200px]"
         />
       </div>
 
@@ -86,7 +86,7 @@ export function InvalidBuildingsFilters({
             )
           }
           placeholder="Search area..."
-          className="w-[200px]"
+          className="w-full sm:w-[200px]"
         />
       </div>
 
@@ -104,7 +104,7 @@ export function InvalidBuildingsFilters({
             onFilterChange("enumeratorId", value === "all" ? undefined : value)
           }
           placeholder="Search enumerator..."
-          className="w-[200px]"
+          className="w-full sm:w-[200px]"
         />
       </div>
     </div>

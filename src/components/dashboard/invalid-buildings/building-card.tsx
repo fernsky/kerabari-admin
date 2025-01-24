@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Users, Building2, AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import { AssignmentDialog } from "./assignment-dialog";
+import { useRouter } from "next/navigation";
 
 interface BuildingCardProps {
   building: {
@@ -26,6 +27,7 @@ export function BuildingCard({ building }: BuildingCardProps) {
   const [assignmentType, setAssignmentType] = useState<
     "ward" | "area" | "enumerator" | "token" | null
   >(null);
+  const router = useRouter();
 
   const validations = {
     ward: {
@@ -50,9 +52,24 @@ export function BuildingCard({ building }: BuildingCardProps) {
     },
   };
 
+  const handleCardClick = () => {
+    router.push(`/buildings/${building.id}`);
+  };
+
+  const handleButtonClick = (
+    e: React.MouseEvent,
+    type: typeof assignmentType,
+  ) => {
+    e.stopPropagation(); // Prevent card click when clicking the Fix button
+    setAssignmentType(type);
+  };
+
   return (
     <>
-      <Card>
+      <Card
+        className="cursor-pointer transition-colors hover:bg-accent/50"
+        onClick={handleCardClick}
+      >
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
@@ -90,7 +107,7 @@ export function BuildingCard({ building }: BuildingCardProps) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setAssignmentType(validation.type)}
+                    onClick={(e) => handleButtonClick(e, validation.type)}
                   >
                     Fix
                   </Button>
