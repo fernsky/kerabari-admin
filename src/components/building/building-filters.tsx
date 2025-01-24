@@ -18,6 +18,7 @@ import {
   AlertCircle,
   Clock,
   Edit,
+  Building2,
 } from "lucide-react";
 
 interface BuildingFiltersProps {
@@ -37,7 +38,26 @@ export function BuildingFilters({
   status,
   onFilterChange,
 }: BuildingFiltersProps) {
+  const { data: areas } = api.area.getAreas.useQuery({ status: "all" });
   const { data: enumerators } = api.admin.getEnumerators.useQuery();
+
+  const wardOptions = [
+    { value: "all", label: "All Wards" },
+    ...Array.from({ length: 7 }, (_, i) => ({
+      value: (i + 1).toString(),
+      label: `Ward ${i + 1}`,
+      searchTerms: [`${i + 1}`, `ward ${i + 1}`],
+    })),
+  ];
+
+  const areaOptions = [
+    { value: "all", label: "All Areas" },
+    ...(areas?.map((area) => ({
+      value: area.code.toString(),
+      label: `Area ${area.code} (Ward ${area.wardNumber})`,
+      searchTerms: [`${area.code}`, `${area.wardNumber}`],
+    })) ?? []),
+  ];
 
   const enumeratorOptions = [
     { value: "all", label: "All Enumerators" },
@@ -124,35 +144,52 @@ export function BuildingFilters({
 
           {/* Filter Controls */}
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-2">
-              <Label className="text-xs font-medium flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                Ward Number
+            {/* Updated Ward Filter */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">
+                <div className="flex items-center gap-2">
+                  <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                  Ward Number
+                </div>
               </Label>
-              <Select
-                value={wardNumber?.toString() || ""}
-                onValueChange={(value) =>
+              <ComboboxSearchable
+                options={wardOptions}
+                value={wardNumber?.toString() || "all"}
+                onChange={(value) =>
                   onFilterChange(
                     "wardNumber",
-                    value ? parseInt(value) : undefined,
+                    value === "all" ? undefined : parseInt(value),
                   )
                 }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All Wards" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Wards</SelectItem>
-                  {[1, 2, 3, 4, 5, 6, 7].map((ward) => (
-                    <SelectItem key={ward} value={ward.toString()}>
-                      Ward {ward}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                placeholder="Search ward..."
+                className="w-full"
+              />
             </div>
 
-            <div className="space-y-2">
+            {/* Added Area Filter */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+                  Area Code
+                </div>
+              </Label>
+              <ComboboxSearchable
+                options={areaOptions}
+                value={locality || "all"}
+                onChange={(value) =>
+                  onFilterChange(
+                    "locality",
+                    value === "all" ? undefined : value,
+                  )
+                }
+                placeholder="Search area..."
+                className="w-full"
+              />
+            </div>
+
+            {/* Existing Enumerator Filter */}
+            <div className="space-y-1.5">
               <Label className="text-xs font-medium flex items-center gap-2">
                 <Users className="h-4 w-4 text-muted-foreground" />
                 Collected By
@@ -171,7 +208,8 @@ export function BuildingFilters({
               />
             </div>
 
-            <div className="space-y-2">
+            {/* Existing Status Filter */}
+            <div className="space-y-1.5">
               <Label className="text-xs font-medium flex items-center gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground" />
                 Status

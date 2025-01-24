@@ -22,6 +22,8 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useMediaQuery } from "react-responsive";
 import { User } from "lucia";
+import { InvalidBuildingsList } from "./invalid-buildings-list";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function ListBuildings({ user }: { user: User }) {
   const [filters, setFilters] = useState({
@@ -116,128 +118,144 @@ export default function ListBuildings({ user }: { user: User }) {
   return (
     <ContentLayout title="Buildings">
       <div className="mx-auto max-w-7xl space-y-6 p-4">
-        <div className="rounded-lg border bg-card shadow-sm">
-          <div className="border-b p-4 flex justify-between items-center">
-            <h2 className="text-lg font-medium">Buildings Overview</h2>
-            <Link href="/buildings/odk-settings">
-              <Button size="sm" className="w-full sm:w-auto">
-                <Settings className="mr-1 h-4 w-4" /> Go to ODK Settings
-              </Button>
-            </Link>
-          </div>
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList className="w-full justify-start border-b">
+            <TabsTrigger value="all" className="flex-1 max-w-[200px]">
+              All Buildings
+            </TabsTrigger>
+            <TabsTrigger value="invalid" className="flex-1 max-w-[200px]">
+              Invalid Buildings
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="all" className="mt-6">
+            <div className="rounded-lg border bg-card shadow-sm">
+              {/* Regular buildings section */}
+              <div className="border-b p-4 flex justify-between items-center">
+                <h2 className="text-lg font-medium">Buildings Overview</h2>
+                <Link href="/buildings/odk-settings">
+                  <Button size="sm" className="w-full sm:w-auto">
+                    <Settings className="mr-1 h-4 w-4" /> Go to ODK Settings
+                  </Button>
+                </Link>
+              </div>
 
-          <div className="p-6 space-y-6">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <StatCard
-                title="Total Buildings"
-                value={stats?.totalBuildings || 0}
-              />
-              <StatCard
-                title="Total Families"
-                value={stats?.totalFamilies || 0}
-              />
-              {/* <StatCard
-                title="Average Businesses"
-                value={(stats?.avgBusinesses || 0).toFixed(1)}
-              /> */}
-            </div>
+              <div className="p-6 space-y-6">
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <StatCard
+                    title="Total Buildings"
+                    value={stats?.totalBuildings || 0}
+                  />
+                  <StatCard
+                    title="Total Families"
+                    value={stats?.totalFamilies || 0}
+                  />
+                  {/* <StatCard
+                    title="Average Businesses"
+                    value={(stats?.avgBusinesses || 0).toFixed(1)}
+                  /> */}
+                </div>
 
-            {/* Actions Bar */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex flex-wrap items-center gap-2">
-                {!isDesktop && (
-                  <FilterDrawer title="Filters">
+                {/* Actions Bar */}
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {!isDesktop && (
+                      <FilterDrawer title="Filters">
+                        <BuildingFilters
+                          {...filters}
+                          onFilterChange={handleFilterChange}
+                        />
+                      </FilterDrawer>
+                    )}
+                    <Input
+                      placeholder="Search locality..."
+                      className="w-full sm:w-[400px] h-9"
+                      value={filters.locality || ""}
+                      onChange={(e) =>
+                        handleFilterChange("locality", e.target.value)
+                      }
+                    />
+                  </div>
+                  <Link href="/buildings/create">
+                    <Button size="sm" className="w-full sm:w-auto">
+                      <Plus className="mr-1 h-4 w-4" /> Add Building
+                    </Button>
+                  </Link>
+                </div>
+
+                {/* Desktop Filters */}
+                {isDesktop && (
+                  <div className="rounded-lg border bg-muted/50 p-4">
                     <BuildingFilters
                       {...filters}
                       onFilterChange={handleFilterChange}
                     />
-                  </FilterDrawer>
+                  </div>
                 )}
-                <Input
-                  placeholder="Search locality..."
-                  className="w-full sm:w-[400px] h-9"
-                  value={filters.locality || ""}
-                  onChange={(e) =>
-                    handleFilterChange("locality", e.target.value)
-                  }
-                />
+
+                {/* Data Table or Cards */}
+                {isLoading ? (
+                  <div className="flex h-32 items-center justify-center">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  </div>
+                ) : isDesktop ? (
+                  <div className="rounded-lg border">
+                    <DataTable
+                      columns={buildingColumns}
+                      //@ts-ignore
+                      data={data?.data || []}
+                      isLoading={isLoading}
+                    />
+                  </div>
+                ) : (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {data?.data.map((building) => (
+                      <BuildingCard key={building.id} building={building} />
+                    ))}
+                  </div>
+                )}
+
+                {/* Pagination */}
+                {data?.data.length ? (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
+                    <span className="text-muted-foreground text-center">
+                      Showing {currentDisplayCount} of {data.pagination.total}{" "}
+                      buildings
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handlePrevPage}
+                        disabled={page === 0}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <span className="min-w-[100px] text-center font-medium">
+                        Page {page + 1} of {totalPages}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleNextPage}
+                        disabled={page >= totalPages - 1}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center text-sm text-muted-foreground py-8">
+                    No buildings found
+                  </div>
+                )}
               </div>
-              <Link href="/buildings/create">
-                <Button size="sm" className="w-full sm:w-auto">
-                  <Plus className="mr-1 h-4 w-4" /> Add Building
-                </Button>
-              </Link>
             </div>
-
-            {/* Desktop Filters */}
-            {isDesktop && (
-              <div className="rounded-lg border bg-muted/50 p-4">
-                <BuildingFilters
-                  {...filters}
-                  onFilterChange={handleFilterChange}
-                />
-              </div>
-            )}
-
-            {/* Data Table or Cards */}
-            {isLoading ? (
-              <div className="flex h-32 items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin" />
-              </div>
-            ) : isDesktop ? (
-              <div className="rounded-lg border">
-                <DataTable
-                  columns={buildingColumns}
-                  //@ts-ignore
-                  data={data?.data || []}
-                  isLoading={isLoading}
-                />
-              </div>
-            ) : (
-              <div className="grid gap-4 sm:grid-cols-2">
-                {data?.data.map((building) => (
-                  <BuildingCard key={building.id} building={building} />
-                ))}
-              </div>
-            )}
-
-            {/* Pagination */}
-            {data?.data.length ? (
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
-                <span className="text-muted-foreground text-center">
-                  Showing {currentDisplayCount} of {data.pagination.total}{" "}
-                  buildings
-                </span>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handlePrevPage}
-                    disabled={page === 0}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <span className="min-w-[100px] text-center font-medium">
-                    Page {page + 1} of {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleNextPage}
-                    disabled={page >= totalPages - 1}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center text-sm text-muted-foreground py-8">
-                No buildings found
-              </div>
-            )}
-          </div>
-        </div>
+          </TabsContent>
+          <TabsContent value="invalid" className="mt-6">
+            <InvalidBuildingsList />
+          </TabsContent>
+        </Tabs>
       </div>
     </ContentLayout>
   );
