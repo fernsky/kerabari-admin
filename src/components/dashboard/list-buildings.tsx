@@ -4,17 +4,23 @@ import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
 import Link from "next/link";
-import { buildingColumns } from "@/components/building/columns";
+import { buildingColumns as originalBuildingColumns } from "@/components/building/columns";
 import { DataTable } from "@/components/shared/data-table/data-table";
 import { BuildingFilters } from "@/components/building/building-filters";
 import { FilterDrawer } from "@/components/shared/filters/filter-drawer";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/lib/hooks/use-debounce";
-import { ChevronLeft, ChevronRight, Loader2, Plus, Eye } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Plus,
+  Eye,
+  Settings,
+} from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useMediaQuery } from "react-responsive";
-import { BuildingCard } from "@/components/building/building-card";
 import { User } from "lucia";
 
 export default function ListBuildings({ user }: { user: User }) {
@@ -78,15 +84,46 @@ export default function ListBuildings({ user }: { user: User }) {
     </div>
   );
 
+  const BuildingCard = ({ building }: { building: any }) => (
+    <div className="rounded-lg border bg-card p-4 shadow-sm">
+      {/* ...existing card content... */}
+      <div className="mt-4 flex gap-2">
+        <Link href={`/buildings/${building.id}`}>
+          <Button size="sm" variant="outline">
+            <Eye className="mr-2 h-4 w-4" /> View
+          </Button>
+        </Link>
+      </div>
+    </div>
+  );
+
+  const buildingColumns = [
+    ...originalBuildingColumns,
+    {
+      id: "actions",
+      cell: ({ row }: { row: any }) => (
+        <div className="flex gap-2">
+          <Link href={`/buildings/${row.original.id}`}>
+            <Button size="sm" variant="outline">
+              <Eye className="mr-2 h-4 w-4" /> View
+            </Button>
+          </Link>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <ContentLayout title="Buildings">
       <div className="mx-auto max-w-7xl space-y-6 p-4">
         <div className="rounded-lg border bg-card shadow-sm">
-          <div className="border-b p-4">
+          <div className="border-b p-4 flex justify-between items-center">
             <h2 className="text-lg font-medium">Overview</h2>
-            <p className="text-sm text-muted-foreground">
-              Manage and monitor all buildings information
-            </p>
+            <Link href="/buildings/odk-settings">
+              <Button size="sm" className="w-full sm:w-auto">
+                <Settings className="mr-1 h-4 w-4" /> Go to ODK Settings
+              </Button>
+            </Link>
           </div>
 
           <div className="p-6 space-y-6">

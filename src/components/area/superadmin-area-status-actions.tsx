@@ -120,7 +120,7 @@ export function SuperadminAreaStatusActions({
   };
 
   const getStatusBadge = () => {
-    const status = area.areaStatus ?? "unknown";
+    const status = area?.areaStatus ?? "unknown";
     const config = statusConfig[status as keyof typeof statusConfig];
 
     if (!config) return null;
@@ -149,7 +149,7 @@ export function SuperadminAreaStatusActions({
     const baseButtonClasses =
       "relative transition-all duration-200 h-9 text-sm gap-2 px-3";
 
-    switch (area.areaStatus) {
+    switch (area?.areaStatus) {
       case "newly_assigned":
       case "ongoing_survey":
         return (

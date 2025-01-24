@@ -11,7 +11,13 @@ import { FilterDrawer } from "@/components/shared/filters/filter-drawer";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/lib/hooks/use-debounce";
-import { ChevronLeft, ChevronRight, Loader2, Plus } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Plus,
+  Settings,
+} from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useMediaQuery } from "react-responsive";
 import { BusinessCard } from "@/components/business/business-card";
@@ -91,11 +97,13 @@ export function ListBusinesses({ user }: ListBusinessesProps) {
     <ContentLayout title="Businesses">
       <div className="mx-auto max-w-7xl space-y-6 p-4">
         <div className="rounded-lg border bg-card shadow-sm">
-          <div className="border-b p-4">
+          <div className="border-b p-4 flex justify-between items-center">
             <h2 className="text-lg font-medium">Overview</h2>
-            <p className="text-sm text-muted-foreground">
-              Manage and monitor all business information
-            </p>
+            <Link href="/businesses/odk-settings">
+              <Button size="sm" className="w-full sm:w-auto">
+                <Settings className="mr-1 h-4 w-4" /> Go To ODK Settings
+              </Button>
+            </Link>
           </div>
 
           <div className="p-6 space-y-6">
@@ -129,14 +137,6 @@ export function ListBusinesses({ user }: ListBusinessesProps) {
                     </FilterDrawer>
                     <div className="flex gap-2">
                       <Input
-                        placeholder="Search business nature..."
-                        className="w-full sm:w-[200px] h-9"
-                        value={filters.businessNature || ""}
-                        onChange={(e) =>
-                          handleFilterChange("businessNature", e.target.value)
-                        }
-                      />
-                      <Input
                         placeholder="Ward no."
                         type="number"
                         className="w-full sm:w-[100px] h-9"
@@ -151,15 +151,13 @@ export function ListBusinesses({ user }: ListBusinessesProps) {
                     </div>
                   </div>
                 )}
-                <Input
-                  placeholder="Search business nature..."
-                  className="w-full sm:w-[400px] h-9"
-                  value={filters.businessNature || ""}
-                  onChange={(e) =>
-                    handleFilterChange("businessNature", e.target.value)
-                  }
-                />
               </div>
+              <Input
+                placeholder="Search Business Nature..."
+                className="w-full sm:w-[400px] h-9"
+                value={filters.businessNature || ""}
+                onChange={(e) => handleFilterChange("locality", e.target.value)}
+              />
               <Link href="/businesses/create">
                 <Button size="sm" className="w-full sm:w-auto">
                   <Plus className="mr-1 h-4 w-4" /> Add Business
