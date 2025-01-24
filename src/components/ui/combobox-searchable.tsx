@@ -35,6 +35,7 @@ interface ComboboxSearchableProps {
     align?: "start" | "end" | "center";
     sideOffset?: number;
   };
+  disabled?: boolean;
 }
 
 export function ComboboxSearchable({

@@ -9,6 +9,8 @@ import {
   getStatusHistory,
 } from "./procedures/status";
 import { assignToEnumerator } from "./procedures/assignment";
+import { assignAreaUpdate } from "./procedures/assignArea";
+import { assignWardUpdate } from "./procedures/assignWard";
 import * as assign from "./procedures/assign";
 
 export const buildingRouter = createTRPCRouter({
@@ -23,6 +25,8 @@ export const buildingRouter = createTRPCRouter({
   reject,
   getStatusHistory,
   assignToEnumerator,
+  assignAreaUpdate,
+  assignWardUpdate,
   assignWard: assign.assignWard,
   assignArea: assign.assignArea,
   assignEnumerator: assign.assignEnumerator,

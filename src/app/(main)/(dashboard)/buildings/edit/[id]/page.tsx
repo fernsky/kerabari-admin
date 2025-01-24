@@ -12,14 +12,14 @@ import { updateBuildingSchema } from "@/server/api/routers/building/building.sch
 import { useEffect } from "react";
 import { EnumeratorAssignment } from "@/components/building/enumerator-assignment";
 import { Form } from "@/components/ui/form";
-import { AreaAssignmentSection } from "@/components/building/edit/area-assignment-section";
 import { BasicInformationSection } from "@/components/building/edit/basic-information-section";
 import { BuildingDetailsSection } from "@/components/building/edit/building-details-section";
 import { AccessibilitySection } from "@/components/building/edit/accessibility-section";
-import { isNull } from "util";
 import { EditPageLayout } from "@/components/building/edit/edit-page-layout";
-import { Building2, MapPin, Info, Home, Clock } from "lucide-react";
+import { Building2, Info, Clock } from "lucide-react";
 import { motion } from "framer-motion";
+import { AreaAssignment } from "@/components/building/area-assignment";
+import { WardAssignment } from "@/components/building/ward-assignment";
 
 export default function EditBuilding({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -29,9 +29,6 @@ export default function EditBuilding({ params }: { params: { id: string } }) {
     resolver: zodResolver(updateBuildingSchema),
     defaultValues: {
       surveyDate: "",
-      enumeratorName: "",
-      enumeratorId: "",
-      wardNumber: 0,
       locality: "",
       areaCode: "",
       totalFamilies: 0,
@@ -43,13 +40,12 @@ export default function EditBuilding({ params }: { params: { id: string } }) {
       floor: "",
       mapStatus: "",
       roadStatus: "",
+      naturalDisasters: [] as string[],
       timeToMarket: "",
       timeToActiveRoad: "",
       timeToPublicBus: "",
       timeToHealthOrganization: "",
       timeToFinancialOrganization: "",
-      areaId: null as unknown as string | undefined,
-      buildingToken: "",
     },
   });
 
@@ -75,8 +71,6 @@ export default function EditBuilding({ params }: { params: { id: string } }) {
     if (building) {
       form.reset({
         surveyDate: building.surveyDate?.toISOString().split("T")[0] ?? "",
-        enumeratorName: building.enumeratorName ?? "",
-        enumeratorId: building.enumeratorId ?? "",
         locality: building.locality ?? "",
         totalFamilies: building.totalFamilies ?? 0,
         totalBusinesses: building.totalBusinesses ?? 0,
@@ -89,13 +83,12 @@ export default function EditBuilding({ params }: { params: { id: string } }) {
         floor: building.floor ?? "",
         mapStatus: building.mapStatus ?? "",
         roadStatus: building.roadStatus ?? "",
+        naturalDisasters: building.naturalDisasters ?? [],
         timeToMarket: building.timeToMarket ?? "",
         timeToActiveRoad: building.timeToActiveRoad ?? "",
         timeToPublicBus: building.timeToPublicBus ?? "",
         timeToHealthOrganization: building.timeToHealthOrganization ?? "",
         timeToFinancialOrganization: building.timeToFinancialOrganization ?? "",
-        areaId: building.areaId ?? undefined,
-        buildingToken: building.buildingToken ?? "",
       });
     }
   }, [building, form]);
@@ -106,7 +99,6 @@ export default function EditBuilding({ params }: { params: { id: string } }) {
       id: decodedId,
       data: {
         ...data,
-        wardNumber: parseInt(data.wardNumber),
         totalFamilies: parseInt(data.totalFamilies),
         totalBusinesses: parseInt(data.totalBusinesses),
       },
@@ -124,8 +116,6 @@ export default function EditBuilding({ params }: { params: { id: string } }) {
       </ContentLayout>
     );
   }
-
-  const currentBuildingToken = form.watch("buildingToken");
 
   return (
     <ContentLayout
@@ -171,17 +161,27 @@ export default function EditBuilding({ params }: { params: { id: string } }) {
           currentEnumeratorId={building?.enumeratorId ?? undefined}
         />
 
+        <WardAssignment
+          buildingId={decodedId}
+          currentWardNumber={building?.wardId?.toString() ?? undefined}
+          isWardValid={building?.isWardValid ?? false}
+          refetchBuilding={refetchBuilding}
+        />
+
+        <AreaAssignment
+          buildingId={decodedId}
+          currentAreaId={building?.areaId ?? undefined}
+          currentBuildingToken={building?.buildingToken ?? undefined}
+          isAreaValid={building?.isAreaValid ?? false}
+          refetchBuilding={refetchBuilding}
+        />
+
         <Form {...form}>
           <form
             id="building-form"
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-8"
           >
-            <AreaAssignmentSection
-              form={form}
-              currentBuildingToken={currentBuildingToken}
-              icon={<MapPin className="h-5 w-5" />}
-            />
             <BasicInformationSection
               form={form}
               icon={<Info className="h-5 w-5" />}

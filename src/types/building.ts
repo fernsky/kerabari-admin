@@ -5,7 +5,6 @@ export interface Building {
   tmpAreaCode: string | null;
   tmpEnumeratorId: string | null;
   tmpBuildingToken: string | null;
-  isWardValid: boolean | null;
   isAreaValid: boolean | null;
   isEnumeratorValid: boolean | null;
   isBuildingTokenValid: boolean | null;
@@ -20,4 +19,6 @@ export interface Building {
   gps?: any;
   gpsAccuracy?: number | null;
   altitude?: number | null;
+  wardId?: string | null;
+  isWardValid?: boolean | null;
 }

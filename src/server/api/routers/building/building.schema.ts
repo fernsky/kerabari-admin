@@ -22,7 +22,7 @@ export const buildingSchema = z.object({
   roof: z.string(),
   floor: z.string(),
   mapStatus: z.string(),
-  naturalDisasters: z.string(),
+  naturalDisasters: z.string().array(),
   timeToMarket: z.string(),
   timeToActiveRoad: z.string(),
   timeToPublicBus: z.string(),

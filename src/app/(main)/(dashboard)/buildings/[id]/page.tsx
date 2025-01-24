@@ -89,7 +89,7 @@ export default function BuildingDetails({
               <BuildingStatsGrid
                 totalFamilies={building?.totalFamilies ?? 0}
                 totalBusinesses={building?.totalBusinesses ?? 0}
-                wardNumber={building?.wardNumber ?? 0}
+                wardNumber={building?.wardId ?? 0}
               />
             </div>
 
@@ -103,6 +103,7 @@ export default function BuildingDetails({
             </div>
           </div>
 
+          {/* Invalid section */}
           <BuildingInvalidSection building={building} />
 
           {/* Media Section */}

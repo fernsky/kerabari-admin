@@ -90,13 +90,13 @@ export function BuildingInvalidSection({
                     {validation.label}: {validation.current || "Not assigned"}
                   </Badge>
                 </div>
-                <Button
+                {/* <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setAssignmentType(validation.type)}
                 >
                   Fix
-                </Button>
+                </Button> */}
               </div>
             );
           })}

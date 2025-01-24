@@ -46,38 +46,29 @@ export function EnumeratorAssignment({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg font-medium">
+    <Card className="h-full">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium">
           Enumerator Assignment
         </CardTitle>
-        <CardDescription>Assign this building to an enumerator</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center gap-4">
-          <Select
-            value={currentEnumeratorId}
-            onValueChange={handleAssign}
-            disabled={isLoading || assignMutation.isLoading}
-          >
-            <SelectTrigger className="w-[300px]">
-              <SelectValue placeholder="Select an enumerator" />
-            </SelectTrigger>
-            <SelectContent>
-              {enumerators?.map((enumerator) => (
-                <SelectItem key={enumerator.id} value={enumerator.id}>
-                  {enumerator.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {assignMutation.isLoading && (
-            <Button variant="ghost" disabled>
-              <UserCheck className="mr-2 h-4 w-4 animate-spin" />
-              Assigning...
-            </Button>
-          )}
-        </div>
+        <Select
+          value={currentEnumeratorId}
+          onValueChange={handleAssign}
+          disabled={isLoading || assignMutation.isLoading}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select an enumerator" />
+          </SelectTrigger>
+          <SelectContent>
+            {enumerators?.map((enumerator) => (
+              <SelectItem key={enumerator.id} value={enumerator.id}>
+                {enumerator.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </CardContent>
     </Card>
   );

@@ -16,6 +16,8 @@ import { FormCard } from "./form-card";
 import { UseFormReturn } from "react-hook-form";
 import { buildingChoices } from "@/lib/resources/building";
 import { fieldStyles, SectionProps } from "./common-field-styles";
+import { SelectMultiple } from "@/components/ui/select-multiple";
+import { MultiSelectCombobox } from "@/components/ui/multiselect-combobox";
 
 interface BuildingDetailsSectionProps extends SectionProps {
   form: UseFormReturn<any>;
@@ -97,6 +99,42 @@ export function BuildingDetailsSection({
             )}
           />
         ))}
+        <FormField
+          control={form.control}
+          name="naturalDisasters"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className={fieldStyles.label}>
+                Natural Disasters
+              </FormLabel>
+              <FormControl>
+                <MultiSelectCombobox
+                  label="Natural Disasters"
+                  options={Object.values(buildingChoices.natural_disasters).map(
+                    (value) => ({
+                      value,
+                      label: value,
+                    }),
+                  )}
+                  value={field.value ?? []}
+                  onChange={field.onChange}
+                  placeholder="Search natural disasters..."
+                  renderItem={(option) => option.label}
+                  renderSelectedItem={(values) => (
+                    <span className="truncate">
+                      {values.length === 0
+                        ? "Select natural disasters..."
+                        : values.length === 1
+                          ? values[0]
+                          : `${values.length} disasters selected`}
+                    </span>
+                  )}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
     </FormCard>
   );
