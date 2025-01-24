@@ -111,13 +111,6 @@ export const getById = publicProcedure
       });
     }
 
-    const result: BusinessResult = {
-      ...businessEntity[0],
-      animals: businessAnimalsData,
-      animalProducts: businessAnimalProductsData,
-      crops: businessCropsData,
-    };
-
     const attachments = await ctx.db.query.surveyAttachments.findMany({
       where: eq(surveyAttachments.dataId, input.id),
     });
@@ -158,7 +151,14 @@ export const getById = publicProcedure
       });
     }
 
-    return businessEntity[0];
+    const result: BusinessResult = {
+      ...businessEntity[0],
+      animals: businessAnimalsData,
+      animalProducts: businessAnimalProductsData,
+      crops: businessCropsData,
+    };
+
+    return result;
   });
 
 export const getStats = publicProcedure.query(async ({ ctx }) => {

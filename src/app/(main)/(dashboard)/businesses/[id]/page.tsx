@@ -13,6 +13,7 @@ import { BusinessActions } from "@/components/business/business-actions";
 import { z } from "zod";
 import { BusinessMediaSection } from "@/components/business/business-media-section";
 import Image from "next/image";
+import { BusinessDetailsSection } from "@/components/business/business-details-section";
 
 const gpsSchema = z.object({
   type: z.literal("Point"),
@@ -94,6 +95,12 @@ export default function BusinessDetails({
           )}
 
           <BusinessInfoGrid business={business} />
+
+          <BusinessDetailsSection
+            animals={business?.animals}
+            animalProducts={business?.animalProducts}
+            crops={business?.crops}
+          />
 
           {(business?.enumeratorSelfie ||
             business?.surveyAudioRecording ||
