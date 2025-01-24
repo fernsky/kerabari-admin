@@ -15,20 +15,24 @@ export const approve = protectedProcedure
       });
     }
 
-    const familyEntity = await ctx.db
-      .select()
-      .from(family)
-      .where(eq(family.id, input.familyId))
-      .limit(1);
+    const familyEntity = await ctx.db.query.family.findFirst({
+      where: eq(family.id, input.familyId),
+      columns: { status: true },
+    });
 
-    if (!familyEntity[0] || familyEntity[0].status !== "pending") {
+    if (!familyEntity || familyEntity.status !== "pending") {
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: "Only pending families can be approved",
       });
     }
 
-    // ...rest remains the same...
+    await ctx.db
+      .update(family)
+      .set({ status: "approved" })
+      .where(eq(family.id, input.familyId));
+
+    return { success: true };
   });
 
 export const requestEdit = protectedProcedure
@@ -41,21 +45,80 @@ export const requestEdit = protectedProcedure
       });
     }
 
-    const familyEntity = await ctx.db
-      .select()
-      .from(family)
-      .where(eq(family.id, input.familyId))
-      .limit(1);
+    const familyEntity = await ctx.db.query.family.findFirst({
+      where: eq(family.id, input.familyId),
+      columns: { status: true },
+    });
 
-    if (!familyEntity[0] || familyEntity[0].status !== "pending") {
+    if (!familyEntity || familyEntity.status !== "pending") {
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: "Only pending families can be requested for edit",
       });
     }
 
-    // ...rest remains the same...
+    await ctx.db.transaction(async (tx) => {
+      await tx
+        .update(family)
+        .set({ status: "requested_for_edit" })
+        .where(eq(family.id, input.familyId));
+
+      await tx.insert(familyEditRequests).values({
+        id: uuidv4(),
+        familyId: input.familyId,
+        message: input.message,
+      });
+    });
+
+    return { success: true };
   });
 
-// ...rest of the file remains the same...
+export const reject = protectedProcedure
+  .input(z.object({ familyId: z.string(), message: z.string() }))
+  .mutation(async ({ ctx, input }) => {
+    if (ctx.user.role !== "superadmin") {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Only admins can reject families",
+      });
+    }
 
+    const familyEntity = await ctx.db.query.family.findFirst({
+      where: eq(family.id, input.familyId),
+      columns: { status: true },
+    });
+
+    if (!familyEntity || familyEntity.status !== "pending") {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Only pending families can be rejected",
+      });
+    }
+
+    await ctx.db.transaction(async (tx) => {
+      await tx
+        .update(family)
+        .set({ status: "rejected" })
+        .where(eq(family.id, input.familyId));
+
+      await tx.insert(familyEditRequests).values({
+        id: uuidv4(),
+        familyId: input.familyId,
+        message: input.message,
+      });
+    });
+
+    return { success: true };
+  });
+
+export const getStatusHistory = protectedProcedure
+  .input(z.object({ familyId: z.string() }))
+  .query(async ({ ctx, input }) => {
+    const history = await ctx.db
+      .select()
+      .from(familyEditRequests)
+      .where(eq(familyEditRequests.familyId, input.familyId))
+      .orderBy(desc(familyEditRequests.requestedAt));
+
+    return history;
+  });

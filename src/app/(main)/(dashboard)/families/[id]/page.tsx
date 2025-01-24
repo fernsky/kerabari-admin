@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
-// import { FamilyActions } from "@/components/family/family-actions";
 import { z } from "zod";
 import { FamilyLoadingState } from "@/components/family/family-loading-state";
 import { FamilyInfoGrid } from "@/components/family/family-info-grid";
 import { FamilyStatsGrid } from "@/components/family/family-stats-grid";
 import { LocationDetailsSection } from "@/components/family/location-details-section";
 import { FamilyMediaSection } from "@/components/family/family-media-section";
+import { FamilyActions } from "@/components/family/family-actions";
+import Image from "next/image";
 
 const gpsSchema = z.object({
   type: z.literal("Point"),
@@ -67,50 +68,58 @@ export default function FamilyDetails({ params }: { params: { id: string } }) {
             headName={family?.headName ?? "N/A"}
           />
 
-          <div className="grid lg:grid-cols-5 gap-6">
-            {family?.geom && gpsSchema.safeParse(family.geom).success && (
-              <LocationDetailsSection
-                coordinates={[
-                  family.geom.coordinates[1],
-                  family.geom.coordinates[0],
-                ]}
-                gpsAccuracy={
-                  family.gpsAccuracy
-                    ? parseFloat(family.gpsAccuracy)
-                    : undefined
-                }
-                altitude={
-                  family.altitude ? parseFloat(family.altitude) : undefined
-                }
-              />
-            )}
+          <FamilyActions
+            familyId={family.id}
+            currentStatus={family.status ?? "pending"}
+            onStatusChange={familyRefetch}
+          />
 
-            {(family?.enumeratorSelfie ||
-              family?.surveyAudioRecording ||
-              (family?.gps && gpsSchema.safeParse(business.gps).success)) && (
-              <div className="grid gap-6 lg:grid-cols-5">
-                <FamilyMediaSection
-                  selfieUrl={family.enumeratorSelfie ?? undefined}
-                  audioUrl={family.surveyAudioRecording ?? undefined}
+          {family?.familyImage && (
+            <div className="overflow-hidden rounded-xl border bg-card">
+              <div className="aspect-video relative">
+                <Image
+                  src={family.familyImage}
+                  alt="Family"
+                  fill
+                  className="object-cover"
                 />
-
-                {family?.gps && gpsSchema.safeParse(family.gps).success && (
-                  <LocationDetailsSection
-                    coordinates={[
-                      family.gps.coordinates[1],
-                      family.gps.coordinates[0],
-                    ]}
-                    gpsAccuracy={parseFloat(
-                      family.gpsAccuracy?.toString() ?? "0",
-                    )}
-                    altitude={parseFloat(family.altitude?.toString() ?? "0")}
-                  />
-                )}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           <FamilyInfoGrid family={family} />
+
+          {(family?.enumeratorSelfie ||
+            family?.surveyAudioRecording ||
+            (family?.gps && gpsSchema.safeParse(family.gps).success)) && (
+            <div className="grid gap-6 lg:grid-cols-5">
+              <FamilyMediaSection
+                selfieUrl={family?.enumeratorSelfie ?? undefined}
+                audioUrl={family?.surveyAudioRecording ?? undefined}
+              />
+
+              {family?.gps && gpsSchema.safeParse(family.gps).success && (
+                <LocationDetailsSection
+                  coordinates={[
+                    family.gps.coordinates[1],
+                    family.gps.coordinates[0],
+                  ]}
+                  gpsAccuracy={
+                    family.gpsAccuracy
+                      ? parseFloat(family.gpsAccuracy.toString())
+                      : undefined
+                  }
+                  altitude={
+                    family.altitude
+                      ? parseFloat(family.altitude.toString())
+                      : undefined
+                  }
+                  locality={family.locality ?? undefined}
+                  wardNo={family.wardNo}
+                />
+              )}
+            </div>
+          )}
         </div>
       )}
     </ContentLayout>

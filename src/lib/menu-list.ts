@@ -100,13 +100,6 @@ const menuConfig: Menu[] = [
     roles: ["admin", "superadmin"],
     submenus: [],
   },
-  {
-    href: "/area/handle-actions",
-    label: "Handle Actions",
-    icon: FormInput,
-    roles: ["admin", "superadmin"],
-    submenus: [],
-  },
 ];
 
 export function getMenuList(pathname: string, userRole: Role): Group[] {

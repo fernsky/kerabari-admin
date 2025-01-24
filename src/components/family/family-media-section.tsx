@@ -1,39 +1,54 @@
+import { AudioPlayer } from "../ui/audio-player";
 import Image from "next/image";
 
 interface FamilyMediaSectionProps {
-  // Note: Add more media props here as they become available in the family schema
-  documents?: string[];
+  selfieUrl?: string;
+  audioUrl?: string;
 }
 
-export function FamilyMediaSection({ documents }: FamilyMediaSectionProps) {
-  if (!documents?.length) return null;
-
+export function FamilyMediaSection({
+  selfieUrl,
+  audioUrl,
+}: FamilyMediaSectionProps) {
   return (
     <div className="lg:col-span-2 space-y-6">
-      <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
-        <div className="border-b bg-muted/50 p-4">
-          <h3 className="font-semibold">Family Documents</h3>
-          <p className="text-xs text-muted-foreground">
-            Supporting documents for family verification
-          </p>
-        </div>
-        <div className="grid gap-4 p-4">
-          {documents.map((doc, index) => (
-            <div
-              key={index}
-              className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border"
-            >
+      {selfieUrl && (
+        <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+          <div className="border-b bg-muted/50 p-4">
+            <h3 className="font-semibold">Enumerator Selfie</h3>
+            <p className="text-xs text-muted-foreground">
+              Photo taken during survey
+            </p>
+          </div>
+          <div className="p-4">
+            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-lg border">
               <Image
-                src={doc}
-                alt={`Family Document ${index + 1}`}
+                src={selfieUrl}
+                alt="Enumerator Selfie"
                 fill
                 className="object-cover transition-all hover:scale-105"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
             </div>
-          ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      {audioUrl && (
+        <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+          <div className="border-b bg-muted/50 p-4">
+            <h3 className="font-semibold">Survey Audio Recording</h3>
+            <p className="text-xs text-muted-foreground">
+              Audio monitoring of survey process
+            </p>
+          </div>
+          <div className="p-4">
+            <div className="rounded-lg border bg-card/50 p-4">
+              <AudioPlayer src={audioUrl} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

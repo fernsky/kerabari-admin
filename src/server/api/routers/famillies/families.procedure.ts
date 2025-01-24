@@ -2,12 +2,12 @@ import { createTRPCRouter } from "@/server/api/trpc";
 import { create } from "./procedures/create";
 import { getAll, getById, getStats } from "./procedures/query";
 // import { update, deleteBuilding } from "./procedures/update";
-// import {
-//   approve,
-//   requestEdit,
-//   reject,
-//   getStatusHistory,
-// } from "./procedures/status";
+import {
+  approve,
+  requestEdit,
+  reject,
+  getStatusHistory,
+} from "./procedures/status";
 import { assignToEnumerator } from "./procedures/assignment";
 
 export const familyRouter = createTRPCRouter({
@@ -17,9 +17,9 @@ export const familyRouter = createTRPCRouter({
   // update,
   // delete: deleteBuilding,
   getStats,
-  // approve,
-  // requestEdit,
-  // reject,
-  // getStatusHistory,
+  approve,
+  requestEdit,
+  reject,
+  getStatusHistory,
   assignToEnumerator,
 });
