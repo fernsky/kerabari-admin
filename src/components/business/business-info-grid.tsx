@@ -129,7 +129,7 @@ interface BusinessInfoGridProps {
 export function BusinessInfoGrid({ business }: BusinessInfoGridProps) {
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      <Card title="Basic Information">
+      <CustomCard title="Basic Information" icon={Building2}>
         <DetailRow
           icon={Building2}
           label="Business Name"
@@ -151,9 +151,9 @@ export function BusinessInfoGrid({ business }: BusinessInfoGridProps) {
           label="Ward No"
           value={business?.wardNo?.toString()}
         />
-      </Card>
+      </CustomCard>
 
-      <Card title="Operator Details">
+      <CustomCard title="Operator Details" icon={Users}>
         <DetailRow icon={Users} label="Name" value={business?.operatorName} />
         <DetailRow icon={Phone} label="Phone" value={business?.operatorPhone} />
         <DetailRow
@@ -171,9 +171,9 @@ export function BusinessInfoGrid({ business }: BusinessInfoGridProps) {
           label="Education"
           value={business?.operatorEducation}
         />
-      </Card>
+      </CustomCard>
 
-      <Card title="Registration Details">
+      <CustomCard title="Registration Details" icon={FileCheck}>
         <DetailRow
           icon={FileCheck}
           label="Registration Status"
@@ -194,9 +194,9 @@ export function BusinessInfoGrid({ business }: BusinessInfoGridProps) {
           label="Statutory Status"
           value={business?.statutoryStatus}
         />
-      </Card>
+      </CustomCard>
 
-      <Card title="Financial Details">
+      <CustomCard title="Financial Details" icon={DollarSign}>
         <DetailRow
           icon={DollarSign}
           label="Investment Amount"
@@ -217,7 +217,7 @@ export function BusinessInfoGrid({ business }: BusinessInfoGridProps) {
           label="Total Partners"
           value={business?.totalPartners?.toString()}
         />
-      </Card>
+      </CustomCard>
     </div>
   );
 }

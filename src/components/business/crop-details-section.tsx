@@ -13,6 +13,12 @@ import {
   ArrowUpRight,
   LayoutGrid,
 } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface CropDetailsSectionProps {
   crops?: BusinessCrop[] | null;
@@ -130,19 +136,32 @@ export function CropDetailsSection({ crops }: CropDetailsSectionProps) {
   );
 
   return (
-    <div className="space-y-6">
-      {Object.entries(groupedCrops).map(([type, crops]) => {
-        const IconComponent = cropIcons[type] || Wheat; // Provide Wheat as fallback icon
-        return (
-          <Card key={type} title={getCropTypeLabel(type)} icon={IconComponent}>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {crops.map((crop) => (
-                <CropCard key={crop.id} crop={crop} />
-              ))}
-            </div>
-          </Card>
-        );
-      })}
-    </div>
+    <Card title="Agricultural Information" icon={Wheat}>
+      <Accordion type="multiple" className="w-full">
+        {Object.entries(groupedCrops).map(([type, crops], index) => {
+          const IconComponent = cropIcons[type] || Wheat;
+          return (
+            <AccordionItem value={type} key={type}>
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <IconComponent className="h-5 w-5" />
+                  <span>{getCropTypeLabel(type)}</span>
+                  <span className="ml-2 text-sm text-muted-foreground">
+                    ({crops.length})
+                  </span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="grid gap-4 pt-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {crops.map((crop) => (
+                    <CropCard key={crop.id} crop={crop} />
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordion>
+    </Card>
   );
 }
