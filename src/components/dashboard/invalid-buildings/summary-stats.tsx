@@ -57,21 +57,25 @@ export function SummaryStats({ summary }: SummaryStatsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-4">
+    <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
       {stats.map((stat) => (
         <div
           key={stat.label}
-          className="flex flex-col p-4 rounded-lg border bg-card transition-colors hover:bg-accent/50"
+          className="flex flex-row sm:flex-col items-center sm:items-start justify-between p-3 sm:p-4 rounded-lg border bg-card transition-colors hover:bg-accent/50"
         >
           <div className="flex items-center gap-2">
-            <div className={cn("p-2 rounded-full", stat.bgColor)}>
-              <stat.icon className={cn("w-4 h-4", stat.color)} />
+            <div className={cn("p-1.5 sm:p-2 rounded-full", stat.bgColor)}>
+              <stat.icon
+                className={cn("w-3.5 h-3.5 sm:w-4 sm:h-4", stat.color)}
+              />
             </div>
-            <span className="text-sm font-medium text-muted-foreground">
+            <span className="text-xs sm:text-sm font-medium text-muted-foreground">
               {stat.label}
             </span>
           </div>
-          <p className={cn("text-2xl font-bold mt-2", stat.color)}>
+          <p
+            className={cn("text-lg sm:text-2xl font-bold sm:mt-2", stat.color)}
+          >
             {stat.value}
           </p>
         </div>

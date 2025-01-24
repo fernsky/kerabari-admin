@@ -96,44 +96,57 @@ export function InvalidBuildingsList() {
   return (
     <div className="space-y-6">
       {/* Header Card */}
-      <Card>
-        <CardHeader className="border-b bg-muted/50">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <Card className="overflow-hidden">
+        <CardHeader className="border-b bg-muted/50 px-4 py-4 sm:px-6">
+          <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <div className="rounded-full bg-destructive/10 p-2">
-                  <AlertTriangle className="h-5 w-5 text-destructive" />
+                <div className="rounded-full bg-destructive/10 p-1.5 sm:p-2">
+                  <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-destructive" />
                 </div>
-                <CardTitle>Invalid Buildings</CardTitle>
+                <CardTitle className="text-base sm:text-lg">
+                  Invalid Buildings
+                </CardTitle>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Manage and fix validation issues in building records
               </p>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="gap-2">
-                <FileDown className="h-4 w-4" />
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full sm:w-auto gap-2 text-xs sm:text-sm h-8 sm:h-9"
+              >
+                <FileDown className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Export List
               </Button>
-              <Button size="sm" className="gap-2">
-                <ArrowDownToLine className="h-4 w-4" />
+              <Button
+                size="sm"
+                className="w-full sm:w-auto gap-2 text-xs sm:text-sm h-8 sm:h-9"
+              >
+                <ArrowDownToLine className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Download Report
               </Button>
             </div>
           </div>
         </CardHeader>
-        {data?.summary && <SummaryStats summary={data.summary} />}
+        <div className="p-4 sm:p-6">
+          {data?.summary && <SummaryStats summary={data.summary} />}
+        </div>
       </Card>
 
       {/* Filters Section */}
       <Card>
-        <CardHeader className="border-b bg-muted/50">
+        <CardHeader className="border-b bg-muted/50 px-4 py-4 sm:px-6">
           <div className="flex items-center gap-2">
-            <Filter className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg">Filter Records</CardTitle>
+            <Filter className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            <CardTitle className="text-base sm:text-lg">
+              Filter Records
+            </CardTitle>
           </div>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <InvalidBuildingsFilters
             {...filters}
             //@ts-ignore
@@ -144,23 +157,26 @@ export function InvalidBuildingsList() {
 
       {/* Buildings List */}
       <Card>
-        <CardHeader className="border-b bg-muted/50">
-          <div className="flex items-center justify-between">
+        <CardHeader className="border-b bg-muted/50 px-4 py-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-primary" />
-              <CardTitle className="text-lg">Buildings</CardTitle>
+              <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <CardTitle className="text-base sm:text-lg">Buildings</CardTitle>
             </div>
-            <Badge variant="secondary">
+            <Badge
+              variant="secondary"
+              className="w-fit text-xs sm:text-sm px-2 py-1"
+            >
               {data?.pagination.total || 0} Records
             </Badge>
           </div>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           {isLoading ? (
             <div className="flex h-32 items-center justify-center">
               <div className="text-center space-y-2">
-                <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-                <p className="text-sm text-muted-foreground">
+                <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin mx-auto text-primary" />
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Loading records...
                 </p>
               </div>
@@ -169,13 +185,13 @@ export function InvalidBuildingsList() {
             <>
               {invalidBuildings?.length ? (
                 <>
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                     {invalidBuildings?.map((building) => (
                       //@ts-ignore
                       <BuildingCard key={building.id} building={building} />
                     ))}
                   </div>
-                  <div className="mt-6">
+                  <div className="mt-4 sm:mt-6">
                     <PaginationControls
                       currentPage={page}
                       totalItems={data.pagination.total}
@@ -187,12 +203,12 @@ export function InvalidBuildingsList() {
                   </div>
                 </>
               ) : (
-                <div className="text-center py-12">
-                  <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">
+                <div className="text-center py-8 sm:py-12">
+                  <Building2 className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
+                  <h3 className="text-base sm:text-lg font-medium mb-2">
                     No Invalid Buildings
                   </h3>
-                  <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                  <p className="text-xs sm:text-sm text-muted-foreground max-w-[15rem] sm:max-w-sm mx-auto">
                     There are no buildings with validation issues at the moment.
                     Check back later or adjust your filters.
                   </p>

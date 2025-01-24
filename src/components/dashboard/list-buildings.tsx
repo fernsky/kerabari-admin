@@ -1,29 +1,25 @@
 "use client";
 
 import { ContentLayout } from "@/components/admin-panel/content-layout";
-import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
-import Link from "next/link";
 import { buildingColumns as originalBuildingColumns } from "@/components/building/columns";
-import { DataTable } from "@/components/shared/data-table/data-table";
 import { BuildingFilters } from "@/components/building/building-filters";
-import { FilterDrawer } from "@/components/shared/filters/filter-drawer";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/lib/hooks/use-debounce";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  Plus,
-  Eye,
-  Settings,
-} from "lucide-react";
+import { Eye } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useMediaQuery } from "react-responsive";
 import { User } from "lucia";
 import { InvalidBuildingsList } from "./invalid-buildings-list";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { BuildingsHeader } from "./buildings/buildings-header";
+import { BuildingsActions } from "./buildings/buildings-actions";
+import { BuildingsTable } from "./buildings/buildings-table";
+import { PaginationControls } from "./invalid-buildings/pagination";
+import Link from "next/link";
+import { TabHeader } from "./buildings/tab-header";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function ListBuildings({ user }: { user: User }) {
   const [filters, setFilters] = useState({
@@ -34,6 +30,7 @@ export default function ListBuildings({ user }: { user: User }) {
   const [page, setPage] = useState(0);
   const debouncedFilters = useDebounce(filters, 500);
   const isDesktop = useMediaQuery({ minWidth: 1024 });
+  const [activeTab, setActiveTab] = useState("all");
 
   const {
     data,
@@ -61,44 +58,6 @@ export default function ListBuildings({ user }: { user: User }) {
   const handleNextPage = () => page < totalPages - 1 && setPage(page + 1);
   const handlePrevPage = () => page > 0 && setPage(page - 1);
 
-  if (buildingsError || statsError) {
-    return (
-      <Alert variant="destructive" className="m-4">
-        <AlertDescription>
-          {buildingsError?.message ||
-            statsError?.message ||
-            "An error occurred"}
-        </AlertDescription>
-      </Alert>
-    );
-  }
-
-  const StatCard = ({
-    title,
-    value,
-  }: {
-    title: string;
-    value: string | number;
-  }) => (
-    <div className="rounded-lg border bg-card/50 p-4 shadow-sm transition-colors hover:bg-card">
-      <div className="text-sm font-medium text-muted-foreground">{title}</div>
-      <div className="mt-1 text-2xl font-bold tracking-tight">{value}</div>
-    </div>
-  );
-
-  const BuildingCard = ({ building }: { building: any }) => (
-    <div className="rounded-lg border bg-card p-4 shadow-sm">
-      {/* ...existing card content... */}
-      <div className="mt-4 flex gap-2">
-        <Link href={`/buildings/${building.id}`}>
-          <Button size="sm" variant="outline">
-            <Eye className="mr-2 h-4 w-4" /> View
-          </Button>
-        </Link>
-      </div>
-    </div>
-  );
-
   const buildingColumns = [
     ...originalBuildingColumns,
     {
@@ -115,147 +74,121 @@ export default function ListBuildings({ user }: { user: User }) {
     },
   ];
 
+  if (buildingsError || statsError) {
+    return (
+      <Alert variant="destructive" className="m-4">
+        <AlertDescription>
+          {buildingsError?.message ||
+            statsError?.message ||
+            "An error occurred"}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
     <ContentLayout title="Buildings">
       <div className="mx-auto max-w-7xl space-y-6 p-4">
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList className="w-full justify-start border-b">
-            <TabsTrigger value="all" className="flex-1 max-w-[200px]">
-              All Buildings
-            </TabsTrigger>
-            <TabsTrigger value="invalid" className="flex-1 max-w-[200px]">
-              Invalid Buildings
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="all" className="mt-6">
-            <div className="rounded-lg border bg-card shadow-sm">
-              {/* Regular buildings section */}
-              <div className="border-b p-4 flex justify-between items-center">
-                <h2 className="text-lg font-medium">Buildings Overview</h2>
-                <Link href="/buildings/odk-settings">
-                  <Button size="sm" className="w-full sm:w-auto">
-                    <Settings className="mr-1 h-4 w-4" /> Go to ODK Settings
-                  </Button>
-                </Link>
+        <Card className="overflow-hidden">
+          <CardHeader className="border-b bg-muted/50">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="space-y-1.5">
+                <h2 className="text-2xl font-semibold tracking-tight">
+                  Buildings Management
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  View and manage all building records in the system
+                </p>
               </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <TabHeader
+              active={activeTab}
+              stats={{
+                totalBuildings: stats?.totalBuildings || 0,
+                //@ts-ignore
+                invalidBuildings: stats?.invalidBuildings || 0,
+              }}
+              onChange={setActiveTab}
+            />
 
-              <div className="p-6 space-y-6">
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  <StatCard
-                    title="Total Buildings"
-                    value={stats?.totalBuildings || 0}
-                  />
-                  <StatCard
-                    title="Total Families"
-                    value={stats?.totalFamilies || 0}
-                  />
-                  {/* <StatCard
-                    title="Average Businesses"
-                    value={(stats?.avgBusinesses || 0).toFixed(1)}
-                  /> */}
-                </div>
-
-                {/* Actions Bar */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex flex-wrap items-center gap-2">
-                    {!isDesktop && (
-                      <FilterDrawer title="Filters">
-                        <BuildingFilters
-                          {...filters}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{
+                  duration: 0.3,
+                  ease: "easeInOut",
+                }}
+                className="min-h-[400px]"
+              >
+                {activeTab === "all" ? (
+                  <div className="p-6">
+                    <div className="rounded-lg border bg-card shadow-sm">
+                      <BuildingsHeader
+                        stats={stats || { totalBuildings: 0, totalFamilies: 0 }}
+                      />
+                      <div className="p-6 space-y-6">
+                        <BuildingsActions
+                          isDesktop={isDesktop}
+                          filters={filters}
                           onFilterChange={handleFilterChange}
                         />
-                      </FilterDrawer>
-                    )}
-                    <Input
-                      placeholder="Search locality..."
-                      className="w-full sm:w-[400px] h-9"
-                      value={filters.locality || ""}
-                      onChange={(e) =>
-                        handleFilterChange("locality", e.target.value)
-                      }
-                    />
-                  </div>
-                  <Link href="/buildings/create">
-                    <Button size="sm" className="w-full sm:w-auto">
-                      <Plus className="mr-1 h-4 w-4" /> Add Building
-                    </Button>
-                  </Link>
-                </div>
-
-                {/* Desktop Filters */}
-                {isDesktop && (
-                  <div className="rounded-lg border bg-muted/50 p-4">
-                    <BuildingFilters
-                      {...filters}
-                      onFilterChange={handleFilterChange}
-                    />
-                  </div>
-                )}
-
-                {/* Data Table or Cards */}
-                {isLoading ? (
-                  <div className="flex h-32 items-center justify-center">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  </div>
-                ) : isDesktop ? (
-                  <div className="rounded-lg border">
-                    <DataTable
-                      columns={buildingColumns}
-                      //@ts-ignore
-                      data={data?.data || []}
-                      isLoading={isLoading}
-                    />
-                  </div>
-                ) : (
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    {data?.data.map((building) => (
-                      <BuildingCard key={building.id} building={building} />
-                    ))}
-                  </div>
-                )}
-
-                {/* Pagination */}
-                {data?.data.length ? (
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
-                    <span className="text-muted-foreground text-center">
-                      Showing {currentDisplayCount} of {data.pagination.total}{" "}
-                      buildings
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handlePrevPage}
-                        disabled={page === 0}
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
-                      <span className="min-w-[100px] text-center font-medium">
-                        Page {page + 1} of {totalPages}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleNextPage}
-                        disabled={page >= totalPages - 1}
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
+                        {isDesktop && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="rounded-lg border bg-muted/50 p-4"
+                          >
+                            <BuildingFilters
+                              {...filters}
+                              onFilterChange={handleFilterChange}
+                            />
+                          </motion.div>
+                        )}
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.1 }}
+                        >
+                          <BuildingsTable
+                            isLoading={isLoading}
+                            isDesktop={isDesktop}
+                            data={data?.data || []}
+                            columns={buildingColumns}
+                          />
+                        </motion.div>
+                        {data?.data && data.data.length > 0 && (
+                          <PaginationControls
+                            currentPage={page}
+                            totalItems={data.pagination.total}
+                            pageSize={10}
+                            currentDisplayCount={currentDisplayCount}
+                            onPageChange={setPage}
+                            hasMore={page < totalPages - 1}
+                          />
+                        )}
+                      </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center text-sm text-muted-foreground py-8">
-                    No buildings found
+                  <div className="p-6">
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <InvalidBuildingsList />
+                    </motion.div>
                   </div>
                 )}
-              </div>
-            </div>
-          </TabsContent>
-          <TabsContent value="invalid" className="mt-6">
-            <InvalidBuildingsList />
-          </TabsContent>
-        </Tabs>
+              </motion.div>
+            </AnimatePresence>
+          </CardContent>
+        </Card>
       </div>
     </ContentLayout>
   );
