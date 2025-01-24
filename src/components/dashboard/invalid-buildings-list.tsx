@@ -3,13 +3,23 @@
 import { api } from "@/trpc/react";
 import { useState } from "react";
 import { useDebounce } from "@/lib/hooks/use-debounce";
-import { Loader2 } from "lucide-react";
+import {
+  Loader2,
+  AlertTriangle,
+  Filter,
+  Building2,
+  FileDown,
+  ArrowDownToLine,
+} from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InvalidBuildingsFilters } from "./invalid-buildings/filters";
 import { PaginationControls } from "./invalid-buildings/pagination";
 import { BuildingCard } from "./invalid-buildings/building-card";
 import { SortingState } from "@tanstack/react-table";
 import { SummaryStats } from "./invalid-buildings/summary-stats";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface Filters {
   wardNumber?: number;
@@ -84,51 +94,114 @@ export function InvalidBuildingsList() {
   );
 
   return (
-    <div className="rounded-lg border bg-card shadow-sm">
-      <div className="border-b p-4">
-        <h2 className="text-lg font-medium">Invalid Buildings</h2>
-        <p className="text-sm text-muted-foreground">
-          View and manage buildings with validation issues
-        </p>
-        {data?.summary && <SummaryStats summary={data.summary} />}
-      </div>
-      <div className="p-6 space-y-6">
-        <InvalidBuildingsFilters
-          {...filters}
-          //@ts-ignore
-          onFilterChange={handleFilterChange}
-        />
-
-        {isLoading ? (
-          <div className="flex h-32 items-center justify-center">
-            <Loader2 className="h-6 w-6 animate-spin" />
-          </div>
-        ) : (
-          <>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {invalidBuildings?.map((building) => (
-                // @ts-ignore
-                <BuildingCard key={building.id} building={building} />
-              ))}
-            </div>
-
-            {invalidBuildings?.length ? (
-              <PaginationControls
-                currentPage={page}
-                totalItems={data.pagination.total}
-                pageSize={10}
-                currentDisplayCount={currentDisplayCount}
-                onPageChange={setPage}
-                hasMore={(invalidBuildings?.length ?? 0) === 10}
-              />
-            ) : (
-              <div className="text-center text-sm text-muted-foreground py-8">
-                No invalid buildings found
+    <div className="space-y-6">
+      {/* Header Card */}
+      <Card>
+        <CardHeader className="border-b bg-muted/50">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <div className="rounded-full bg-destructive/10 p-2">
+                  <AlertTriangle className="h-5 w-5 text-destructive" />
+                </div>
+                <CardTitle>Invalid Buildings</CardTitle>
               </div>
-            )}
-          </>
-        )}
-      </div>
+              <p className="text-sm text-muted-foreground">
+                Manage and fix validation issues in building records
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="gap-2">
+                <FileDown className="h-4 w-4" />
+                Export List
+              </Button>
+              <Button size="sm" className="gap-2">
+                <ArrowDownToLine className="h-4 w-4" />
+                Download Report
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        {data?.summary && <SummaryStats summary={data.summary} />}
+      </Card>
+
+      {/* Filters Section */}
+      <Card>
+        <CardHeader className="border-b bg-muted/50">
+          <div className="flex items-center gap-2">
+            <Filter className="h-5 w-5 text-primary" />
+            <CardTitle className="text-lg">Filter Records</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          <InvalidBuildingsFilters
+            {...filters}
+            //@ts-ignore
+            onFilterChange={handleFilterChange}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Buildings List */}
+      <Card>
+        <CardHeader className="border-b bg-muted/50">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-primary" />
+              <CardTitle className="text-lg">Buildings</CardTitle>
+            </div>
+            <Badge variant="secondary">
+              {data?.pagination.total || 0} Records
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          {isLoading ? (
+            <div className="flex h-32 items-center justify-center">
+              <div className="text-center space-y-2">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+                <p className="text-sm text-muted-foreground">
+                  Loading records...
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              {invalidBuildings?.length ? (
+                <>
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {invalidBuildings?.map((building) => (
+                      //@ts-ignore
+                      <BuildingCard key={building.id} building={building} />
+                    ))}
+                  </div>
+                  <div className="mt-6">
+                    <PaginationControls
+                      currentPage={page}
+                      totalItems={data.pagination.total}
+                      pageSize={10}
+                      currentDisplayCount={currentDisplayCount}
+                      onPageChange={setPage}
+                      hasMore={(invalidBuildings?.length ?? 0) === 10}
+                    />
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-12">
+                  <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium mb-2">
+                    No Invalid Buildings
+                  </h3>
+                  <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                    There are no buildings with validation issues at the moment.
+                    Check back later or adjust your filters.
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
