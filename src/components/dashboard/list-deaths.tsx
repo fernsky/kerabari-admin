@@ -96,7 +96,7 @@ export default function ListDeaths({ user }: { user: User }) {
       id: "actions",
       cell: ({ row }: { row: any }) => (
         <div className="flex gap-2">
-          <Link href={`/families/${row.familyId}`}>
+          <Link href={`/families/${row.original.famliyId}`}>
             <Button size="sm" variant="outline">
               <Eye className="mr-2 h-4 w-4" /> View Family
             </Button>
