@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { ComboboxSearchable } from "@/components/ui/combobox-searchable";
 import { toast } from "sonner";
+import { MapPin } from "lucide-react";
 
 interface WardAssignmentProps {
   buildingId: string;
@@ -46,10 +47,19 @@ export function WardAssignment({
   }));
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg font-medium">Ward Assignment</CardTitle>
-        <CardDescription>Assign this building to a ward</CardDescription>
+    <Card className="h-full border-muted-foreground/20 shadow-sm transition-all hover:border-muted-foreground/30 hover:shadow-md">
+      <CardHeader className="space-y-1.5 pb-4">
+        <div className="flex items-center space-x-2">
+          <div className="rounded-full bg-primary/10 p-2">
+            <MapPin className="h-4 w-4 text-primary" />
+          </div>
+          <CardTitle className="text-base font-semibold">
+            Ward Assignment
+          </CardTitle>
+        </div>
+        <CardDescription className="text-xs">
+          Assign this building to a specific ward
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ComboboxSearchable
@@ -57,7 +67,7 @@ export function WardAssignment({
           value={currentWardNumber || "none"}
           onChange={handleWardChange}
           placeholder="Search ward..."
-          className={"w-full sm:w-[250px]"}
+          className="w-full transition-all"
         />
       </CardContent>
     </Card>

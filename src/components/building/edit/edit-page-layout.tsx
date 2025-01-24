@@ -1,25 +1,28 @@
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
+import React from "react";
 
 interface EditPageLayoutProps {
   children: React.ReactNode;
 }
 
-export function EditPageLayout({ children }: EditPageLayoutProps) {
+export function EditPageLayout({ children }: { children: React.ReactNode }) {
+  // Extract the first 3 children (assignments) and rest of the form
+  const [
+    enumeratorAssignment,
+    wardAssignment,
+    areaAssignment,
+    ...restChildren
+  ] = React.Children.toArray(children);
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="relative"
-    >
-      <div className="absolute inset-0 bg-gradient-to-b from-muted/50 to-transparent h-32" />
-      <div className="relative">
-        <div className="mx-auto max-w-5xl space-y-8 p-4 pt-8">
-          <Card className="border-none shadow-none bg-transparent">
-            <div className="grid gap-6">{children}</div>
-          </Card>
-        </div>
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-3">
+        {enumeratorAssignment}
+        {wardAssignment}
+        {areaAssignment}
       </div>
-    </motion.div>
+      {restChildren}
+    </div>
   );
 }

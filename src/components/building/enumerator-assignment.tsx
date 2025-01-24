@@ -13,8 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { UserCheck } from "lucide-react";
+import { UserCheck, Users } from "lucide-react";
 import { toast } from "sonner";
 
 export function EnumeratorAssignment({
@@ -46,11 +45,19 @@ export function EnumeratorAssignment({
   };
 
   return (
-    <Card className="h-full">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">
-          Enumerator Assignment
-        </CardTitle>
+    <Card className="h-full border-muted-foreground/20 shadow-sm transition-all hover:border-muted-foreground/30 hover:shadow-md">
+      <CardHeader className="space-y-1.5 pb-4">
+        <div className="flex items-center space-x-2">
+          <div className="rounded-full bg-primary/10 p-2">
+            <Users className="h-4 w-4 text-primary" />
+          </div>
+          <CardTitle className="text-base font-semibold">
+            Enumerator Assignment
+          </CardTitle>
+        </div>
+        <CardDescription className="text-xs">
+          Select an enumerator for this building
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Select
@@ -58,13 +65,20 @@ export function EnumeratorAssignment({
           onValueChange={handleAssign}
           disabled={isLoading || assignMutation.isLoading}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full transition-all hover:border-primary focus-visible:ring-1 focus-visible:ring-primary">
             <SelectValue placeholder="Select an enumerator" />
           </SelectTrigger>
           <SelectContent>
             {enumerators?.map((enumerator) => (
-              <SelectItem key={enumerator.id} value={enumerator.id}>
-                {enumerator.name}
+              <SelectItem
+                key={enumerator.id}
+                value={enumerator.id}
+                className="focus:bg-primary/5"
+              >
+                <span className="flex items-center gap-2">
+                  <UserCheck className="h-3.5 w-3.5 text-muted-foreground" />
+                  {enumerator.name}
+                </span>
               </SelectItem>
             ))}
           </SelectContent>
