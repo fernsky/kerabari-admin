@@ -9,7 +9,8 @@ interface BuildingsActionsProps {
   isDesktop: boolean;
   filters: {
     wardNumber?: number;
-    locality?: string;
+    locality: string;
+    areaCode?: string;
     mapStatus?: string;
   };
   onFilterChange: (key: string, value: any) => void;
@@ -27,7 +28,7 @@ export function BuildingsActions({
           <FilterDrawer title="Filters">
             <BuildingFilters
               wardNumber={filters.wardNumber || 0}
-              locality={filters.locality || ""}
+              areaCode={filters.areaCode || ""}
               mapStatus={filters.mapStatus || ""}
               onFilterChange={onFilterChange}
             />
