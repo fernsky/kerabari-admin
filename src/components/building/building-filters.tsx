@@ -23,7 +23,7 @@ import {
 
 interface BuildingFiltersProps {
   wardNumber: number | undefined;
-  locality: string | undefined;
+  areaCode: string | undefined;
   mapStatus: string | undefined;
   enumeratorId?: string;
   status?: string;
@@ -32,7 +32,7 @@ interface BuildingFiltersProps {
 
 export function BuildingFilters({
   wardNumber,
-  locality,
+  areaCode,
   mapStatus,
   enumeratorId,
   status,
@@ -96,156 +96,151 @@ export function BuildingFilters({
   ];
 
   return (
-    <Card className="mb-6">
-      <CardContent className="pt-6">
-        <div className="space-y-4">
-          {/* Active Filters */}
-          <div className="flex flex-wrap gap-2">
-            {wardNumber && (
-              <Badge variant="secondary" className="gap-2">
-                <MapPin className="h-3 w-3" />
-                Ward {wardNumber}
-                <X
-                  className="h-3 w-3 cursor-pointer"
-                  onClick={() => onFilterChange("wardNumber", undefined)}
-                />
-              </Badge>
-            )}
-            {enumeratorId && (
-              <Badge variant="secondary" className="gap-2">
-                <Users className="h-3 w-3" />
-                {enumerators?.find((e) => e.id === enumeratorId)?.name ||
-                  "Enumerator"}
-                <X
-                  className="h-3 w-3 cursor-pointer"
-                  onClick={() => onFilterChange("enumeratorId", undefined)}
-                />
-              </Badge>
-            )}
-            {status && (
-              <Badge
-                variant="secondary"
-                className={`gap-2 ${statusOptions.find((s) => s.value === status)?.color}`}
-              >
-                {(() => {
-                  const StatusIcon =
-                    statusOptions.find((s) => s.value === status)?.icon ||
-                    Clock;
-                  return <StatusIcon className="h-3 w-3" />;
-                })()}
-                {statusOptions.find((s) => s.value === status)?.label}
-                <X
-                  className="h-3 w-3 cursor-pointer"
-                  onClick={() => onFilterChange("status", undefined)}
-                />
-              </Badge>
-            )}
-          </div>
+    <div className="space-y-4">
+      {/* Active Filters */}
+      <div className="flex flex-wrap gap-2">
+        {wardNumber && (
+          <Badge variant="secondary" className="gap-2">
+            <MapPin className="h-3 w-3" />
+            Ward {wardNumber}
+            <X
+              className="h-3 w-3 cursor-pointer"
+              onClick={() => onFilterChange("wardNumber", undefined)}
+            />
+          </Badge>
+        )}
+        {enumeratorId && (
+          <Badge variant="secondary" className="gap-2">
+            <Users className="h-3 w-3" />
+            {enumerators?.find((e) => e.id === enumeratorId)?.name ||
+              "Enumerator"}
+            <X
+              className="h-3 w-3 cursor-pointer"
+              onClick={() => onFilterChange("enumeratorId", undefined)}
+            />
+          </Badge>
+        )}
+        {status && (
+          <Badge
+            variant="secondary"
+            className={`gap-2 ${statusOptions.find((s) => s.value === status)?.color}`}
+          >
+            {(() => {
+              const StatusIcon =
+                statusOptions.find((s) => s.value === status)?.icon || Clock;
+              return <StatusIcon className="h-3 w-3" />;
+            })()}
+            {statusOptions.find((s) => s.value === status)?.label}
+            <X
+              className="h-3 w-3 cursor-pointer"
+              onClick={() => onFilterChange("status", undefined)}
+            />
+          </Badge>
+        )}
+      </div>
 
-          {/* Filter Controls */}
-          <div className="grid gap-4 md:grid-cols-3">
-            {/* Updated Ward Filter */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">
-                <div className="flex items-center gap-2">
-                  <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                  Ward Number
-                </div>
-              </Label>
-              <ComboboxSearchable
-                options={wardOptions}
-                value={wardNumber?.toString() || "all"}
-                onChange={(value) =>
-                  onFilterChange(
-                    "wardNumber",
-                    value === "all" ? undefined : parseInt(value),
-                  )
-                }
-                placeholder="Search ward..."
-                className="w-full"
-              />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* Ward Filter */}
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium">
+            <div className="flex items-center gap-2">
+              <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+              Ward Number
             </div>
-
-            {/* Added Area Filter */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                  Area Code
-                </div>
-              </Label>
-              <ComboboxSearchable
-                options={areaOptions}
-                value={locality || "all"}
-                onChange={(value) =>
-                  onFilterChange(
-                    "locality",
-                    value === "all" ? undefined : value,
-                  )
-                }
-                placeholder="Search area..."
-                className="w-full"
-              />
-            </div>
-
-            {/* Existing Enumerator Filter */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium flex items-center gap-2">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                Collected By
-              </Label>
-              <ComboboxSearchable
-                options={enumeratorOptions}
-                value={enumeratorId || "all"}
-                onChange={(value) =>
-                  onFilterChange(
-                    "enumeratorId",
-                    value === "all" ? undefined : value,
-                  )
-                }
-                placeholder="Search enumerator..."
-                className={""}
-              />
-            </div>
-
-            {/* Existing Status Filter */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium flex items-center gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                Status
-              </Label>
-              <Select
-                value={status || ""}
-                onValueChange={(value) =>
-                  onFilterChange("status", value || undefined)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  {statusOptions.map((option) => {
-                    const Icon = option.icon;
-                    return (
-                      <SelectItem
-                        key={option.value}
-                        value={option.value}
-                        className="flex items-center gap-2"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Icon className="h-4 w-4" />
-                          {option.label}
-                        </div>
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          </Label>
+          <ComboboxSearchable
+            options={wardOptions}
+            value={wardNumber?.toString() || "all"}
+            onChange={(value) =>
+              onFilterChange(
+                "wardNumber",
+                value === "all" ? undefined : parseInt(value),
+              )
+            }
+            placeholder="Filter by ward..."
+            className="w-full"
+          />
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Area Code Filter */}
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium">
+            <div className="flex items-center gap-2">
+              <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+              Area Code
+            </div>
+          </Label>
+          <ComboboxSearchable
+            options={areaOptions}
+            value={areaCode || "all"}
+            onChange={(value) =>
+              onFilterChange("areaCode", value === "all" ? undefined : value)
+            }
+            placeholder="Filter by area..."
+            className="w-full"
+          />
+        </div>
+
+        {/* Enumerator Filter */}
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium">
+            <div className="flex items-center gap-2">
+              <Users className="h-3.5 w-3.5 text-muted-foreground" />
+              Collected By
+            </div>
+          </Label>
+          <ComboboxSearchable
+            options={enumeratorOptions}
+            value={enumeratorId || "all"}
+            onChange={(value) =>
+              onFilterChange(
+                "enumeratorId",
+                value === "all" ? undefined : value,
+              )
+            }
+            placeholder="Filter by enumerator..."
+            className="w-full"
+          />
+        </div>
+
+        {/* Status Filter */}
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium">
+            <div className="flex items-center gap-2">
+              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+              Status
+            </div>
+          </Label>
+          <Select
+            value={status || ""}
+            onValueChange={(value) =>
+              onFilterChange("status", value === "all" ? undefined : value)
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              {statusOptions.map((option) => {
+                const Icon = option.icon;
+                return (
+                  <SelectItem
+                    key={option.value}
+                    value={option.value}
+                    className="flex items-center gap-2"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Icon className="h-3.5 w-3.5" />
+                      {option.label}
+                    </div>
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
   );
 }

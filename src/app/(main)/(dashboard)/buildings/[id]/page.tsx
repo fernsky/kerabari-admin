@@ -6,10 +6,9 @@ import { BuildingLoadingState } from "@/components/building/building-loading-sta
 import { BuildingStatsGrid } from "@/components/building/building-stats-grid";
 import { BuildingInfoGrid } from "@/components/building/building-info-grid";
 import { BuildingMediaSection } from "@/components/building/building-media-section";
-import { LocationDetailsSection } from "@/components/building/location-details-section";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Edit, Trash2 } from "lucide-react";
+import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { BuildingActions } from "@/components/building/building-actions";
@@ -53,6 +52,11 @@ export default function BuildingDetails({
       title="Building Details"
       actions={
         <div className="flex gap-2">
+          <Link href={`/buildings`}>
+            <Button size="sm" variant="outline">
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Buildings
+            </Button>
+          </Link>
           <Link href={`/buildings/edit/${params.id}`}>
             <Button size="sm" variant="outline">
               <Edit className="mr-2 h-4 w-4" /> Edit
@@ -103,7 +107,7 @@ export default function BuildingDetails({
             </div>
           </div>
 
-          {/* Invalid section */}
+          {/* @ts-ignore */}
           <BuildingInvalidSection building={building} />
 
           {/* Media Section */}

@@ -18,9 +18,9 @@ export const getAll = publicProcedure
       if (filters.wardNumber) {
         filterConditions.push(eq(buildings.tmpWardNumber, filters.wardNumber));
       }
-      if (filters.locality) {
+      if (filters.areaCode) {
         filterConditions.push(
-          ilike(buildings.locality, `%${filters.locality}%`),
+          ilike(buildings.tmpAreaCode, `%${filters.areaCode}%`),
         );
       }
       if (filters.mapStatus) {

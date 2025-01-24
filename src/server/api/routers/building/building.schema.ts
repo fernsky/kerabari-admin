@@ -41,13 +41,18 @@ export const buildingQuerySchema = z.object({
   limit: z.number().min(1).max(100).default(10),
   offset: z.number().min(0).default(0),
   sortBy: z
-    .enum(["survey_date", "ward_number", "locality"])
-    .default("survey_date"),
+    .enum([
+      "tmp_ward_number",
+      "tmp_area_code",
+      "building_token",
+      "enumerator_name",
+    ])
+    .default("tmp_ward_number"),
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
   filters: z
     .object({
       wardNumber: z.number().optional(),
-      locality: z.string().optional(),
+      areaCode: z.string().optional(),
       mapStatus: z.string().optional(),
       enumeratorId: z.string().optional(),
       status: z
