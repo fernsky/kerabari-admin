@@ -1,5 +1,8 @@
 import { protectedProcedure } from "@/server/api/trpc";
-import { business, businessEditRequests } from "@/server/db/schema/business/business";
+import {
+  business,
+  businessEditRequests,
+} from "@/server/db/schema/business/business";
 import { eq, desc } from "drizzle-orm";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";

@@ -41,7 +41,10 @@ export async function parseAndInsertInStaging(r: RawBusiness, ctx: any) {
         operator_name: r.b.op_name,
         operator_phone: r.b.opph,
         operator_age: r.b.op_age,
-        operator_gender: r.b.op_gender,
+        operator_gender: decodeSingleChoice(
+          r.b.op_gender,
+          businessChoices.genders,
+        ),
         operator_education: r.b.op_edu_lvl,
 
         // Business Classification

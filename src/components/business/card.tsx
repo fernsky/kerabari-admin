@@ -15,7 +15,6 @@ export function Card({ title, icon: Icon, children }: CardProps) {
         </div>
         <div>
           <h3 className="font-semibold">{title}</h3>
-          <p className="text-xs text-muted-foreground">Building Information</p>
         </div>
       </div>
       <div className="grid gap-2 p-4">{children}</div>

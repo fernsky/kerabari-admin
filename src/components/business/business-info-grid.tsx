@@ -9,6 +9,10 @@ import {
   AlertTriangle,
   Clock,
   Construction,
+  Phone,
+  GraduationCap,
+  FileCheck,
+  DollarSign,
 } from "lucide-react";
 import { Card as CustomCard } from "./card";
 import { DetailRow } from "../shared/detail-row";
@@ -118,48 +122,101 @@ export function BuildingInfoGrid({ building }: BuildingInfoGridProps) {
   );
 }
 
-export function BusinessInfoGrid({ business }: { business: BusinessSchema }) {
+interface BusinessInfoGridProps {
+  business: BusinessSchema;
+}
+
+export function BusinessInfoGrid({ business }: BusinessInfoGridProps) {
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-medium">Basic Information</h3>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <InfoItem label="Business Name" value={business.businessName} />
-          <InfoItem label="Business Type" value={business.businessType} />
-          <InfoItem label="Business Nature" value={business.businessNature} />
-          <InfoItem label="Location" value={business.locality} />
-          <InfoItem label="Ward No" value={business.wardNo?.toString()} />
-        </CardContent>
+    <div className="grid gap-6 md:grid-cols-2">
+      <Card title="Basic Information" icon={Building2}>
+        <DetailRow
+          icon={Building2}
+          label="Business Name"
+          value={business?.businessName}
+        />
+        <DetailRow
+          icon={Building2}
+          label="Business Type"
+          value={business?.businessType}
+        />
+        <DetailRow
+          icon={Building2}
+          label="Business Nature"
+          value={business?.businessNature}
+        />
+        <DetailRow icon={MapPin} label="Location" value={business?.locality} />
+        <DetailRow
+          icon={MapPin}
+          label="Ward No"
+          value={business?.wardNo?.toString()}
+        />
       </Card>
 
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-medium">Operator Details</h3>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <InfoItem label="Name" value={business.operatorName} />
-          <InfoItem label="Phone" value={business.operatorPhone} />
-          <InfoItem label="Gender" value={business.operatorGender} />
-          <InfoItem label="Age" value={business.operatorAge?.toString()} />
-          <InfoItem label="Education" value={business.operatorEducation} />
-        </CardContent>
+      <Card title="Operator Details">
+        <DetailRow icon={Users} label="Name" value={business?.operatorName} />
+        <DetailRow icon={Phone} label="Phone" value={business?.operatorPhone} />
+        <DetailRow
+          icon={Users}
+          label="Gender"
+          value={business?.operatorGender}
+        />
+        <DetailRow
+          icon={Calendar}
+          label="Age"
+          value={business?.operatorAge?.toString()}
+        />
+        <DetailRow
+          icon={GraduationCap}
+          label="Education"
+          value={business?.operatorEducation}
+        />
       </Card>
 
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-medium">Registration Details</h3>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <InfoItem
-            label="Registration Status"
-            value={business.registrationStatus}
-          />
-          <InfoItem label="PAN Status" value={business.panStatus} />
-          <InfoItem label="PAN Number" value={business.panNumber} />
-          <InfoItem label="Statutory Status" value={business.statutoryStatus} />
-        </CardContent>
+      <Card title="Registration Details">
+        <DetailRow
+          icon={FileCheck}
+          label="Registration Status"
+          value={business?.registrationStatus}
+        />
+        <DetailRow
+          icon={FileCheck}
+          label="PAN Status"
+          value={business?.panStatus}
+        />
+        <DetailRow
+          icon={Binary}
+          label="PAN Number"
+          value={business?.panNumber}
+        />
+        <DetailRow
+          icon={FileCheck}
+          label="Statutory Status"
+          value={business?.statutoryStatus}
+        />
+      </Card>
+
+      <Card title="Financial Details">
+        <DetailRow
+          icon={DollarSign}
+          label="Investment Amount"
+          value={business?.investmentAmount?.toString()}
+        />
+        <DetailRow
+          icon={Users}
+          label="Permanent Employees"
+          value={business?.totalPermanentEmployees?.toString()}
+        />
+        <DetailRow
+          icon={Users}
+          label="Temporary Employees"
+          value={business?.totalTemporaryEmployees?.toString()}
+        />
+        <DetailRow
+          icon={Users}
+          label="Total Partners"
+          value={business?.totalPartners?.toString()}
+        />
       </Card>
     </div>
   );

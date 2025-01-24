@@ -6,6 +6,10 @@ import { and, eq, ilike, sql } from "drizzle-orm";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { env } from "@/env";
+import { businessAnimals } from "@/server/db/schema/business/business-animals";
+import { businessAnimalProducts } from "@/server/db/schema/business/business-animal-products";
+import { businessCrops } from "@/server/db/schema/business/business-crops";
+import { BusinessResult } from "../types";
 
 export const getAll = publicProcedure
   .input(businessQuerySchema)
@@ -84,10 +88,21 @@ export const getById = publicProcedure
       .from(business)
       .where(eq(business.id, input.id))
       .limit(1);
-
-    const attachments = await ctx.db.query.surveyAttachments.findMany({
-      where: eq(surveyAttachments.dataId, input.id),
-    });
+    const [businessAnimalsData, businessAnimalProductsData, businessCropsData] =
+      await Promise.all([
+        ctx.db
+          .select()
+          .from(businessAnimals)
+          .where(eq(businessAnimals.businessId, input.id)),
+        ctx.db
+          .select()
+          .from(businessAnimalProducts)
+          .where(eq(businessAnimalProducts.businessId, input.id)),
+        ctx.db
+          .select()
+          .from(businessCrops)
+          .where(eq(businessCrops.businessId, input.id)),
+      ]);
 
     if (!businessEntity[0]) {
       throw new TRPCError({
@@ -95,6 +110,10 @@ export const getById = publicProcedure
         message: "Business not found",
       });
     }
+
+    const attachments = await ctx.db.query.surveyAttachments.findMany({
+      where: eq(surveyAttachments.dataId, input.id),
+    });
 
     try {
       // Process the attachments and create presigned URLs
@@ -132,7 +151,14 @@ export const getById = publicProcedure
       });
     }
 
-    return businessEntity[0];
+    const result: BusinessResult = {
+      ...businessEntity[0],
+      animals: businessAnimalsData,
+      animalProducts: businessAnimalProductsData,
+      crops: businessCropsData,
+    };
+
+    return result;
   });
 
 export const getStats = publicProcedure.query(async ({ ctx }) => {
