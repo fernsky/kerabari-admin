@@ -35,19 +35,16 @@ export const setupPDFHeader = async (doc: jsPDF, details: HeaderDetails) => {
   // Initialize A4 in portrait
   doc.setProperties({
     title: `Survey Form - Area ${details.areaCode}`,
-    creator: "kerabari Municipality",
+    creator: "Kerabari Municipality",
   });
 
   // Set title and main header - slightly smaller font sizes
   doc.setFontSize(14);
-  doc.text(
-    "kerabari Rural Municipality",
-    doc.internal.pageSize.width / 2,
-    15,
-    { align: "center" },
-  );
+  doc.text("Kerabari Rural Municipality", doc.internal.pageSize.width / 2, 15, {
+    align: "center",
+  });
   doc.setFontSize(10);
-  doc.text("Jhapa, Koshi Province", doc.internal.pageSize.width / 2, 22, {
+  doc.text("Biratnagar, Koshi Province", doc.internal.pageSize.width / 2, 22, {
     align: "center",
   });
 
