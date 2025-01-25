@@ -4,7 +4,7 @@ import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { api } from "@/trpc/react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Edit, ArrowLeft, User } from "lucide-react";
+import { Edit, ArrowLeft, User, Home } from "lucide-react";
 import Link from "next/link";
 import {
   Card,
@@ -20,6 +20,8 @@ import { CulturalSection } from "@/components/individual/sections/cultural-secti
 import { HealthSection } from "@/components/individual/sections/health-section";
 import { EducationSection } from "@/components/individual/sections/education-section";
 import { OccupationSection } from "@/components/individual/sections/occupation-section";
+import { FertilitySection } from "@/components/individual/sections/fertility-section";
+import { MigrationSection } from "@/components/individual/sections/migration-section";
 
 export default function IndividualDetails({
   params,
@@ -53,6 +55,13 @@ export default function IndividualDetails({
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to List
             </Button>
           </Link>
+          {individual?.familyId && (
+            <Link href={`/families/${individual.familyId}`}>
+              <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                <Home className="mr-2 h-4 w-4" /> Back to Family
+              </Button>
+            </Link>
+          )}
           <Link href={`/individuals/edit/${params.id}`}>
             <Button size="sm" className="w-full sm:w-auto">
               <Edit className="mr-2 h-4 w-4" /> Edit Profile
@@ -111,11 +120,15 @@ export default function IndividualDetails({
             {/* @ts-ignore */}
             <CulturalSection individual={individual} />
             {/* @ts-ignore */}
+            <FertilitySection individual={individual} />
+            {/* @ts-ignore */}
             <HealthSection individual={individual} />
             {/* @ts-ignore */}
             <EducationSection individual={individual} />
             {/* @ts-ignore */}
             <OccupationSection individual={individual} />
+            {/* @ts-ignore */}
+            <MigrationSection individual={individual} />
           </div>
         </div>
       )}
