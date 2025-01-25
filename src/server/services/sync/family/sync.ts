@@ -267,7 +267,7 @@ async function performFamilySync(ctx: any, recordId: string) {
           areaCode: familyData[0].areaCode,
           locality: familyData[0].locality,
           devOrg: familyData[0].devOrg,
-          geom: familyData[0].gps,
+          gps: familyData[0].gps,
           altitude: familyData[0].altitude,
           gpsAccuracy: familyData[0].gpsAccuracy,
 

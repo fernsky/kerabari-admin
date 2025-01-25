@@ -58,13 +58,15 @@ async function attachmentExists(
   attachmentName: string,
 ) {
   console.log(`Checking if attachment exists: ${attachmentName}`);
+  const lastSevenDigits = submissionId.slice(-7);
+  const newAttachmentName = `${lastSevenDigits}_${attachmentName}`;
   const existingAttachment = await ctx.db
     .select()
     .from(surveyAttachments)
     .where(
       and(
         eq(surveyAttachments.dataId, submissionId),
-        eq(surveyAttachments.name, attachmentName),
+        eq(surveyAttachments.name, newAttachmentName),
       ),
     )
     .limit(1);
