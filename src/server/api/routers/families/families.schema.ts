@@ -52,16 +52,16 @@ export const familyQuerySchema = z.object({
   limit: z.number().min(1).max(100).default(10),
   offset: z.number().min(0).default(0),
   sortBy: z
-    .enum(["headName", "wardNo", "locality"])
-    .default("headName"),
+    .enum(["head_name", "ward_no", "area_code", "enumerator_name", "status"])
+    .default("head_name"),
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
   filters: z
     .object({
       wardNo: z.number().optional(),
-      locality: z.string().optional(),
+      areaCode: z.string().optional(),
       enumeratorId: z.string().optional(),
       status: z
-        .enum(["pending", "approved", "rejected", "requested_for_edit"])
+        .enum(["all", "pending", "approved", "rejected", "requested_for_edit"])
         .optional(),
     })
     .optional(),

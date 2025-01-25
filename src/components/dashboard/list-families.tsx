@@ -1,27 +1,19 @@
 "use client";
 
-import { ContentLayout } from "@/components/admin-panel/content-layout";
-import { Button } from "@/components/ui/button";
+import { ContentLayout } from "../admin-panel/content-layout";
 import { api } from "@/trpc/react";
-import Link from "next/link";
 import { familyColumns } from "@/components/family/columns";
-import { DataTable } from "@/components/shared/data-table/data-table";
 import { FamilyFilters } from "@/components/family/family-filters";
-import { FilterDrawer } from "@/components/shared/filters/filter-drawer";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/lib/hooks/use-debounce";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  Plus,
-  Settings,
-} from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useMediaQuery } from "react-responsive";
-import { FamilyCard } from "@/components/family/family-card";
 import { User } from "lucia";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { DataTable } from "@/components/shared/data-table/data-table";
+import { Filter, Users2 } from "lucide-react";
+import { PaginationControls } from "./invalid-buildings/pagination";
 
 interface ListFamiliesProps {
   user: User;
@@ -42,6 +34,11 @@ export function ListFamilies({ user }: ListFamiliesProps) {
   const [page, setPage] = useState(0);
   const debouncedFilters = useDebounce(filters, 500);
   const isDesktop = useMediaQuery({ minWidth: 1024 });
+  const [sorting, setSorting] = useState<string>(""); // Add sorting state
+
+  const handleSort = (field: string) => {
+    setSorting(field);
+  };
 
   const {
     data,
@@ -95,18 +92,28 @@ export function ListFamilies({ user }: ListFamiliesProps) {
   return (
     <ContentLayout title="Families">
       <div className="mx-auto max-w-7xl space-y-6 p-4">
-        <div className="rounded-lg border bg-card shadow-sm">
-          <div className="border-b p-4 flex justify-between items-center">
-            <h2 className="text-lg font-medium">Families Overview</h2>
-            <Link href="/families/odk-settings">
-              <Button size="sm" className="w-full sm:w-auto">
-                <Settings className="mr-1 h-4 w-4" /> Go To ODK Settings
-              </Button>
-            </Link>
-          </div>
+        <Card className="overflow-hidden">
+          <CardHeader className="border-b bg-muted/50">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <div className="rounded-full bg-primary/10 p-1.5 sm:p-2">
+                    <Users2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                  </div>
+                  <h2 className="text-2xl font-semibold tracking-tight">
+                    Families Management
+                  </h2>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  View and manage all family records in the system
+                </p>
+              </div>
+              {/* ... export buttons ... */}
+            </div>
+          </CardHeader>
 
-          <div className="p-6 space-y-6">
-            {/* Stats Cards */}
+          <CardContent className="p-6">
+            {/* Stats Section */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <StatCard
                 title="Total Families"
@@ -122,124 +129,58 @@ export function ListFamilies({ user }: ListFamiliesProps) {
               />
             </div>
 
-            {/* Actions Bar */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex flex-wrap items-center gap-2">
-                {!isDesktop && (
-                  <div className="flex items-center gap-2">
-                    <FilterDrawer title="Filters">
-                      <FamilyFilters
-                        {...filters}
-                        onFilterChange={handleFilterChange}
-                      />
-                    </FilterDrawer>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Search by head name..."
-                        className="w-full sm:w-[200px] h-9"
-                        value={filters.headName || ""}
-                        onChange={(e) =>
-                          handleFilterChange("headName", e.target.value)
-                        }
-                      />
-                      <Input
-                        placeholder="Ward no."
-                        type="number"
-                        className="w-full sm:w-[100px] h-9"
-                        value={filters.wardNo || ""}
-                        onChange={(e) =>
-                          handleFilterChange(
-                            "wardNo",
-                            Number(e.target.value) || undefined,
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                )}
-                <Input
-                  placeholder="Search by head name..."
-                  className="w-full sm:w-[400px] h-9"
-                  value={filters.headName || ""}
-                  onChange={(e) =>
-                    handleFilterChange("headName", e.target.value)
-                  }
-                />
-              </div>
-              <Link href="/families/create">
-                <Button size="sm" className="w-full sm:w-auto">
-                  <Plus className="mr-1 h-4 w-4" /> Add Family
-                </Button>
-              </Link>
-            </div>
-
-            {/* Desktop Filters */}
-            {isDesktop && (
-              <div className="rounded-lg border bg-muted/50 p-4">
+            {/* Filters Section */}
+            <Card className="mt-6">
+              <CardHeader className="border-b bg-muted/50 py-4">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-primary" />
+                  <CardTitle className="text-base">Filter Records</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="p-4">
                 <FamilyFilters
                   {...filters}
                   onFilterChange={handleFilterChange}
                 />
-              </div>
-            )}
+              </CardContent>
+            </Card>
 
-            {/* Data Table or Cards */}
-            {isLoading ? (
-              <div className="flex h-32 items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin" />
-              </div>
-            ) : isDesktop ? (
-              <div className="rounded-lg border">
+            {/* Families Table */}
+            <Card className="mt-6">
+              <CardHeader className="border-b bg-muted/50 py-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Users2 className="h-4 w-4 text-primary" />
+                    <CardTitle className="text-base">Families List</CardTitle>
+                  </div>
+                  <Badge variant="secondary">
+                    {data?.pagination.total || 0} Records
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="p-4">
                 <DataTable
-                  columns={familyColumns}
+                  //@ts-ignore
+                  columns={familyColumns(handleSort)}
                   data={data?.data || []}
                   isLoading={isLoading}
                 />
-              </div>
-            ) : (
-              <div className="grid gap-4 sm:grid-cols-2">
-                {data?.data.map((family) => (
-                  <FamilyCard key={family.id} family={family} />
-                ))}
-              </div>
-            )}
-
-            {/* Pagination */}
-            {data?.data.length ? (
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
-                <span className="text-muted-foreground text-center">
-                  Showing {currentDisplayCount} of {data.pagination.total}{" "}
-                  families
-                </span>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handlePrevPage}
-                    disabled={page === 0}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <span className="min-w-[100px] text-center font-medium">
-                    Page {page + 1} of {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleNextPage}
-                    disabled={page >= totalPages - 1}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center text-sm text-muted-foreground py-8">
-                No families found
-              </div>
-            )}
-          </div>
-        </div>
+                {data?.data && data.data.length > 0 && (
+                  <div className="mt-4">
+                    <PaginationControls
+                      currentPage={page}
+                      totalItems={data.pagination.total}
+                      pageSize={10}
+                      currentDisplayCount={currentDisplayCount}
+                      onPageChange={setPage}
+                      hasMore={page < totalPages - 1}
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </CardContent>
+        </Card>
       </div>
     </ContentLayout>
   );

@@ -18,12 +18,12 @@ export const getAll = publicProcedure
   .query(async ({ ctx, input }) => {
     const { limit, offset, sortBy = "id", sortOrder = "desc", filters } = input;
 
-    // Validate sortBy field exists in family table
     const validSortColumns = [
       "id",
-      "head_name",
+      "headName",
       "wardNo",
-      "totalMembers",
+      "areaCode",
+      "enumeratorName",
       "status",
     ];
     const actualSortBy = validSortColumns.includes(sortBy) ? sortBy : "id";
@@ -34,15 +34,16 @@ export const getAll = publicProcedure
       if (filters.wardNo) {
         filterConditions.push(eq(family.wardNo, filters.wardNo));
       }
-      if (filters.locality) {
-        filterConditions.push(ilike(family.locality, `%${filters.locality}%`));
+      if (filters.areaCode) {
+        filterConditions.push(eq(family.areaCode, filters.areaCode));
       }
       if (filters.enumeratorId) {
         filterConditions.push(eq(family.enumeratorId, filters.enumeratorId));
       }
-      if (filters.status) {
+      if (filters.status && filters.status !== "all") {
         filterConditions.push(eq(family.status, filters.status));
       }
+
       if (filterConditions.length > 0) {
         const andCondition = and(...filterConditions);
         if (andCondition) conditions = andCondition;
