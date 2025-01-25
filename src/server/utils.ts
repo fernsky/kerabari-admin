@@ -77,6 +77,7 @@ export const fetchSurveySubmissions = async (
       },
     );
     const submissions = response.data.value;
+    console.log("Successfully fetched submissions:", submissions.length);
 
     // Process each submission
     for (let submission of submissions) {

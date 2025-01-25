@@ -121,6 +121,7 @@ export async function parseFamilyBase(r: RawFamily, ctx: any) {
   );
 
   if (mainStatement) {
+    console.log("Inserting family data into staging database");
     await ctx.db.execute(sql.raw(mainStatement));
   }
 }

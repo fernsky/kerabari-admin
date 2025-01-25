@@ -9,6 +9,7 @@ import { parseDeaths } from "./death";
 
 export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
   try {
+    console.log("Parsing and inserting family data into staging database");
     await parseFamilyBase(r, ctx);
 
     if (r.individual?.length > 0) {

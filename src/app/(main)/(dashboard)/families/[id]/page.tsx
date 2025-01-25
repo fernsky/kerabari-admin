@@ -27,6 +27,7 @@ import { AnimalSection } from "@/components/family/animal-section";
 import { AudioPlayer } from "@/components/ui/audio-player";
 import Image from "next/image";
 import { AgriculturalDetailsSection } from "@/components/family/agricultural-details-section";
+import { IndividualsSection } from "@/components/family/individuals-section";
 
 const gpsSchema = z.object({
   type: z.literal("Point"),
@@ -177,6 +178,9 @@ export default function FamilyDetails({ params }: { params: { id: string } }) {
               wardNo={family.wardNo}
             />
           )}
+
+          {/* Add this section just before the Basic Information Card */}
+          <IndividualsSection individuals={family?.individuals} />
 
           {/* Basic Information */}
           <Card>

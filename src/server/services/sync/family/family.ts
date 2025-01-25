@@ -10,6 +10,7 @@ export const handleFamilyFlow = async (familySubmission: any, ctx: any) => {
   // 1. Parse the business data.
   // 2. Insert the business data into the staging database.
   // 3. Check if the business data is already in the production database.
+  console.log("Parsing and inserting family data into staging database");
   await parseAndInsertInStaging(familySubmission, ctx);
   const productionInsert = await ctx.db
     .select()

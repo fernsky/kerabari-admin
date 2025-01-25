@@ -155,6 +155,7 @@ export const superadminRouter = createTRPCRouter({
         attachmentPaths,
       } = surveyForm[0];
 
+      console.log("Fetching submissions for form:", surveyForm[0].name);
       await fetchSurveySubmissions(
         {
           siteEndpoint: siteEndpoint as string,
