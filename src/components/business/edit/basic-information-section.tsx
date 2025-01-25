@@ -1,4 +1,3 @@
-import { fieldStyles, SectionProps } from "./common-field-styles";
 import { cn } from "@/lib/utils";
 import {
   FormField,
@@ -8,7 +7,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-
+import {
+  fieldStyles,
+  SectionProps,
+} from "@/components/building/edit/common-field-styles";
 import { FormCard } from "./form-card";
 
 export function BasicInformationSection({

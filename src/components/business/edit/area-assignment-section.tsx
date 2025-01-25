@@ -9,7 +9,10 @@ import { ComboboxSearchable } from "@/components/ui/combobox-searchable";
 import { FormCard } from "./form-card";
 import { UseFormReturn } from "react-hook-form";
 import { api } from "@/trpc/react";
-import { fieldStyles, SectionProps } from "./common-field-styles";
+import {
+  fieldStyles,
+  SectionProps,
+} from "@/components/building/edit/common-field-styles";
 
 interface AreaAssignmentSectionProps extends SectionProps {
   currentBuildingToken: string;

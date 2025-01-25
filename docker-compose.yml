@@ -2,7 +2,7 @@ services:
   ## High performance S3 compabitle object storage
   minio:
     image: quay.io/minio/minio
-    container_name: minio-survey
+    container_name: minio-survey-kerabari
     restart: always
     ports:
       - "9000:9000"
@@ -17,7 +17,7 @@ services:
 
   postgres:
     image: postgis/postgis
-    container_name: ${POSTGRES_HOSTNAME}
+    container_name: ${POSTGRES_HOSTNAME}-kerabari
     restart: always
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -30,7 +30,7 @@ services:
 
   cache:
     image: redis:latest
-    container_name: redis-survey
+    container_name: redis-survey-kerabari
     restart: always
     ports:
       - "6379:6379"

@@ -50,7 +50,7 @@ const CreateAreaMap = ({ onGeometryChange }: CreateAreaMapProps) => {
   return (
     <Card className="relative mt-4 min-h-[400px] h-[calc(100vh-400px)]">
       <Map
-        center={[26.72069444681497, 88.04840072844279]}
+        center={[26.92632339689546, 87.37272328644147]}
         zoom={13}
         className="h-full w-full rounded-md"
       >

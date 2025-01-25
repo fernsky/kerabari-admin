@@ -234,7 +234,7 @@ export default function RequestArea({ user }: { user: User }) {
                 </div>
                 <MapContainer
                   className="h-full w-full z-10"
-                  center={[26.72069444681497, 88.04840072844279]}
+                  center={[26.92632339689546, 87.37272328644147]}
                   zoom={13}
                   scrollWheelZoom={false}
                 >

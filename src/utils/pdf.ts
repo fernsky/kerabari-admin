@@ -1,6 +1,6 @@
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
-import MUNICIPALITY_LOGO from "@/lib/assets/kerabari-logo.png";
+import MUNICIPALITY_LOGO from "@/lib/assets/nepal-logo.png";
 
 interface HeaderDetails {
   enumeratorName: string;

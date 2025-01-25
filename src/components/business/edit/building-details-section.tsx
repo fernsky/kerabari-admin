@@ -15,9 +15,12 @@ import {
 import { FormCard } from "./form-card";
 import { UseFormReturn } from "react-hook-form";
 import { buildingChoices } from "@/lib/resources/building";
-import { fieldStyles, SectionProps } from "./common-field-styles";
 import { SelectMultiple } from "@/components/ui/select-multiple";
 import { MultiSelectCombobox } from "@/components/ui/multiselect-combobox";
+import {
+  fieldStyles,
+  SectionProps,
+} from "@/components/building/edit/common-field-styles";
 
 interface BuildingDetailsSectionProps extends SectionProps {
   form: UseFormReturn<any>;
