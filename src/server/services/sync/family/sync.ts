@@ -28,9 +28,10 @@ import {
   buddhashantiAnimalProduct,
 } from "@/server/db/schema/family/animal-products";
 
-import {
-  StagingBuddhashantiDeath,
-} from "@/server/db/schema/family/deaths";
+import { StagingBuddhashantiDeath } from "@/server/db/schema/family/deaths";
+import buddhashantiAgriculturalLand, {
+  stagingBuddhashantiAgriculturalLand,
+} from "@/server/db/schema/family/agricultural-lands";
 
 export async function syncFamilySurvey(recordId: string, data: any, ctx: any) {
   try {
@@ -224,6 +225,11 @@ async function performFamilySync(ctx: any, recordId: string) {
       .from(stagingBuddhashantiIndividual)
       .where(eq(stagingBuddhashantiIndividual.familyId, recordId));
 
+    const agriculturalLands = await ctx.db
+      .select()
+      .from(stagingBuddhashantiAgriculturalLand)
+      .where(eq(stagingBuddhashantiAgriculturalLand.familyId, recordId));
+
     const deaths = await ctx.db
       .select()
       .from(stagingBuddhashantiDeath)
@@ -327,16 +333,17 @@ async function performFamilySync(ctx: any, recordId: string) {
         await tx
           .insert(buddhashantiDeath)
           .values(
-        deaths.map((death: StagingBuddhashantiDeath) => ({
-          id: death.id,
-          famliyId: death.familyId,
-          wardNo: death.wardNo,
-          deceasedName: death.deceasedName,
-          deceasedAge: death.deceasedAge,
-          deceasedDeathCause: death.deceasedDeathCause,
-          deceasedGender: death.deceasedGender,
-          deceasedFertilityDeathCondition: death.deceasedFertilityDeathCondition,
-        })),
+            deaths.map((death: StagingBuddhashantiDeath) => ({
+              id: death.id,
+              famliyId: death.familyId,
+              wardNo: death.wardNo,
+              deceasedName: death.deceasedName,
+              deceasedAge: death.deceasedAge,
+              deceasedDeathCause: death.deceasedDeathCause,
+              deceasedGender: death.deceasedGender,
+              deceasedFertilityDeathCondition:
+                death.deceasedFertilityDeathCondition,
+            })),
           )
           .onConflictDoNothing();
       }
@@ -359,6 +366,14 @@ async function performFamilySync(ctx: any, recordId: string) {
         await tx
           .insert(buddhashantiAnimalProduct)
           .values(animalProducts)
+          .onConflictDoNothing();
+      }
+
+      // Insert agricultural lands
+      if (agriculturalLands.length > 0) {
+        await tx
+          .insert(buddhashantiAgriculturalLand)
+          .values(agriculturalLands)
           .onConflictDoNothing();
       }
 

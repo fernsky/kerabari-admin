@@ -36,8 +36,8 @@ export function ListBusinesses({ user }: { user: User }) {
   const isDesktop = useMediaQuery({ minWidth: 1024 });
 
   const [sorting, setSorting] = useState({
-    sortBy: "wardNo" as const,
-    sortOrder: "desc" as const,
+    sortBy: "ward_id" as const,
+    sortOrder: "desc" as "asc" | "desc",
   });
 
   const {
@@ -48,7 +48,8 @@ export function ListBusinesses({ user }: { user: User }) {
     limit: 10,
     offset: page * 10,
     filters: debouncedFilters,
-    ...sorting,
+    sortBy: sorting.sortBy,
+    sortOrder: sorting.sortOrder,
   });
 
   const { data: stats, error: statsError } = api.business.getStats.useQuery();
@@ -66,6 +67,14 @@ export function ListBusinesses({ user }: { user: User }) {
 
   const handleNextPage = () => page < totalPages - 1 && setPage(page + 1);
   const handlePrevPage = () => page > 0 && setPage(page - 1);
+
+  const handleSort = (field: string) => {
+    setSorting((prev) => ({
+      sortBy: field as typeof prev.sortBy,
+      sortOrder:
+        prev.sortBy === field && prev.sortOrder === "desc" ? "asc" : "desc",
+    }));
+  };
 
   if (businessesError || statsError) {
     return (
@@ -143,7 +152,7 @@ export function ListBusinesses({ user }: { user: User }) {
                   isLoading={isLoading}
                   isDesktop={isDesktop}
                   data={data?.data || []}
-                  columns={businessColumns}
+                  columns={businessColumns(handleSort)}
                 />
                 {data?.data && data.data.length > 0 && (
                   <div className="mt-4">

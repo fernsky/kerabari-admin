@@ -22,7 +22,7 @@ export function PaginationControls({
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <div className="h-2 w-2 rounded-full bg-primary" />
         <span>
-          Showing {currentDisplayCount} of {totalItems} buildings
+          Showing {currentDisplayCount} of {totalItems} businesses
         </span>
       </div>
       <div className="flex items-center gap-2">

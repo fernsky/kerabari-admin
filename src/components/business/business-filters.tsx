@@ -8,8 +8,7 @@ import {
 } from "@/components/ui/select";
 import { ComboboxSearchable } from "@/components/ui/combobox-searchable";
 import { api } from "@/trpc/react";
-import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+
 import {
   MapPin,
   Users,
@@ -74,14 +73,14 @@ export function BusinessFilters({
         <Select
           value={wardNumber?.toString()}
           onValueChange={(value) =>
-            onFilterChange("wardNo", value ? parseInt(value) : undefined)
+            onFilterChange("wardId", value ? parseInt(value) : undefined)
           }
         >
           <SelectTrigger>
             <SelectValue placeholder="All Wards" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Wards</SelectItem>
+            <SelectItem value="all">All Wards</SelectItem>
             {Array.from({ length: 7 }, (_, i) => i + 1).map((ward) => (
               <SelectItem key={ward} value={ward.toString()}>
                 Ward {ward}
@@ -148,7 +147,7 @@ export function BusinessFilters({
             <SelectValue placeholder="All Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Status</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
             {statusOptions.map((option) => {
               const Icon = option.icon;
               return (

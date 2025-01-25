@@ -1,11 +1,17 @@
 import { publicProcedure } from "@/server/api/trpc";
 import { familyQuerySchema } from "../families.schema";
 import { family } from "@/server/db/schema/family/family";
+import { buddhashantiAnimal } from "@/server/db/schema/family/animals";
+import { buddhashantiAnimalProduct } from "@/server/db/schema/family/animal-products";
+import { buddhashantiCrop } from "@/server/db/schema/family/crops";
+import { buddhashantiIndividual } from "@/server/db/schema/family/individual";
 import { surveyAttachments } from "@/server/db/schema";
 import { and, eq, ilike, sql } from "drizzle-orm";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { env } from "@/env";
+import { FamilyResult } from "../types";
+import buddhashantiAgriculturalLand from "@/server/db/schema/family/agricultural-lands";
 
 export const getAll = publicProcedure
   .input(familyQuerySchema)
@@ -77,6 +83,35 @@ export const getById = publicProcedure
       .where(eq(family.id, input.id))
       .limit(1);
 
+    const [
+      familyAgriculturalLandData,
+      familyAnimalsData,
+      familyAnimalProductsData,
+      familyFarmingCropsData,
+      familyIndividualsData,
+    ] = await Promise.all([
+      ctx.db
+        .select()
+        .from(buddhashantiAgriculturalLand)
+        .where(eq(buddhashantiAgriculturalLand.familyId, input.id)),
+      ctx.db
+        .select()
+        .from(buddhashantiAnimal)
+        .where(eq(buddhashantiAnimal.familyId, input.id)),
+      ctx.db
+        .select()
+        .from(buddhashantiAnimalProduct)
+        .where(eq(buddhashantiAnimalProduct.familyId, input.id)),
+      ctx.db
+        .select()
+        .from(buddhashantiCrop)
+        .where(eq(buddhashantiCrop.familyId, input.id)),
+      ctx.db
+        .select()
+        .from(buddhashantiIndividual)
+        .where(eq(buddhashantiIndividual.familyId, input.id)),
+    ]);
+
     const attachments = await ctx.db.query.surveyAttachments.findMany({
       where: eq(surveyAttachments.dataId, input.id),
     });
@@ -122,7 +157,16 @@ export const getById = publicProcedure
       });
     }
 
-    return familyEntity[0];
+    const result: FamilyResult = {
+      ...familyEntity[0],
+      agriculturalLands: familyAgriculturalLandData,
+      animals: familyAnimalsData,
+      animalProducts: familyAnimalProductsData,
+      crops: familyFarmingCropsData,
+      individuals: familyIndividualsData,
+    };
+
+    return result;
   });
 
 export const getStats = publicProcedure.query(async ({ ctx }) => {

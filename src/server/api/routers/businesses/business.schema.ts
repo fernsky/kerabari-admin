@@ -133,16 +133,22 @@ export const businessQuerySchema = z.object({
   limit: z.number().min(1).max(100).default(10),
   offset: z.number().min(0).default(0),
   sortBy: z
-    .enum(["businessName", "wardNo", "businessNature", "operatorName"])
-    .default("businessName"),
+    .enum([
+      "business_name",
+      "ward_id",
+      "area_code",
+      "enumerator_name",
+      "status",
+    ])
+    .default("ward_id"),
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
   filters: z
     .object({
-      wardNo: z.number().optional(),
+      wardId: z.number().optional(),
       areaCode: z.string().optional(),
       enumeratorId: z.string().optional(),
       status: z
-        .enum(["pending", "approved", "rejected", "requested_for_edit"])
+        .enum(["all", "pending", "approved", "rejected", "requested_for_edit"])
         .optional(),
     })
     .optional(),
@@ -150,7 +156,13 @@ export const businessQuerySchema = z.object({
 
 export const businessStatusSchema = z.object({
   businessId: z.string(),
-  status: z.enum(["approved", "pending", "requested_for_edit", "rejected"]),
+  status: z.enum([
+    "all",
+    "approved",
+    "pending",
+    "requested_for_edit",
+    "rejected",
+  ]),
   message: z.string().optional(),
 });
 

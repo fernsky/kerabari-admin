@@ -2,7 +2,7 @@ import { publicProcedure } from "@/server/api/trpc";
 import { businessQuerySchema } from "../business.schema";
 import { business } from "@/server/db/schema/business/business";
 import { surveyAttachments } from "@/server/db/schema";
-import { and, eq, ilike, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { env } from "@/env";
@@ -16,12 +16,11 @@ export const getAll = publicProcedure
   .query(async ({ ctx, input }) => {
     const { limit, offset, sortBy = "id", sortOrder = "desc", filters } = input;
 
-    // Validate sortBy field exists in business table
     const validSortColumns = [
       "id",
       "businessNature",
       "businessType",
-      "wardNo",
+      "wardId",
       "status",
       "registrationNo",
     ];
@@ -30,8 +29,8 @@ export const getAll = publicProcedure
     let conditions = sql`TRUE`;
     if (filters) {
       const filterConditions = [];
-      if (filters.wardNo) {
-        filterConditions.push(eq(business.wardNo, filters.wardNo));
+      if (filters.wardId) {
+        filterConditions.push(eq(business.wardId, filters.wardId));
       }
       if (filters.areaCode) {
         filterConditions.push(
@@ -41,7 +40,7 @@ export const getAll = publicProcedure
       if (filters.enumeratorId) {
         filterConditions.push(eq(business.enumeratorId, filters.enumeratorId));
       }
-      if (filters.status) {
+      if (filters.status && filters.status !== "all") {
         filterConditions.push(eq(business.status, filters.status));
       }
 

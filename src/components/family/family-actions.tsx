@@ -13,9 +13,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { LoadingButton } from "@/components/loading-button";
-import { Check, XCircle, Edit, Clock, CheckCircle } from "lucide-react";
+import {
+  Check,
+  XCircle,
+  Edit,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  Shield,
+  Info,
+} from "lucide-react";
 import { api } from "@/trpc/react";
 import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 type Status = "pending" | "approved" | "requested_for_edit" | "rejected";
 
@@ -140,25 +150,60 @@ export function FamilyActions({
     }
   };
 
-  // Only show actions if the family is in pending state
-  const isActionable = currentStatus === "pending";
-
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <StatusBadge status={currentStatus} />
+    <Card className="h-full">
+      <CardHeader className="border-b bg-muted/50 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Shield className="h-4 w-4 text-primary" />
+            <h3 className="font-medium">Verification Status</h3>
+          </div>
+          <StatusBadge status={currentStatus} />
+        </div>
+        <div className="mt-2 flex items-start gap-2 text-xs text-muted-foreground">
+          <Info className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+          <p>Change family status to manage survey verification workflow</p>
+        </div>
+      </CardHeader>
 
-        {isActionable && (
+      <CardContent className="p-4">
+        <div className="space-y-4">
+          {/* Status Info Box */}
+          <div className="rounded-lg border bg-muted/50 p-3">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <AlertCircle className="h-4 w-4 text-muted-foreground" />
+              Current Status
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+              <div className="rounded-md bg-background p-2">
+                <span className="text-muted-foreground">Last Updated</span>
+                <p className="mt-1 font-medium">Today, 2:30 PM</p>
+              </div>
+              <div className="rounded-md bg-background p-2">
+                <span className="text-muted-foreground">Modified By</span>
+                <p className="mt-1 font-medium">Admin User</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
           <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant="default"
-              onClick={handleApprove}
-              disabled={approve.isLoading}
-            >
-              <Check className="mr-2 h-4 w-4" />
-              Approve
-            </Button>
+            {currentStatus !== "approved" && (
+              <Button
+                size="sm"
+                variant="default"
+                onClick={handleApprove}
+                disabled={approve.isLoading}
+                className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
+              >
+                <div className="flex items-center gap-1.5">
+                  <div className="rounded-full bg-white/20 p-1">
+                    <Check className="h-3 w-3" />
+                  </div>
+                  <span>Approve</span>
+                </div>
+              </Button>
+            )}
 
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
               <DialogTrigger asChild>
@@ -236,8 +281,8 @@ export function FamilyActions({
               </DialogContent>
             </Dialog>
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

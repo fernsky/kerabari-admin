@@ -12,7 +12,7 @@ interface BusinessInvalidSectionProps {
     isWardValid?: boolean;
     isAreaValid?: boolean;
     isEnumeratorValid?: boolean;
-    isBusinessTokenValid?: boolean;
+    isBuildingTokenValid?: boolean;
     enumeratorName?: string;
     areaId?: string;
   };
@@ -25,7 +25,7 @@ export function BusinessInvalidSection({
     !business.isWardValid ||
     !business.isAreaValid ||
     !business.isEnumeratorValid ||
-    !business.isBusinessTokenValid;
+    !business.isBuildingTokenValid;
 
   if (!hasInvalidFields) return null;
 
@@ -49,10 +49,10 @@ export function BusinessInvalidSection({
       label: "Enumerator",
     },
     token: {
-      valid: business.isBusinessTokenValid,
-      current: business.businessToken,
+      valid: business.isBuildingTokenValid,
+      current: business.isBuildingTokenValid,
       icon: <Binary className="h-4 w-4" />,
-      label: "Business Token",
+      label: "Building Token",
     },
   };
 
