@@ -50,7 +50,7 @@ export function AreaRequestFilters({
           </SelectTrigger>
           <SelectContent className="z-[10000]">
             <SelectItem value="all">All Wards</SelectItem>
-            {Array.from({ length: 7 }, (_, i) => i + 1).map((ward) => (
+            {Array.from({ length: 10 }, (_, i) => i + 1).map((ward) => (
               <SelectItem key={ward} value={ward.toString()}>
                 Ward {ward}
               </SelectItem>

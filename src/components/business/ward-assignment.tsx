@@ -41,7 +41,7 @@ export function WardAssignment({
   };
 
   // Generate ward numbers 1-7 for example
-  const wardOptions = Array.from({ length: 7 }, (_, i) => ({
+  const wardOptions = Array.from({ length: 10 }, (_, i) => ({
     value: (i + 1).toString(),
     label: `Ward ${i + 1}`,
   }));
