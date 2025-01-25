@@ -1,6 +1,6 @@
 import { publicProcedure } from "@/server/api/trpc";
 import { z } from "zod";
-import { business } from "@/server/db/schema";
+import { business } from "@/server/db/schema/business/business";
 import { eq } from "drizzle-orm";
 
 export const assignWardUpdate = publicProcedure

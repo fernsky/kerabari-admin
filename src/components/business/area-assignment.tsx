@@ -18,14 +18,21 @@ interface AreaAssignmentProps {
   isAreaValid?: boolean;
   refetchBuilding: () => void;
 }
+interface BusinessAreaAssignmentProps {
+  businessId: string;
+  currentAreaId?: string | null;
+  currentBuildingToken?: string | null;
+  isAreaValid?: boolean;
+  refetchBusiness: () => void;
+}
 
-export function AreaAssignment({
-  buildingId,
+export function BusinessAreaAssignment({
+  businessId,
   currentAreaId,
   currentBuildingToken,
   isAreaValid = false,
-  refetchBuilding,
-}: AreaAssignmentProps) {
+  refetchBusiness,
+}: BusinessAreaAssignmentProps) {
   const [selectedAreaId, setSelectedAreaId] = useState(currentAreaId ?? null);
 
   const { data: areas } = api.area.getAreas.useQuery({
@@ -37,10 +44,10 @@ export function AreaAssignment({
     { enabled: !!selectedAreaId },
   );
 
-  const assignMutation = api.building.assignAreaUpdate.useMutation({
+  const assignMutation = api.business.assignAreaUpdate.useMutation({
     onSuccess: () => {
       toast.success("Successfully assigned area");
-      refetchBuilding();
+      refetchBusiness();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -50,7 +57,7 @@ export function AreaAssignment({
   const handleAreaChange = (areaId: string) => {
     setSelectedAreaId(areaId === "none" ? null : areaId);
     assignMutation.mutate({
-      buildingId,
+      businessId,
       areaId: areaId === "none" ? null : areaId,
       buildingToken: null,
     });
@@ -58,7 +65,7 @@ export function AreaAssignment({
 
   const handleTokenChange = (token: string) => {
     assignMutation.mutate({
-      buildingId,
+      businessId,
       areaId: selectedAreaId,
       buildingToken: token === "none" ? null : token,
     });
@@ -76,7 +83,7 @@ export function AreaAssignment({
           </CardTitle>
         </div>
         <CardDescription className="text-xs">
-          Assign area and token number to this building
+          Assign area and token number to this business
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

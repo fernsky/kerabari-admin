@@ -1,29 +1,25 @@
-import { protectedProcedure } from "@/server/api/trpc";
-import { business } from "@/server/db/schema/business/business";
-import { eq } from "drizzle-orm";
+import { publicProcedure } from "@/server/api/trpc";
 import { z } from "zod";
-import { TRPCError } from "@trpc/server";
+import { business } from "@/server/db/schema/business/business";
 import { users } from "@/server/db/schema";
+import { eq, sql } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 
-export const assignToEnumerator = protectedProcedure
-  .input(z.object({ businessId: z.string(), enumeratorId: z.string() }))
+export const assignToEnumerator = publicProcedure
+  .input(
+    z.object({
+      businessId: z.string(),
+      enumeratorId: z.string(),
+    }),
+  )
   .mutation(async ({ ctx, input }) => {
-    const businessEntity = await ctx.db.query.business.findFirst({
-      where: eq(business.id, input.businessId),
-    });
+    const enumerator = await ctx.db
+      .select()
+      .from(users)
+      .where(eq(users.id, input.enumeratorId))
+      .limit(1);
 
-    if (!businessEntity) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Business not found",
-      });
-    }
-
-    const enumerator = await ctx.db.query.users.findFirst({
-      where: eq(users.id, input.enumeratorId),
-    });
-
-    if (!enumerator) {
+    if (!enumerator.length) {
       throw new TRPCError({
         code: "NOT_FOUND",
         message: "Enumerator not found",
@@ -33,9 +29,9 @@ export const assignToEnumerator = protectedProcedure
     await ctx.db
       .update(business)
       .set({
-        enumeratorId: input.enumeratorId,
-        enumeratorName: enumerator.name,
-        isEnumeratorValid: true, // Set the enumerator validation flag
+        enumeratorId: enumerator[0].id,
+        enumeratorName: enumerator[0].name,
+        isEnumeratorValid: true,
       })
       .where(eq(business.id, input.businessId));
 
