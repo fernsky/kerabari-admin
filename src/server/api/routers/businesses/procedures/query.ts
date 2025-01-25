@@ -33,14 +33,9 @@ export const getAll = publicProcedure
       if (filters.wardNo) {
         filterConditions.push(eq(business.wardNo, filters.wardNo));
       }
-      if (filters.businessNature) {
+      if (filters.areaCode) {
         filterConditions.push(
-          ilike(business.businessNature, `%${filters.businessNature}%`),
-        );
-      }
-      if (filters.businessType) {
-        filterConditions.push(
-          ilike(business.businessType, `%${filters.businessType}%`),
+          eq(business.areaCode, parseInt(filters.areaCode)),
         );
       }
       if (filters.enumeratorId) {
@@ -49,6 +44,7 @@ export const getAll = publicProcedure
       if (filters.status) {
         filterConditions.push(eq(business.status, filters.status));
       }
+
       if (filterConditions.length > 0) {
         const andCondition = and(...filterConditions);
         if (andCondition) conditions = andCondition;
@@ -169,10 +165,10 @@ export const getStats = publicProcedure.query(async ({ ctx }) => {
       totalEmployees: sql<number>`
         sum(
           coalesce(${business.totalPermanentEmployees}, 0) + 
-          coalesce(${business.totalTemporaryEmployees}, 0)
+          coalesce(${business.totalTemporaryEmployees}, 0) +
+          coalesce(${business.totalInvolvedFamily}, 0)
         )
       `,
-      totalPartners: sql<number>`sum(coalesce(${business.totalPartners}, 0))`,
     })
     .from(business);
 
