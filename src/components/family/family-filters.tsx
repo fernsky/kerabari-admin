@@ -103,7 +103,7 @@ export function FamilyFilters({
             })) ?? []),
           ]}
           value={areaCode || "areaCode"}
-          onChange={(value) => onFilterChange("", value || undefined)}
+          onChange={(value) => onFilterChange("areaCode", value || undefined)}
           placeholder="Select area..."
           className={""}
         />
