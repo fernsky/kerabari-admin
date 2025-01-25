@@ -2,7 +2,19 @@ import { RawBuildingData } from "../parser/kerabari/parse-buildings";
 import { decodeSingleChoice, decodeMultipleChoices } from "./utils";
 
 export const buildingChoices = {
+  drinking_water_source: {
+    tap_inside_house: "  धारा/पाइप (घरपरिसर भित्र)",
+    tap_outside_house: "  धारा/पाइप (घरपरिसर) बाहिर)",
+    tubewell: "  ट्युबवेल/हाते पम्प",
+    covered_well: "  ढाकिएको इनार/कुवा",
+    open_well: "  खुला इनार/कुवा",
+    aquifier_mool: "  मूल धारा",
+    river: "  नदी/खोला",
+    jar: "  जार/बोतल",
+    other: "  अन्य (खुलाउने)",
+  },
   house_base: {
+    wood_brick_combo: "काठ वरिपरि ईट्टा लगाएर खम्बा जोडेको",
     concrete_pillar: "ढलान पिल्लरसहितको",
     cement_joined: "सिमेन्टको जोडाइ भएको इँटा/ढुङ्गा",
     mud_joined: "माटोको जोडाइ भएको इँटा/ढुङ्गा",
@@ -18,6 +30,7 @@ export const buildingChoices = {
     other: "अन्य (उल्लेख गर्ने)",
   },
   house_outer_wall: {
+    floor_cement_wood_house: "भुईतल सिमेन्ट र ईट्टा भएको काठे घर",
     cement_joined: "सिमेन्टको जोडाइ भएको इँटा/ढुङ्गा",
     unbaked_brick: "काँचो इँटा",
     mud_joined: "माटोको जोडाइ भएको इँटा/ढुङ्गा",
@@ -83,7 +96,6 @@ export const buildingChoices = {
   },
   toilet_type: {
     flush_with_septic_tank: "फ्लस भएको (सेप्टिक ट्याङ्क)",
-    flush_with_drainage: "फ्लस भएको (सार्वजनिक ढल)",
     normal: "साधारण",
     public_eilani: "सार्वजनिक",
     no_toilet: "चर्पी नभएको",
