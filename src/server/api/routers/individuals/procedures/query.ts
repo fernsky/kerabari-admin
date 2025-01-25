@@ -1,6 +1,6 @@
 import { publicProcedure } from "@/server/api/trpc";
 import { individualQuerySchema } from "../individuals.schema";
-import { buddhashantiIndividual } from "@/server/db/schema/family/individual";
+import { kerabariIndividual } from "@/server/db/schema/family/individual";
 import { and, eq, ilike, sql } from "drizzle-orm";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
@@ -13,20 +13,20 @@ export const getAll = publicProcedure
     if (filters) {
       const filterConditions = [];
       if (filters.wardNo) {
-        filterConditions.push(eq(buddhashantiIndividual.wardNo, filters.wardNo));
+        filterConditions.push(eq(kerabariIndividual.wardNo, filters.wardNo));
       }
       if (filters.familyId) {
-        filterConditions.push(eq(buddhashantiIndividual.familyId, filters.familyId));
+        filterConditions.push(eq(kerabariIndividual.familyId, filters.familyId));
       }
       if (filters.gender) {
-        filterConditions.push(eq(buddhashantiIndividual.gender, filters.gender));
+        filterConditions.push(eq(kerabariIndividual.gender, filters.gender));
       }
       if (filters.ageRange) {
         if (filters.ageRange.min !== undefined) {
-          filterConditions.push(sql`${buddhashantiIndividual.age} >= ${filters.ageRange.min}`);
+          filterConditions.push(sql`${kerabariIndividual.age} >= ${filters.ageRange.min}`);
         }
         if (filters.ageRange.max !== undefined) {
-          filterConditions.push(sql`${buddhashantiIndividual.age} <= ${filters.ageRange.max}`);
+          filterConditions.push(sql`${kerabariIndividual.age} <= ${filters.ageRange.max}`);
         }
       }
       if (filterConditions.length > 0) {
@@ -38,14 +38,14 @@ export const getAll = publicProcedure
     const [data, totalCount] = await Promise.all([
       ctx.db
         .select()
-        .from(buddhashantiIndividual)
+        .from(kerabariIndividual)
         .where(conditions)
         .orderBy(sql`${sql.identifier(sortBy)} ${sql.raw(sortOrder)}`)
         .limit(limit)
         .offset(offset),
       ctx.db
         .select({ count: sql<number>`count(*)` })
-        .from(buddhashantiIndividual)
+        .from(kerabariIndividual)
         .where(conditions)
         .then((result) => result[0].count),
     ]);
@@ -65,8 +65,8 @@ export const getById = publicProcedure
   .query(async ({ ctx, input }) => {
     const individual = await ctx.db
       .select()
-      .from(buddhashantiIndividual)
-      .where(eq(buddhashantiIndividual.id, input.id))
+      .from(kerabariIndividual)
+      .where(eq(kerabariIndividual.id, input.id))
       .limit(1);
 
     if (!individual[0]) {
@@ -83,7 +83,7 @@ export const getStats = publicProcedure.query(async ({ ctx }) => {
   const stats = await ctx.db
     .select({
       totalIndividuals: sql<number>`count(*)`,
-      averageAge: sql<number>`ROUND(AVG(${buddhashantiIndividual.age}))::integer`}).from(buddhashantiIndividual);
+      averageAge: sql<number>`ROUND(AVG(${kerabariIndividual.age}))::integer`}).from(kerabariIndividual);
 
   return stats[0];
 }

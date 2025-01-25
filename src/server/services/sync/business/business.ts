@@ -1,4 +1,4 @@
-import { parseAndInsertInStaging } from "@/lib/parser/buddhashanti/parse-business";
+import { parseAndInsertInStaging } from "@/lib/parser/kerabari/parse-business";
 import { stagingToProduction } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { syncBusinessSurvey } from "./sync";

@@ -12,7 +12,7 @@ import { geometry } from "../../geographical";
 import { areas, users, wards } from "../basic";
 import { buildingTokens } from "../building";
 
-export const stagingBusiness = pgTable("staging_buddhashanti_business", {
+export const stagingBusiness = pgTable("staging_kerabari_business", {
   id: varchar("id", { length: 48 }).primaryKey(),
   // Enumerator Information
   enumeratorName: varchar("enumerator_name", { length: 255 }),
@@ -133,7 +133,7 @@ export const businessStatusEnum = pgEnum("business_status_enum", [
   "rejected",
 ]);
 
-export const business = pgTable("buddhashanti_business", {
+export const business = pgTable("kerabari_business", {
   id: varchar("id", { length: 48 }).primaryKey(),
   //  id: text("id").primaryKey(),
   // Enumerator Information
@@ -270,7 +270,7 @@ export const business = pgTable("buddhashanti_business", {
 
 // Table for building edit requests
 export const businessEditRequests = pgTable(
-  "buddhashanti_business_edit_requests",
+  "kerabari_business_edit_requests",
   {
     id: varchar("id", { length: 48 }).primaryKey(),
     businessId: varchar("business_id", { length: 48 }).references(

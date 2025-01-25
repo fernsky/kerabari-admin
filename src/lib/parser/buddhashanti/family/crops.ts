@@ -23,7 +23,7 @@ export async function parseCrops(r: RawFamily, ctx: any) {
 
         try {
           const cropStatement = jsonToPostgres(
-            "staging_buddhashanti_crop",
+            "staging_kerabari_crop",
             crop,
           );
           if (cropStatement) {
@@ -53,7 +53,7 @@ export async function parseCrops(r: RawFamily, ctx: any) {
 
         try {
           const cropStatement = jsonToPostgres(
-            "staging_buddhashanti_crop",
+            "staging_kerabari_crop",
             crop,
           );
           if (cropStatement) {
@@ -83,7 +83,7 @@ export async function parseCrops(r: RawFamily, ctx: any) {
 
         try {
           const cropStatement = jsonToPostgres(
-            "staging_buddhashanti_crop",
+            "staging_kerabari_crop",
             crop,
           );
           if (cropStatement) {
@@ -113,7 +113,7 @@ export async function parseCrops(r: RawFamily, ctx: any) {
       };
 
       try {
-        const cropStatement = jsonToPostgres("staging_buddhashanti_crop", crop);
+        const cropStatement = jsonToPostgres("staging_kerabari_crop", crop);
         if (cropStatement) {
           await ctx.db.execute(sql.raw(cropStatement));
         }
@@ -140,7 +140,7 @@ export async function parseCrops(r: RawFamily, ctx: any) {
       };
 
       try {
-        const cropStatement = jsonToPostgres("staging_buddhashanti_crop", crop);
+        const cropStatement = jsonToPostgres("staging_kerabari_crop", crop);
         if (cropStatement) {
           await ctx.db.execute(sql.raw(cropStatement));
         }
@@ -167,7 +167,7 @@ export async function parseCrops(r: RawFamily, ctx: any) {
       };
 
       try {
-        const cropStatement = jsonToPostgres("staging_buddhashanti_crop", crop);
+        const cropStatement = jsonToPostgres("staging_kerabari_crop", crop);
         if (cropStatement) {
           await ctx.db.execute(sql.raw(cropStatement));
         }
@@ -194,7 +194,7 @@ export async function parseCrops(r: RawFamily, ctx: any) {
       };
 
       try {
-        const cropStatement = jsonToPostgres("staging_buddhashanti_crop", crop);
+        const cropStatement = jsonToPostgres("staging_kerabari_crop", crop);
         if (cropStatement) {
           await ctx.db.execute(sql.raw(cropStatement));
         }

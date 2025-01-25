@@ -1,7 +1,7 @@
 import { pgTable, varchar, integer, decimal } from "drizzle-orm/pg-core";
 import { family } from "./family";
 
-const buddhashantiAgriculturalLand = pgTable("buddhashanti_agricultural_land", {
+const kerabariAgriculturalLand = pgTable("kerabari_agricultural_land", {
   id: varchar("id", { length: 48 }).primaryKey().notNull(),
   familyId: varchar("family_id", { length: 48 }).references(() => family.id),
   wardNo: integer("ward_no"),
@@ -15,9 +15,9 @@ const buddhashantiAgriculturalLand = pgTable("buddhashanti_agricultural_land", {
   irrigationSource: varchar("irrigation_source", { length: 100 }),
 });
 
-export default buddhashantiAgriculturalLand;
-export const stagingBuddhashantiAgriculturalLand = pgTable(
-  "staging_buddhashanti_agricultural_land",
+export default kerabariAgriculturalLand;
+export const stagingkerabariAgriculturalLand = pgTable(
+  "staging_kerabari_agricultural_land",
   {
     id: varchar("id", { length: 48 }).primaryKey().notNull(),
     familyId: varchar("family_id", { length: 48 }),
@@ -33,7 +33,7 @@ export const stagingBuddhashantiAgriculturalLand = pgTable(
   },
 );
 
-export type BuddhashantiAgriculturalLand =
-  typeof buddhashantiAgriculturalLand.$inferSelect;
-export type StagingBuddhashantiAgriculturalLand =
-  typeof stagingBuddhashantiAgriculturalLand.$inferSelect;
+export type kerabariAgriculturalLand =
+  typeof kerabariAgriculturalLand.$inferSelect;
+export type StagingkerabariAgriculturalLand =
+  typeof stagingkerabariAgriculturalLand.$inferSelect;

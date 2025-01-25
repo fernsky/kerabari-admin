@@ -27,7 +27,7 @@ export async function parseAgriculturalLand(r: RawFamily, ctx: any) {
     };
 
     const agricultureStatement = jsonToPostgres(
-      "staging_buddhashanti_agricultural_land",
+      "staging_kerabari_agricultural_land",
       agricultural_land,
     );
 

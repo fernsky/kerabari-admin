@@ -12,7 +12,7 @@ import { geometry } from "../../geographical";
 import { areas, users, wards } from "../basic";
 import { buildingTokens } from "../building";
 
-export const stagingFamily = pgTable("staging_buddhashanti_family", {
+export const stagingFamily = pgTable("staging_kerabari_family", {
   id: text("id").primaryKey().notNull(),
 
   // Enumerator Information
@@ -78,7 +78,7 @@ export const familyStatusEnum = pgEnum("family_status_enum", [
   "rejected",
 ]);
 
-export const family = pgTable("buddhashanti_family", {
+export const family = pgTable("kerabari_family", {
   id: text("id").primaryKey().notNull(),
 
   // Enumerator Information
@@ -164,7 +164,7 @@ export const family = pgTable("buddhashanti_family", {
   status: familyStatusEnum("status").default("pending"),
 });
 
-export const familyEditRequests = pgTable("buddhashanti_family_edit_requests", {
+export const familyEditRequests = pgTable("kerabari_family_edit_requests", {
   id: varchar("id", { length: 48 }).primaryKey(),
   familyId: varchar("family_id", { length: 48 }).references(() => family.id),
   message: text("message").notNull(),

@@ -2,7 +2,7 @@ import { publicProcedure } from "@/server/api/trpc";
 import { z } from "zod";
 import { and, eq, ilike, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { buddhashantiDeath } from "@/server/db/schema/family/deaths";
+import { kerabariDeath } from "@/server/db/schema/family/deaths";
 
 const deathQuerySchema = z.object({
   limit: z.number().min(1).max(100).default(10),
@@ -27,16 +27,16 @@ export const getAll = publicProcedure
     if (filters) {
       const filterConditions = [];
       if (filters.wardNo) {
-        filterConditions.push(eq(buddhashantiDeath.wardNo, filters.wardNo));
+        filterConditions.push(eq(kerabariDeath.wardNo, filters.wardNo));
       }
       if (filters.deceasedName) {
         filterConditions.push(
-          ilike(buddhashantiDeath.deceasedName, `%${filters.deceasedName}%`),
+          ilike(kerabariDeath.deceasedName, `%${filters.deceasedName}%`),
         );
       }
       if (filters.deceasedGender) {
         filterConditions.push(
-          eq(buddhashantiDeath.deceasedGender, filters.deceasedGender),
+          eq(kerabariDeath.deceasedGender, filters.deceasedGender),
         );
       }
       if (filterConditions.length > 0) {
@@ -48,14 +48,14 @@ export const getAll = publicProcedure
     const [data, totalCount] = await Promise.all([
       ctx.db
         .select()
-        .from(buddhashantiDeath)
+        .from(kerabariDeath)
         .where(conditions)
         .orderBy(sql`${sql.identifier(sortBy)} ${sql.raw(sortOrder)}`)
         .limit(limit)
         .offset(offset),
       ctx.db
         .select({ count: sql<number>`count(*)` })
-        .from(buddhashantiDeath)
+        .from(kerabariDeath)
         .where(conditions)
         .then((result) => result[0].count),
     ]);
@@ -75,8 +75,8 @@ export const getById = publicProcedure
   .query(async ({ ctx, input }) => {
     const death = await ctx.db
       .select()
-      .from(buddhashantiDeath)
-      .where(eq(buddhashantiDeath.id, input.id))
+      .from(kerabariDeath)
+      .where(eq(kerabariDeath.id, input.id))
       .limit(1);
 
     if (!death[0]) {
@@ -93,9 +93,9 @@ export const getStats = publicProcedure.query(async ({ ctx }) => {
   const stats = await ctx.db
     .select({
       totalDeaths: sql<number>`count(*)`,
-      avgAge: sql<number>`avg(${buddhashantiDeath.deceasedAge})`,
+      avgAge: sql<number>`avg(${kerabariDeath.deceasedAge})`,
     })
-    .from(buddhashantiDeath);
+    .from(kerabariDeath);
 
   return stats[0];
 });

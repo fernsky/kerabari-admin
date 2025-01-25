@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { BuddhashantiCrop } from "@/server/db/schema/family/crops";
+import { kerabariCrop } from "@/server/db/schema/family/crops";
 import { Sprout, CircleDollarSign, Scale, ArrowUpRight } from "lucide-react";
 import {
   Accordion,
@@ -9,10 +9,10 @@ import {
 } from "@/components/ui/accordion";
 
 interface CropsSectionProps {
-  crops?: BuddhashantiCrop[] | null;
+  crops?: kerabariCrop[] | null;
 }
 
-function CropCard({ crop }: { crop: BuddhashantiCrop }) {
+function CropCard({ crop }: { crop: kerabariCrop }) {
   return (
     <div className="rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
       <div className="mb-3 flex items-center gap-2">

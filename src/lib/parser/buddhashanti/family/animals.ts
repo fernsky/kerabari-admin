@@ -30,7 +30,7 @@ export async function parseAnimals(r: RawFamily, ctx: any) {
     }
 
     const animalStatement = jsonToPostgres(
-      "staging_buddhashanti_animal",
+      "staging_kerabari_animal",
       animal,
     );
 

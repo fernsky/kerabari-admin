@@ -14,8 +14,8 @@ INSERT INTO
     )
 VALUES
     (
-        'buddhashanti_building_survey',
-        'Buddhashanti Building Survey',
+        'kerabari_building_survey',
+        'kerabari Building Survey',
         '"\"https://survey.digprofile.com\""',
         4,
         'Kerabari_Buildings',
@@ -41,8 +41,8 @@ INSERT INTO
     )
 VALUES
     (
-        'buddhashanti_business_survey',
-        'Buddhashanti Business Survey',
+        'kerabari_business_survey',
+        'kerabari Business Survey',
         '"\"https://survey.digprofile.com\""',
         4,
         'biz',
@@ -68,8 +68,8 @@ INSERT INTO
     )
 VALUES
     (
-        'buddhashanti_family_survey',
-        'Buddhashanti Family Survey',
+        'kerabari_family_survey',
+        'kerabari Family Survey',
         '"\"https://survey.digprofile.com\""',
         2,
         'household',

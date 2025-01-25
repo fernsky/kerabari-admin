@@ -22,7 +22,7 @@ modification that happens should happen on the actual table.
 There must be an option to Restore Survey Data while modifying in the actual buildings data.
 */
 
-export const stagingBuildings = pgTable("staging_buddhashanti_buildings", {
+export const stagingBuildings = pgTable("staging_kerabari_buildings", {
   id: varchar("id", { length: 48 }).primaryKey(), // Unique identifier for the record
   surveyDate: timestamp("survey_date"),
   enumeratorName: varchar("enumerator_name", { length: 255 }),
@@ -84,7 +84,7 @@ export const buildingStatusEnum = pgEnum("building_status_enum", [
   "rejected",
 ]);
 
-export const buildings = pgTable("buddhashanti_buildings", {
+export const buildings = pgTable("kerabari_buildings", {
   id: varchar("id", { length: 48 }).primaryKey(), // Unique identifier for the record
   surveyDate: timestamp("survey_date"),
   enumeratorName: varchar("enumerator_name", { length: 255 }),
@@ -151,7 +151,7 @@ export const buildings = pgTable("buddhashanti_buildings", {
 
 // Table for building edit requests
 export const buildingEditRequests = pgTable(
-  "buddhashanti_building_edit_requests",
+  "kerabari_building_edit_requests",
   {
     id: varchar("id", { length: 48 }).primaryKey(),
     buildingId: varchar("building_id", { length: 48 }).references(
@@ -172,7 +172,7 @@ export const buildingTokenStatusEnum = pgEnum("building_token_status_enum", [
   "unallocated",
 ]);
 
-export const buildingTokens = pgTable("buddhashanti_building_tokens", {
+export const buildingTokens = pgTable("kerabari_building_tokens", {
   token: varchar("token", { length: 48 }).primaryKey(),
   areaId: varchar("area_id", { length: 48 }).references(() => areas.id),
   status: buildingTokenStatusEnum("status").default("unallocated"),

@@ -128,7 +128,7 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
 
       try {
         const mainStatement = jsonToPostgres(
-          "staging_buddhashanti_family",
+          "staging_kerabari_family",
           mainFamilyTable,
         );
         if (mainStatement) {
@@ -386,7 +386,7 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
             // Insert individual into staging
             try {
               const individualStatement = jsonToPostgres(
-                "staging_buddhashanti_individual",
+                "staging_kerabari_individual",
                 individual,
                 "ON CONFLICT(id) DO UPDATE SET",
               );
@@ -423,7 +423,7 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
 
             try {
               const agricultureStatement = jsonToPostgres(
-                "staging_buddhashanti_agricultural_land",
+                "staging_kerabari_agricultural_land",
                 agricultural_land,
                 "ON CONFLICT(id) DO UPDATE SET",
               );
@@ -462,7 +462,7 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
 
               try {
                 const cropStatement = jsonToPostgres(
-                  "staging_buddhashanti_crop",
+                  "staging_kerabari_crop",
                   crop,
                   "ON CONFLICT(id) DO UPDATE SET",
                 );
@@ -496,7 +496,7 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
 
               try {
                 const cropStatement = jsonToPostgres(
-                  "staging_buddhashanti_crop",
+                  "staging_kerabari_crop",
                   crop,
                   "ON CONFLICT(id) DO UPDATE SET",
                 );
@@ -530,7 +530,7 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
 
               try {
                 const cropStatement = jsonToPostgres(
-                  "staging_buddhashanti_crop",
+                  "staging_kerabari_crop",
                   crop,
                   "ON CONFLICT(id) DO UPDATE SET",
                 );
@@ -562,7 +562,7 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
 
             try {
               const cropStatement = jsonToPostgres(
-                "staging_buddhashanti_crop",
+                "staging_kerabari_crop",
                 crop,
                 "ON CONFLICT(id) DO UPDATE SET",
               );
@@ -593,7 +593,7 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
 
             try {
               const cropStatement = jsonToPostgres(
-                "staging_buddhashanti_crop",
+                "staging_kerabari_crop",
                 crop,
                 "ON CONFLICT(id) DO UPDATE SET",
               );
@@ -624,7 +624,7 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
 
             try {
               const cropStatement = jsonToPostgres(
-                "staging_buddhashanti_crop",
+                "staging_kerabari_crop",
                 crop,
                 "ON CONFLICT(id) DO UPDATE SET",
               );
@@ -655,7 +655,7 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
 
             try {
               const cropStatement = jsonToPostgres(
-                "staging_buddhashanti_crop",
+                "staging_kerabari_crop",
                 crop,
                 "ON CONFLICT(id) DO UPDATE SET",
               );
@@ -712,7 +712,7 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
 
             try {
               const animalStatement = jsonToPostgres(
-                "staging_buddhashanti_animal",
+                "staging_kerabari_animal",
                 animal,
                 "ON CONFLICT(id) DO UPDATE SET",
               );
@@ -741,7 +741,7 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
 
             try {
               const animalProductStatement = jsonToPostgres(
-                "staging_buddhashanti_animal_product",
+                "staging_kerabari_animal_product",
                 animalProduct,
                 "ON CONFLICT(id) DO UPDATE SET",
               );
@@ -779,7 +779,7 @@ export async function parseAndInsertInStaging(r: RawFamily, ctx: any) {
 
             try {
               const deathStatement = jsonToPostgres(
-                "staging_buddhashanti_death",
+                "staging_kerabari_death",
                 death,
                 "ON CONFLICT(id) DO UPDATE SET",
               );

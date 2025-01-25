@@ -2,7 +2,7 @@ import { pgTable, varchar, integer, decimal } from "drizzle-orm/pg-core";
 import { business } from "./business";
 
 export const stagingBusinessCrops = pgTable(
-  "staging_buddhashanti_business_crops",
+  "staging_kerabari_business_crops",
   {
     id: varchar("id", { length: 48 }).primaryKey().notNull(),
     businessId: varchar("business_id", { length: 48 }),
@@ -17,7 +17,7 @@ export const stagingBusinessCrops = pgTable(
   },
 );
 
-export const businessCrops = pgTable("buddhashanti_business_crops", {
+export const businessCrops = pgTable("kerabari_business_crops", {
   id: varchar("id", { length: 48 }).primaryKey().notNull(),
   businessId: varchar("business_id", { length: 48 }).references(
     () => business.id,

@@ -260,7 +260,7 @@ export async function parseIndividuals(r: RawFamily, ctx: any) {
       // Database Operations
       try {
         const individualStatement = jsonToPostgres(
-          "staging_buddhashanti_individual",
+          "staging_kerabari_individual",
           individual,
         );
         if (individualStatement) {
