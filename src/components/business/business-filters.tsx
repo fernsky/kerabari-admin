@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/select";
 import { ComboboxSearchable } from "@/components/ui/combobox-searchable";
 import { api } from "@/trpc/react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import {
@@ -19,35 +18,24 @@ import {
   Clock,
   Edit,
 } from "lucide-react";
-import { business } from "@/server/db/schema";
 
-interface BuildingFiltersProps {
-  wardNumber: number | undefined;
-  locality: string | undefined;
-  mapStatus: string | undefined;
+interface BusinessFiltersProps {
+  wardNumber?: number;
+  areaCode?: string;
   enumeratorId?: string;
-  status?: string;
+  status?: "pending" | "approved" | "rejected" | "requested_for_edit";
   onFilterChange: (key: string, value: any) => void;
 }
 
-export function BuildingFilters({
+export function BusinessFilters({
   wardNumber,
-  locality,
-  mapStatus,
+  areaCode,
   enumeratorId,
   status,
   onFilterChange,
-}: BuildingFiltersProps) {
+}: BusinessFiltersProps) {
+  const { data: areas } = api.area.getAreas.useQuery({ status: "all" });
   const { data: enumerators } = api.admin.getEnumerators.useQuery();
-
-  const enumeratorOptions = [
-    { value: "all", label: "All Enumerators" },
-    ...(enumerators?.map((enumerator) => ({
-      value: enumerator.id,
-      label: enumerator.name,
-      searchTerms: [enumerator.name],
-    })) ?? []),
-  ];
 
   const statusOptions = [
     {
@@ -77,164 +65,24 @@ export function BuildingFilters({
   ];
 
   return (
-    <Card className="mb-6">
-      <CardContent className="pt-6">
-        <div className="space-y-4">
-          {/* Active Filters */}
-          <div className="flex flex-wrap gap-2">
-            {wardNumber && (
-              <Badge variant="secondary" className="gap-2">
-                <MapPin className="h-3 w-3" />
-                Ward {wardNumber}
-                <X
-                  className="h-3 w-3 cursor-pointer"
-                  onClick={() => onFilterChange("wardNumber", undefined)}
-                />
-              </Badge>
-            )}
-            {enumeratorId && (
-              <Badge variant="secondary" className="gap-2">
-                <Users className="h-3 w-3" />
-                {enumerators?.find((e) => e.id === enumeratorId)?.name ||
-                  "Enumerator"}
-                <X
-                  className="h-3 w-3 cursor-pointer"
-                  onClick={() => onFilterChange("enumeratorId", undefined)}
-                />
-              </Badge>
-            )}
-            {status && (
-              <Badge
-                variant="secondary"
-                className={`gap-2 ${statusOptions.find((s) => s.value === status)?.color}`}
-              >
-                {(() => {
-                  const StatusIcon =
-                    statusOptions.find((s) => s.value === status)?.icon ||
-                    Clock;
-                  return <StatusIcon className="h-3 w-3" />;
-                })()}
-                {statusOptions.find((s) => s.value === status)?.label}
-                <X
-                  className="h-3 w-3 cursor-pointer"
-                  onClick={() => onFilterChange("status", undefined)}
-                />
-              </Badge>
-            )}
-          </div>
-
-          {/* Filter Controls */}
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-2">
-              <Label className="text-xs font-medium flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                Ward Number
-              </Label>
-              <Select
-                value={wardNumber?.toString() || ""}
-                onValueChange={(value) =>
-                  onFilterChange(
-                    "wardNumber",
-                    value ? parseInt(value) : undefined,
-                  )
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All Wards" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Wards</SelectItem>
-                  {[1, 2, 3, 4, 5, 6, 7].map((ward) => (
-                    <SelectItem key={ward} value={ward.toString()}>
-                      Ward {ward}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-xs font-medium flex items-center gap-2">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                Collected By
-              </Label>
-              <ComboboxSearchable
-                options={enumeratorOptions}
-                value={enumeratorId || "all"}
-                onChange={(value) =>
-                  onFilterChange(
-                    "enumeratorId",
-                    value === "all" ? undefined : value,
-                  )
-                }
-                placeholder="Search enumerator..."
-                className={""}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-xs font-medium flex items-center gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                Status
-              </Label>
-              <Select
-                value={status || ""}
-                onValueChange={(value) =>
-                  onFilterChange("status", value || undefined)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  {statusOptions.map((option) => {
-                    const Icon = option.icon;
-                    return (
-                      <SelectItem
-                        key={option.value}
-                        value={option.value}
-                        className="flex items-center gap-2"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Icon className="h-4 w-4" />
-                          {option.label}
-                        </div>
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-export function BusinessFilters({
-  wardNumber,
-  businessNature,
-  onFilterChange,
-}: {
-  wardNumber?: number;
-  businessNature?: string;
-  onFilterChange: (key: string, value: any) => void;
-}) {
-  return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <div className="space-y-2">
-        <Label>Ward Number</Label>
+        <Label className="flex items-center gap-2">
+          <MapPin className="h-4 w-4 text-muted-foreground" />
+          Ward Number
+        </Label>
         <Select
           value={wardNumber?.toString()}
-          onValueChange={(value) => onFilterChange("wardNumber", Number(value))}
+          onValueChange={(value) =>
+            onFilterChange("wardNo", value ? parseInt(value) : undefined)
+          }
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select ward" />
+            <SelectValue placeholder="All Wards" />
           </SelectTrigger>
           <SelectContent>
-            {Array.from({ length: 8 }, (_, i) => i + 1).map((ward) => (
+            <SelectItem value="">All Wards</SelectItem>
+            {Array.from({ length: 7 }, (_, i) => i + 1).map((ward) => (
               <SelectItem key={ward} value={ward.toString()}>
                 Ward {ward}
               </SelectItem>
@@ -244,26 +92,78 @@ export function BusinessFilters({
       </div>
 
       <div className="space-y-2">
-        <Label>Business Nature</Label>
+        <Label className="flex items-center gap-2">
+          <MapPin className="h-4 w-4 text-muted-foreground" />
+          Area Code
+        </Label>
+        <ComboboxSearchable
+          options={[
+            { value: "", label: "All Areas" },
+            ...(areas?.map((area) => ({
+              value: area.code.toString(),
+              label: `Area ${area.code} (Ward ${area.wardNumber})`,
+            })) ?? []),
+          ]}
+          value={areaCode || ""}
+          onChange={(value) => onFilterChange("areaCode", value || undefined)}
+          placeholder="Select area..."
+          className={""}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label className="flex items-center gap-2">
+          <Users className="h-4 w-4 text-muted-foreground" />
+          Enumerator
+        </Label>
+        <ComboboxSearchable
+          options={[
+            { value: "", label: "All Enumerators" },
+            ...(enumerators?.map((e) => ({
+              value: e.id,
+              label: e.name,
+            })) ?? []),
+          ]}
+          value={enumeratorId || ""}
+          onChange={(value) =>
+            onFilterChange("enumeratorId", value || undefined)
+          }
+          placeholder="Select enumerator..."
+          className=""
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label className="flex items-center gap-2">
+          <Clock className="h-4 w-4 text-muted-foreground" />
+          Status
+        </Label>
         <Select
-          value={businessNature}
-          onValueChange={(value) => onFilterChange("businessNature", value)}
+          value={status || ""}
+          onValueChange={(value: any) =>
+            onFilterChange("status", value || undefined)
+          }
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select type" />
+            <SelectValue placeholder="All Status" />
           </SelectTrigger>
           <SelectContent>
-            {[
-              "वस्तु (मालसामान)को बिक्री",
-              "सेवाको बिक्री",
-              "वस्तुको उत्पादन",
-              "कृषि, पशुपन्छी, माछा तथा मौरी पालन फार्म ",
-              "अन्य",
-            ].map((type) => (
-              <SelectItem key={type} value={type}>
-                {type}
-              </SelectItem>
-            ))}
+            <SelectItem value="">All Status</SelectItem>
+            {statusOptions.map((option) => {
+              const Icon = option.icon;
+              return (
+                <SelectItem
+                  key={option.value}
+                  value={option.value}
+                  className="flex items-center gap-2"
+                >
+                  <div className="flex items-center gap-2">
+                    <Icon className="h-4 w-4" />
+                    {option.label}
+                  </div>
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>

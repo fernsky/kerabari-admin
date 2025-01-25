@@ -117,7 +117,9 @@ export const businessSchema = z.object({
   buildingToken: z.string().optional(),
 
   // Status and validation fields
-  status: z.enum(["approved", "pending", "requested_for_edit", "rejected"]).default("pending"),
+  status: z
+    .enum(["approved", "pending", "requested_for_edit", "rejected"])
+    .default("pending"),
   isAreaValid: z.boolean().default(false),
   isWardValid: z.boolean().default(false),
   isBuildingTokenValid: z.boolean().default(false),
@@ -130,20 +132,20 @@ export const updateBusinessSchema = businessSchema.partial();
 export const businessQuerySchema = z.object({
   limit: z.number().min(1).max(100).default(10),
   offset: z.number().min(0).default(0),
-  sortBy: z.enum([
-    "businessName",
-    "wardNo",
-    "businessNature",
-    "operatorName"
-  ]).default("businessName"),
+  sortBy: z
+    .enum(["businessName", "wardNo", "businessNature", "operatorName"])
+    .default("businessName"),
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
-  filters: z.object({
-    wardNo: z.number().optional(),
-    businessNature: z.string().optional(),
-    businessType: z.string().optional(),
-    enumeratorId: z.string().optional(),
-    status: z.enum(["pending", "approved", "rejected", "requested_for_edit"]).optional(),
-  }).optional(),
+  filters: z
+    .object({
+      wardNo: z.number().optional(),
+      areaCode: z.string().optional(),
+      enumeratorId: z.string().optional(),
+      status: z
+        .enum(["pending", "approved", "rejected", "requested_for_edit"])
+        .optional(),
+    })
+    .optional(),
 });
 
 export const businessStatusSchema = z.object({
