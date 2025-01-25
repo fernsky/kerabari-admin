@@ -1,7 +1,9 @@
 import { createTRPCRouter } from "@/server/api/trpc";
 // import { create } from "./procedures/create";
 import { getAll, getById, getStats } from "./procedures/query";
-// import { update, deleteBuilding } from "./procedures/update";
+import { update, deleteBusiness } from "./procedures/update";
+import { assignWardUpdate } from "./procedures/assignWard";
+import { assignAreaUpdate } from "./procedures/assignArea";
 import {
   approve,
   requestEdit,
@@ -10,12 +12,14 @@ import {
 } from "./procedures/status";
 import { assignToEnumerator } from "./procedures/assignment";
 
-export const businessRouter= createTRPCRouter({
+export const businessRouter = createTRPCRouter({
   // create,
   getAll,
   getById,
-  // update,
-  // delete: deleteBuilding,
+  update,
+  delete: deleteBusiness,
+  assignWardUpdate,
+  assignAreaUpdate,
   getStats,
   approve,
   requestEdit,

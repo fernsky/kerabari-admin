@@ -1,28 +1,17 @@
-import {
-  Building2,
-  Users,
-  MapPin,
-  Store,
-  Binary,
-  Calendar,
-  Globe,
-  Phone,
-  GraduationCap,
-  FileCheck,
-  DollarSign,
-} from "lucide-react";
-import { Card } from "../building/card";
-import { DetailRow } from "../shared/detail-row";
-import { BusinessSchema } from "@/server/db/schema/business/business";
-import { LocationDetailsSection } from "./location-details-section";
+import type { BusinessSchema, LocationDetails } from "./types";
+import { SurveyInfoSection } from "./sections/survey-info-section";
+import { BusinessBasicSection } from "./sections/business-basic-section";
+import { LegalInfoSection } from "./sections/legal-info-section";
+import { WorkforceSection } from "./sections/workforce-section";
+import { ApicultureSection } from "./sections/apiculture-section";
+import { AquacultureSection } from "./sections/aquaculture-section";
+import { HotelSection } from "./sections/hotel-section";
+import { LocationSection } from "./sections/location-section";
+import { OperatorSection } from "./sections/operator-section";
 
 interface BusinessInfoGridProps {
   business: BusinessSchema;
-  locationDetails?: {
-    coordinates: [number, number];
-    gpsAccuracy?: number;
-    altitude?: number;
-  };
+  locationDetails?: LocationDetails;
 }
 
 export function BusinessInfoGrid({
@@ -31,84 +20,33 @@ export function BusinessInfoGrid({
 }: BusinessInfoGridProps) {
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      {/* Basic and Location Info */}
+      {/* Left Column */}
       <div className="space-y-6">
-        <Card title="Survey Information" icon={Users}>
-          {/* <DetailRow
-            icon={Calendar}
-            label="Survey Date"
-            value={business?.createdAt?.toLocaleDateString()}
-          /> */}
-          <DetailRow
-            icon={Users}
-            label="Enumerator"
-            value={business?.enumeratorName}
-          />
-          <DetailRow
-            icon={Binary}
-            label="Enumerator ID"
-            value={business?.enumeratorId}
-          />
-        </Card>
-
-        <Card title="Business Information" icon={Store}>
-          <DetailRow
-            icon={Store}
-            label="Business Name"
-            value={business?.businessName}
-          />
-          <DetailRow
-            icon={Store}
-            label="Business Type"
-            value={business?.businessType}
-          />
-          <DetailRow
-            icon={Store}
-            label="Business Nature"
-            value={business?.businessNature}
-          />
-        </Card>
+        {/* @ts-ignore */}
+        <SurveyInfoSection business={business} />
+        {/* @ts-ignore */}
+        <BusinessBasicSection business={business} />
+        {/* @ts-ignore */}
+        <LegalInfoSection business={business} />
+        {(business?.hotelAccommodationType || business?.hotelRoomCount) && (
+          <HotelSection business={business} />
+        )}
       </div>
 
-      {/* Operator and Registration */}
+      {/* Right Column */}
       <div className="space-y-6">
-        <Card title="Location Details" icon={MapPin}>
-          <DetailRow icon={Globe} label="Locality" value={business?.locality} />
-          <DetailRow
-            icon={MapPin}
-            label="Ward Number"
-            value={business?.wardNo?.toString()}
-          />
-
-          {locationDetails && (
-            <div className="mt-4 pt-4 border-t">
-              <LocationDetailsSection {...locationDetails} />
-            </div>
-          )}
-        </Card>
-
-        <Card title="Financial Information" icon={DollarSign}>
-          <DetailRow
-            icon={DollarSign}
-            label="Investment Amount"
-            value={business?.investmentAmount?.toString()}
-          />
-          <DetailRow
-            icon={Users}
-            label="Permanent Employees"
-            value={business?.totalPermanentEmployees?.toString()}
-          />
-          <DetailRow
-            icon={Users}
-            label="Temporary Employees"
-            value={business?.totalTemporaryEmployees?.toString()}
-          />
-          <DetailRow
-            icon={Users}
-            label="Total Partners"
-            value={business?.totalPartners?.toString()}
-          />
-        </Card>
+        <LocationSection
+          business={business}
+          locationDetails={locationDetails}
+        />
+        <OperatorSection business={business} />
+        <WorkforceSection business={business} />
+        {business?.aquacultureWardNo && (
+          <AquacultureSection business={business} />
+        )}
+        {business?.hasApiculture === "yes" && (
+          <ApicultureSection business={business} />
+        )}
       </div>
     </div>
   );

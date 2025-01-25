@@ -95,7 +95,12 @@ export default function BusinessDetails({
                   (business?.totalTemporaryEmployees ?? 0)
                 }
                 totalPartners={business?.totalPartners ?? 0}
-                wardNumber={business?.wardNo ?? 0}
+                wardNumber={
+                  business?.tmpWardNumber ??
+                  business?.wardNo ??
+                  business?.wardId ??
+                  0
+                }
               />
             </div>
 
@@ -156,6 +161,7 @@ export default function BusinessDetails({
 
           {/* Info Grid with Location */}
           <BusinessInfoGrid
+            //@ts-ignore
             business={business}
             locationDetails={
               business?.gps && gpsSchema.safeParse(business.gps).success

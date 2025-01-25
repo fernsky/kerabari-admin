@@ -170,7 +170,7 @@ export const business = pgTable("buddhashanti_business", {
 
   // Registration and Legal Information
   registrationStatus: varchar("registration_status", { length: 100 }),
-  registeredBodies: varchar("registered_bodies", { length: 255 }),
+  registeredBodies: text("registered_bodies").array(),
   registeredBodiesOther: varchar("registered_bodies_other", { length: 255 }),
   statutoryStatus: varchar("statutory_status", { length: 100 }),
   statutoryStatusOther: varchar("statutory_status_other", { length: 255 }),

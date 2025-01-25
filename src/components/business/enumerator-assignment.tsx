@@ -13,25 +13,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { UserCheck } from "lucide-react";
+import { UserCheck, Users } from "lucide-react";
 import { toast } from "sonner";
 
 export function EnumeratorAssignment({
-  buildingId,
+  businessId,
   currentEnumeratorId,
-  refetchBuilding,
+  refetchBusiness,
 }: {
-  buildingId: string;
+  businessId: string;
   currentEnumeratorId?: string;
-  refetchBuilding: () => void;
+  refetchBusiness: () => void;
 }) {
   const { data: enumerators, isLoading } = api.admin.getEnumerators.useQuery();
 
-  const assignMutation = api.building.assignToEnumerator.useMutation({
+  const assignMutation = api.business.assignToEnumerator.useMutation({
     onSuccess: () => {
       toast.success("Successfully assigned enumerator");
-      refetchBuilding();
+      refetchBusiness();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -40,44 +39,50 @@ export function EnumeratorAssignment({
 
   const handleAssign = (enumeratorId: string) => {
     assignMutation.mutate({
-      buildingId,
+      businessId,
       enumeratorId,
     });
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg font-medium">
-          Enumerator Assignment
-        </CardTitle>
-        <CardDescription>Assign this building to an enumerator</CardDescription>
+    <Card className="h-full border-muted-foreground/20 shadow-sm transition-all hover:border-muted-foreground/30 hover:shadow-md">
+      <CardHeader className="space-y-1.5 pb-4">
+        <div className="flex items-center space-x-2">
+          <div className="rounded-full bg-primary/10 p-2">
+            <Users className="h-4 w-4 text-primary" />
+          </div>
+          <CardTitle className="text-base font-semibold">
+            Enumerator Assignment
+          </CardTitle>
+        </div>
+        <CardDescription className="text-xs">
+          Select an enumerator for this business
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center gap-4">
-          <Select
-            value={currentEnumeratorId}
-            onValueChange={handleAssign}
-            disabled={isLoading || assignMutation.isLoading}
-          >
-            <SelectTrigger className="w-[300px]">
-              <SelectValue placeholder="Select an enumerator" />
-            </SelectTrigger>
-            <SelectContent>
-              {enumerators?.map((enumerator) => (
-                <SelectItem key={enumerator.id} value={enumerator.id}>
+        <Select
+          value={currentEnumeratorId}
+          onValueChange={handleAssign}
+          disabled={isLoading || assignMutation.isLoading}
+        >
+          <SelectTrigger className="w-full transition-all hover:border-primary focus-visible:ring-1 focus-visible:ring-primary">
+            <SelectValue placeholder="Select an enumerator" />
+          </SelectTrigger>
+          <SelectContent>
+            {enumerators?.map((enumerator) => (
+              <SelectItem
+                key={enumerator.id}
+                value={enumerator.id}
+                className="focus:bg-primary/5"
+              >
+                <span className="flex items-center gap-2">
+                  <UserCheck className="h-3.5 w-3.5 text-muted-foreground" />
                   {enumerator.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {assignMutation.isLoading && (
-            <Button variant="ghost" disabled>
-              <UserCheck className="mr-2 h-4 w-4 animate-spin" />
-              Assigning...
-            </Button>
-          )}
-        </div>
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </CardContent>
     </Card>
   );
