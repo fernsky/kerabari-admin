@@ -42,8 +42,14 @@ export function AssignmentDialog({
     { enabled: type === "area" && wardNumber !== undefined },
   );
 
-  const { data: enumerators } = api.admin.getEnumerators.useQuery(undefined, {
-    enabled: type === "enumerator",
+  const { data: enumerators } = api.admin.getEnumerators.useQuery({
+    pageIndex: 0,
+    pageSize: 10,
+    filters: {},
+    sorting: {
+      field: "wardNumber",
+      order: "asc",
+    },
   });
 
   const { data: tokens } = api.area.getAreaTokens.useQuery(
@@ -107,7 +113,7 @@ export function AssignmentDialog({
         );
       case "enumerator":
         return (
-          enumerators?.map((enumerator) => ({
+          enumerators?.data.map((enumerator) => ({
             value: enumerator.id,
             label: enumerator.name,
             searchTerms: [enumerator.name],

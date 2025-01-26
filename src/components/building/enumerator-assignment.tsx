@@ -25,8 +25,15 @@ export function EnumeratorAssignment({
   currentEnumeratorId?: string;
   refetchBuilding: () => void;
 }) {
-  const { data: enumerators, isLoading } = api.admin.getEnumerators.useQuery();
-
+  const { data: enumerators } = api.admin.getEnumerators.useQuery({
+    pageIndex: 0,
+    pageSize: 10,
+    filters: {},
+    sorting: {
+      field: "wardNumber",
+      order: "asc",
+    },
+  });
   const assignMutation = api.building.assignToEnumerator.useMutation({
     onSuccess: () => {
       toast.success("Successfully assigned enumerator");
@@ -63,24 +70,26 @@ export function EnumeratorAssignment({
         <Select
           value={currentEnumeratorId}
           onValueChange={handleAssign}
-          disabled={isLoading || assignMutation.isLoading}
+          disabled={assignMutation.isLoading}
         >
           <SelectTrigger className="w-full transition-all hover:border-primary focus-visible:ring-1 focus-visible:ring-primary">
             <SelectValue placeholder="Select an enumerator" />
           </SelectTrigger>
           <SelectContent>
-            {enumerators?.map((enumerator) => (
-              <SelectItem
-                key={enumerator.id}
-                value={enumerator.id}
-                className="focus:bg-primary/5"
-              >
-                <span className="flex items-center gap-2">
-                  <UserCheck className="h-3.5 w-3.5 text-muted-foreground" />
-                  {enumerator.name}
-                </span>
-              </SelectItem>
-            ))}
+            {enumerators?.data.map(
+              (enumerator: { id: string; name: string }) => (
+                <SelectItem
+                  key={enumerator.id}
+                  value={enumerator.id}
+                  className="focus:bg-primary/5"
+                >
+                  <span className="flex items-center gap-2">
+                    <UserCheck className="h-3.5 w-3.5 text-muted-foreground" />
+                    {enumerator.name}
+                  </span>
+                </SelectItem>
+              ),
+            )}
           </SelectContent>
         </Select>
       </CardContent>

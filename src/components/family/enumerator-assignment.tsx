@@ -25,8 +25,15 @@ export function EnumeratorAssignment({
   currentEnumeratorId?: string;
   refetchFamily: () => void;
 }) {
-  const { data: enumerators, isLoading } = api.admin.getEnumerators.useQuery();
-
+  const { data: enumerators, isLoading } = api.admin.getEnumerators.useQuery({
+    pageIndex: 0,
+    pageSize: 10,
+    filters: {},
+    sorting: {
+      field: "wardNumber",
+      order: "asc",
+    },
+  });
   const assignMutation = api.family.assignEnumerator.useMutation({
     onSuccess: () => {
       toast.success("Successfully assigned enumerator");
@@ -69,7 +76,7 @@ export function EnumeratorAssignment({
             <SelectValue placeholder="Select an enumerator" />
           </SelectTrigger>
           <SelectContent>
-            {enumerators?.map((enumerator) => (
+            {enumerators?.data.map((enumerator) => (
               <SelectItem
                 key={enumerator.id}
                 value={enumerator.id}

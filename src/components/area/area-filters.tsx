@@ -26,11 +26,19 @@ export function AreaFilters({
   assignedTo,
   onFilterChange,
 }: AreaFiltersProps) {
-  const { data: enumerators } = api.admin.getEnumerators.useQuery();
+  const { data: enumerators } = api.admin.getEnumerators.useQuery({
+    pageIndex: 0,
+    pageSize: 10,
+    filters: {},
+    sorting: {
+      field: "wardNumber",
+      order: "asc",
+    },
+  });
 
   const enumeratorOptions = [
     { value: "all", label: "All Enumerators" },
-    ...(enumerators?.map((enumerator) => ({
+    ...(enumerators?.data.map((enumerator: { id: any; name: any }) => ({
       value: enumerator.id,
       label: enumerator.name,
       searchTerms: [enumerator.name],

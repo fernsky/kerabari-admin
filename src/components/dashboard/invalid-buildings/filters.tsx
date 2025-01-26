@@ -17,7 +17,15 @@ export function InvalidBuildingsFilters({
   onFilterChange,
 }: InvalidBuildingsFiltersProps) {
   const { data: areas } = api.area.getAreas.useQuery({ status: "all" });
-  const { data: enumerators } = api.admin.getEnumerators.useQuery();
+  const { data: enumerators } = api.admin.getEnumerators.useQuery({
+    pageIndex: 0,
+    pageSize: 10,
+    filters: {},
+    sorting: {
+      field: "wardNumber",
+      order: "asc",
+    },
+  });
 
   const wardOptions = [
     { value: "all", label: "All Wards" },
@@ -39,7 +47,7 @@ export function InvalidBuildingsFilters({
 
   const enumeratorOptions = [
     { value: "all", label: "All Enumerators" },
-    ...(enumerators?.map((enumerator) => ({
+    ...(enumerators?.data.map((enumerator) => ({
       value: enumerator.id,
       label: enumerator.name,
       searchTerms: [enumerator.name],
