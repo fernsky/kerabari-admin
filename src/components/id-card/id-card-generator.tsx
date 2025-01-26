@@ -87,6 +87,57 @@ export function IdCardGenerator({ details, avatar }: IdCardGeneratorProps) {
     };
   }, [details.nepaliName, details.nepaliAddress, details.nepaliPhone, avatar]);
 
+  const convertSvgToPng = async (svgString: string): Promise<ArrayBuffer> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const svg = new Blob([svgString], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(svg);
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 359; // SVG width
+        canvas.height = 493; // SVG height
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          URL.revokeObjectURL(url);
+          reject(new Error("Failed to get canvas context"));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error("Failed to convert canvas to blob"));
+              return;
+            }
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              if (reader.result instanceof ArrayBuffer) {
+                resolve(reader.result);
+              } else {
+                reject(new Error("Failed to convert blob to array buffer"));
+              }
+            };
+            reader.onerror = reject;
+            reader.readAsArrayBuffer(blob);
+            URL.revokeObjectURL(url);
+          },
+          "image/png",
+          1.0,
+        );
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error("Failed to load SVG"));
+      };
+
+      img.src = url;
+    });
+  };
+
   const handleDownload = async () => {
     try {
       if (!isValid) {
@@ -97,32 +148,29 @@ export function IdCardGenerator({ details, avatar }: IdCardGeneratorProps) {
       const svg = await generateSvg();
       if (!svg) return;
 
+      // Convert SVG to PNG
+      const pngArrayBuffer = await convertSvgToPng(svg);
+
       // Create PDF document
       const pdfDoc = await PDFDocument.create();
-      const page = pdfDoc.addPage([359, 493]); // SVG dimensions
+      const page = pdfDoc.addPage([359, 493]);
 
-      const svgBlob = new Blob([svg], { type: "image/svg+xml" });
-      const url = URL.createObjectURL(svgBlob);
-
-      // Create Image from SVG
-      const response = await fetch(url);
-      const arrayBuffer = await response.arrayBuffer();
-      const image = await pdfDoc.embedPng(arrayBuffer);
+      // Embed PNG in PDF
+      const pngImage = await pdfDoc.embedPng(pngArrayBuffer);
 
       // Draw image on page
-      page.drawImage(image, {
+      page.drawImage(pngImage, {
         x: 0,
         y: 0,
         width: page.getWidth(),
         height: page.getHeight(),
       });
 
-      // Save PDF
+      // Save and download PDF
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: "application/pdf" });
       const downloadUrl = URL.createObjectURL(blob);
 
-      // Trigger download
       const link = document.createElement("a");
       link.href = downloadUrl;
       link.download = `id-card-${details.nepaliName}.pdf`;
@@ -130,13 +178,11 @@ export function IdCardGenerator({ details, avatar }: IdCardGeneratorProps) {
       link.click();
       document.body.removeChild(link);
 
-      // Cleanup
       URL.revokeObjectURL(downloadUrl);
-      URL.revokeObjectURL(url);
       setError(null);
     } catch (err) {
-      setError("Failed to generate PDF. Please try again.");
       console.error("PDF generation error:", err);
+      setError("Failed to generate PDF. Please try again.");
     }
   };
 
