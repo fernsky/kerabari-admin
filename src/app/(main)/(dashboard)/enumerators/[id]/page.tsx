@@ -26,20 +26,15 @@ export default function EnumeratorDetailsPage({
   params: { id: string };
 }) {
   const router = useRouter();
+  const utils = api.useUtils();
   const { data: enumerator, isLoading } = api.enumerator.getById.useQuery(
     params.id,
   );
-  const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
 
-  // Get presigned URL for the avatar
-  const { data: presignedUrl } = api.enumerator.getAvatarUrl.useQuery(
-    params.id,
-    {
-      onSuccess: (url) => {
-        if (url) setAvatarUrl(url);
-      },
-    },
-  );
+  const handleUploadSuccess = () => {
+    // Only invalidate the avatar URL
+    utils.enumerator.getAvatarUrl.invalidate(params.id);
+  };
 
   if (isLoading) {
     return (
@@ -129,7 +124,8 @@ export default function EnumeratorDetailsPage({
           <div className="flex items-center justify-center py-4">
             <UserAvatarUpload
               userId={params.id}
-              currentAvatar={enumerator.avatar}
+              currentAvatar={enumerator?.avatar}
+              onUploadSuccess={handleUploadSuccess}
             />
           </div>
         </FormCard>
@@ -198,12 +194,12 @@ export default function EnumeratorDetailsPage({
           description="Generate and download enumerator ID card"
         >
           <IdCardGenerator
-            avatar={avatarUrl}
             details={{
-              nepaliName: enumerator.nepaliName,
-              nepaliAddress: enumerator.nepaliAddress,
-              nepaliPhone: enumerator.nepaliPhone,
+              nepaliName: enumerator?.nepaliName,
+              nepaliAddress: enumerator?.nepaliAddress,
+              nepaliPhone: enumerator?.nepaliPhone,
             }}
+            userId={params.id} // Just pass the userId instead of avatar URL
           />
         </FormCard>
 

@@ -8,6 +8,7 @@ import idCardSvg from "@/lib/assets/buddhashanti-id-card.svg";
 import { PDFDocument, rgb } from "pdf-lib";
 import { useState } from "react";
 import React from "react";
+import { api } from "@/trpc/react";
 
 const getBase64FromUrl = async (url: string): Promise<string> => {
   const response = await fetch(url);
@@ -22,19 +23,27 @@ const getBase64FromUrl = async (url: string): Promise<string> => {
 
 interface IdCardGeneratorProps {
   details: IdCardDetails;
-  avatar?: string | null; // Add avatar prop
+  userId: string; // Change to userId instead of avatar
 }
 
-export function IdCardGenerator({ details, avatar }: IdCardGeneratorProps) {
+export function IdCardGenerator({ details, userId }: IdCardGeneratorProps) {
   const [error, setError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  // Get avatar URL directly
+  const { data: avatarUrl } = api.enumerator.getAvatarUrl.useQuery(userId, {
+    enabled: true,
+    staleTime: Infinity, // Cache the URL indefinitely
+  });
 
   // Validate if all required fields are present
   const isValid =
     details.nepaliName && details.nepaliAddress && details.nepaliPhone;
 
   const generateSvg = async () => {
-    if (!isValid) return null;
+    if (!isValid || isGenerating) return null;
+    setIsGenerating(true);
 
     try {
       const response = await fetch(idCardSvg.src);
@@ -51,9 +60,9 @@ export function IdCardGenerator({ details, avatar }: IdCardGeneratorProps) {
       );
 
       // Replace photo layer with avatar image if available
-      if (avatar) {
+      if (avatarUrl) {
         try {
-          const base64Image = await getBase64FromUrl(avatar);
+          const base64Image = await getBase64FromUrl(avatarUrl);
           const photoLayerRegex = /<rect[^>]*id="photo-layer"[^>]*\/>/;
           const imageElement = `<image id="photo-layer" x="114" y="179" width="135" height="155" href="${base64Image}" preserveAspectRatio="xMidYMid slice"/>`;
           svgContent = svgContent.replace(photoLayerRegex, imageElement);
@@ -73,6 +82,8 @@ export function IdCardGenerator({ details, avatar }: IdCardGeneratorProps) {
       console.error("SVG generation error:", err);
       setError("Failed to generate ID card template");
       return null;
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -85,7 +96,26 @@ export function IdCardGenerator({ details, avatar }: IdCardGeneratorProps) {
         URL.revokeObjectURL(previewUrl);
       }
     };
-  }, [details.nepaliName, details.nepaliAddress, details.nepaliPhone, avatar]);
+  }, [
+    details.nepaliName,
+    details.nepaliAddress,
+    details.nepaliPhone,
+    avatarUrl,
+  ]);
+
+  // Clean up URLs when component unmounts or key props change
+  React.useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [
+    avatarUrl,
+    details.nepaliName,
+    details.nepaliAddress,
+    details.nepaliPhone,
+  ]);
 
   const convertSvgToPng = async (svgString: string): Promise<ArrayBuffer> => {
     return new Promise((resolve, reject) => {
@@ -95,8 +125,9 @@ export function IdCardGenerator({ details, avatar }: IdCardGeneratorProps) {
 
       img.onload = () => {
         const canvas = document.createElement("canvas");
-        canvas.width = 359; // SVG width
-        canvas.height = 493; // SVG height
+        // Increase canvas size for better quality (2x)
+        canvas.width = 359 * 2;
+        canvas.height = 493 * 2;
         const ctx = canvas.getContext("2d");
         if (!ctx) {
           URL.revokeObjectURL(url);
@@ -104,6 +135,12 @@ export function IdCardGenerator({ details, avatar }: IdCardGeneratorProps) {
           return;
         }
 
+        // Enable high-quality image rendering
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+
+        // Scale up the image for better quality
+        ctx.scale(2, 2);
         ctx.drawImage(img, 0, 0);
 
         canvas.toBlob(
@@ -125,7 +162,7 @@ export function IdCardGenerator({ details, avatar }: IdCardGeneratorProps) {
             URL.revokeObjectURL(url);
           },
           "image/png",
-          1.0,
+          1.0, // Maximum quality
         );
       };
 
@@ -148,26 +185,32 @@ export function IdCardGenerator({ details, avatar }: IdCardGeneratorProps) {
       const svg = await generateSvg();
       if (!svg) return;
 
-      // Convert SVG to PNG
+      // Convert SVG to high-quality PNG
       const pngArrayBuffer = await convertSvgToPng(svg);
 
-      // Create PDF document
+      // Create PDF document with higher DPI
       const pdfDoc = await PDFDocument.create();
       const page = pdfDoc.addPage([359, 493]);
 
       // Embed PNG in PDF
       const pngImage = await pdfDoc.embedPng(pngArrayBuffer);
+      const { width, height } = pngImage.scale(1);
 
-      // Draw image on page
+      // Draw image maintaining aspect ratio and high quality
       page.drawImage(pngImage, {
         x: 0,
         y: 0,
         width: page.getWidth(),
         height: page.getHeight(),
+        opacity: 1,
+      });
+
+      // Save PDF with better compression
+      const pdfBytes = await pdfDoc.save({
+        useObjectStreams: false,
       });
 
       // Save and download PDF
-      const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: "application/pdf" });
       const downloadUrl = URL.createObjectURL(blob);
 

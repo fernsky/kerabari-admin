@@ -19,40 +19,58 @@ import { useRouter } from "next/navigation";
 interface UserAvatarUploadProps {
   userId: string;
   currentAvatar?: string | null;
+  onUploadSuccess?: () => void;
 }
 
 export function UserAvatarUpload({
   userId,
   currentAvatar,
+  onUploadSuccess,
 }: UserAvatarUploadProps) {
-  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [cropperFile, setCropperFile] = useState<string | null>(null);
   const [cropper, setCropper] = useState<any>();
-  const [imageLoading, setImageLoading] = useState(true);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Get presigned URL for the avatar
-  const { data: presignedUrl } = api.enumerator.getAvatarUrl.useQuery(userId, {
+  // Simplified avatar URL query
+  const { data: avatarUrl } = api.enumerator.getAvatarUrl.useQuery(userId, {
     enabled: !!currentAvatar,
-    refetchInterval: 23 * 60 * 60 * 1000, // Refetch every 23 hours
-    onSuccess: (url) => {
-      if (url) setAvatarUrl(url);
-    },
+    refetchInterval: false,
   });
 
   const { mutate: uploadPhoto } = api.enumerator.uploadIdCardPhoto.useMutation({
     onSuccess: () => {
-      toast.success("Photo uploaded successfully");
+      setIsLoading(false);
       setIsOpen(false);
       setCropperFile(null);
-      // Force revalidation of the page
-      router.refresh();
+      toast.success("Photo uploaded successfully");
+      onUploadSuccess?.();
     },
     onError: (error) => {
+      setIsLoading(false);
       toast.error(error.message || "Failed to upload photo");
     },
   });
+
+  const handleCrop = async () => {
+    if (!cropper || isLoading) return;
+
+    try {
+      setIsLoading(true);
+      const croppedCanvas = cropper.getCroppedCanvas({
+        width: 300,
+        height: 300,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: "high",
+      });
+
+      const croppedImage = croppedCanvas.toDataURL("image/jpeg", 0.8);
+      uploadPhoto({ photo: croppedImage, enumeratorId: userId });
+    } catch (error) {
+      setIsLoading(false);
+      toast.error("Failed to process image");
+    }
+  };
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -74,48 +92,18 @@ export function UserAvatarUpload({
     maxSize: 5 * 1024 * 1024, // 5MB
   });
 
-  const handleCrop = async () => {
-    if (cropper) {
-      try {
-        const croppedCanvas = cropper.getCroppedCanvas({
-          width: 300,
-          height: 300,
-          imageSmoothingEnabled: true,
-          imageSmoothingQuality: "high",
-        });
-
-        const croppedImage = croppedCanvas.toDataURL("image/jpeg", 0.8); // Specify format and quality
-        uploadPhoto({ photo: croppedImage, enumeratorId: userId });
-      } catch (error) {
-        toast.error("Failed to process image");
-      }
-    }
-  };
-
   return (
     <>
       <div className="relative group">
         <div className="relative w-32 h-32 rounded-full overflow-hidden bg-gray-100">
           {currentAvatar && avatarUrl ? (
-            <>
-              {imageLoading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              )}
-              <Image
-                src={avatarUrl}
-                alt="Profile"
-                fill
-                className="object-cover"
-                priority
-                onLoadingComplete={() => setImageLoading(false)}
-                onError={() => {
-                  setImageLoading(false);
-                  toast.error("Failed to load image");
-                }}
-              />
-            </>
+            <Image
+              src={avatarUrl}
+              alt="Profile"
+              fill
+              className="object-cover"
+              priority
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-100">
               <Upload className="h-8 w-8 text-gray-400" />
@@ -124,14 +112,17 @@ export function UserAvatarUpload({
           <div
             className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 
                      transition-opacity flex items-center justify-center cursor-pointer"
-            onClick={() => setIsOpen(true)}
+            onClick={() => !isLoading && setIsOpen(true)}
           >
             <Upload className="h-6 w-6 text-white" />
           </div>
         </div>
       </div>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => !isLoading && setIsOpen(open)}
+      >
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Upload Profile Photo</DialogTitle>
@@ -164,11 +155,23 @@ export function UserAvatarUpload({
                 />
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setCropperFile(null)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setCropperFile(null)}
+                  disabled={isLoading}
+                >
                   Cancel
                 </Button>
-
-                <Button onClick={handleCrop}>Save Photo</Button>
+                <Button onClick={handleCrop} disabled={isLoading}>
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      Saving...
+                    </div>
+                  ) : (
+                    "Save Photo"
+                  )}
+                </Button>
               </div>
             </div>
           )}
