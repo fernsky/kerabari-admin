@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { IdCardDetails } from "@/types/idCard";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import idCardSvg from "@/lib/assets/buddhashanti-id-card.svg";
+import idCardSvg from "@/lib/assets/kerabari-id-card.svg";
 import { PDFDocument, rgb } from "pdf-lib";
 import { useState } from "react";
 import React from "react";
