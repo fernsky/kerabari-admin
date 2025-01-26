@@ -17,6 +17,8 @@ import { Phone, Mail, MapPin, User2, UserCheck } from "lucide-react";
 import { SuperadminAreaStatusActions } from "@/components/area/superadmin-area-status-actions";
 import { NepaliIdCard } from "@/app/(main)/account/_components/nepali-id-card";
 import { UserAvatarUpload } from "@/app/(main)/account/_components/user-avatar-upload";
+import { IdCardGenerator } from "@/components/id-card/id-card-generator";
+import React from "react";
 
 export default function EnumeratorDetailsPage({
   params,
@@ -26,6 +28,17 @@ export default function EnumeratorDetailsPage({
   const router = useRouter();
   const { data: enumerator, isLoading } = api.enumerator.getById.useQuery(
     params.id,
+  );
+  const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
+
+  // Get presigned URL for the avatar
+  const { data: presignedUrl } = api.enumerator.getAvatarUrl.useQuery(
+    params.id,
+    {
+      onSuccess: (url) => {
+        if (url) setAvatarUrl(url);
+      },
+    },
   );
 
   if (isLoading) {
@@ -178,6 +191,20 @@ export default function EnumeratorDetailsPage({
               </div>
             </div>
           </div>
+        </FormCard>
+
+        <FormCard
+          title="ID Card"
+          description="Generate and download enumerator ID card"
+        >
+          <IdCardGenerator
+            avatar={avatarUrl}
+            details={{
+              nepaliName: enumerator.nepaliName,
+              nepaliAddress: enumerator.nepaliAddress,
+              nepaliPhone: enumerator.nepaliPhone,
+            }}
+          />
         </FormCard>
 
         <NepaliIdCard
