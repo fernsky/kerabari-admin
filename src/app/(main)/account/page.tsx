@@ -1,3 +1,4 @@
+"use client";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/lib/auth/actions";
@@ -8,10 +9,11 @@ import { ContentLayout } from "@/components/admin-panel/content-layout";
 import { ProfileCard } from "./_components/profile-card";
 import { QuickActionsCard } from "./_components/quick-actions-card";
 import { HelpCard } from "./_components/help-card";
+import { NepaliIdCard } from "./_components/nepali-id-card";
+import { api } from "@/trpc/react";
 
-export default async function AccountPage() {
-  const { user } = await validateRequest();
-  if (!user) redirect(Paths.Login);
+export default function AccountPage() {
+  const { data: user } = api.user.get.useQuery();
 
   return (
     <ContentLayout title="Account Settings">
@@ -37,7 +39,19 @@ export default async function AccountPage() {
 
           <div className="grid gap-6 md:grid-cols-2">
             <ProfileCard user={user} />
-            <QuickActionsCard />
+            <div className="space-y-6">
+              <QuickActionsCard />
+              {user && (
+                <NepaliIdCard
+                  userId={user.id}
+                  initialData={{
+                    nepaliName: null,
+                    nepaliAddress: null,
+                    nepaliPhone: user.phoneNumber,
+                  }}
+                />
+              )}
+            </div>
           </div>
 
           <HelpCard />

@@ -15,10 +15,14 @@ export const enumeratorIdCardProcedures = {
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role !== "superadmin") {
+      // Allow if user is admin or if updating their own account
+      if (
+        ctx.user.role !== "superadmin" &&
+        ctx.user.id !== input.enumeratorId
+      ) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: "Must be an admin to update ID card details",
+          message: "Unauthorized to update ID card details",
         });
       }
 
@@ -37,10 +41,11 @@ export const enumeratorIdCardProcedures = {
   getIdCardDetails: protectedProcedure
     .input(z.string())
     .query(async ({ ctx, input }) => {
-      if (ctx.user.role !== "superadmin") {
+      // Allow if user is admin or if viewing their own details
+      if (ctx.user.role !== "superadmin" && ctx.user.id !== input) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: "Must be an admin to view ID card details",
+          message: "Unauthorized to view ID card details",
         });
       }
 

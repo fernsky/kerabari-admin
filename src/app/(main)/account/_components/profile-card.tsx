@@ -16,6 +16,7 @@ const roleColors = {
 };
 
 export function ProfileCard({ user }: { user: any }) {
+  if (!user) return null;
   return (
     <Card className="border-primary/10 shadow-md">
       <CardHeader className="border-b bg-muted/50 pb-8">

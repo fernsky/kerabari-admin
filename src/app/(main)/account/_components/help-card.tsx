@@ -14,14 +14,14 @@ export function HelpCard() {
             If you need assistance with your account or have any questions,
             please contact your supervisor or the support team at{" "}
             <a
-              href="mailto:support@example.com"
+              href="mailto:intensivestudy.research@gmail.com"
               className="text-primary hover:underline"
             >
-              support@example.com
+              intensivestudy.research@gmail.com
             </a>{" "}
             or call us at{" "}
             <a href="tel:+1234567890" className="text-primary hover:underline">
-              123-456-7890
+              9862768543
             </a>
           </p>
         </div>
