@@ -9,61 +9,30 @@ export const enumeratorPhotoProcedures = {
   uploadIdCardPhoto: protectedProcedure
     .input(
       z.object({
-        photo: z.string(),
-        enumeratorId: z.string(),
+        photo: z.string().regex(/^data:image\/(jpeg|jpg|png);base64,/),
+        enumeratorId: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role !== "superadmin") {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Must be an admin to upload ID card photos",
-        });
-      }
-
       if (!process.env.BUCKET_NAME) {
         throw new Error("Bucket name not configured");
       }
 
-      // Get file extension from base64 string
-      const matches = input.photo.match(/^data:image\/([a-zA-Z]+);base64,/);
-      if (!matches) {
+      const isSuperadmin = ctx.user.role === "superadmin";
+      const targetUserId = isSuperadmin ? input.enumeratorId : ctx.user.id;
+
+      if (!targetUserId) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Invalid image format",
+          message: "Enumerator ID is required for admin uploads",
         });
       }
-      const fileExtension = matches[1];
-      const buffer = Buffer.from(input.photo.split(",")[1], "base64");
-      const fileName = `${input.enumeratorId}-id-card-photo.${fileExtension}`;
 
-      try {
-        await ctx.minio.putObject(process.env.BUCKET_NAME, fileName, buffer);
-
-        await ctx.db
-          .update(users)
-          .set({ avatar: fileName })
-          .where(eq(users.id, input.enumeratorId));
-
-        return { success: true };
-      } catch (error) {
-        console.error("Failed to upload photo:", error);
+      if (!isSuperadmin && targetUserId !== ctx.user.id) {
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to upload photo",
+          code: "UNAUTHORIZED",
+          message: "You can only upload your own photo",
         });
-      }
-    }),
-
-  updateMyPhoto: protectedProcedure
-    .input(
-      z.object({
-        photo: z.string().regex(/^data:image\/(jpeg|jpg|png);base64,/),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      if (!process.env.BUCKET_NAME) {
-        throw new Error("Bucket name not configured");
       }
 
       try {
@@ -78,7 +47,7 @@ export const enumeratorPhotoProcedures = {
         const fileExtension = matches[1];
         const base64Data = input.photo.replace(/^data:image\/\w+;base64,/, "");
         const buffer = Buffer.from(base64Data, "base64");
-        const fileName = `${ctx.user.id}-avatar.${fileExtension}`;
+        const fileName = `${targetUserId}-avatar.${fileExtension}`;
 
         // Add content type metadata
         const metaData = {
@@ -96,7 +65,7 @@ export const enumeratorPhotoProcedures = {
         await ctx.db
           .update(users)
           .set({ avatar: fileName })
-          .where(eq(users.id, ctx.user.id));
+          .where(eq(users.id, targetUserId));
 
         return { success: true };
       } catch (error) {

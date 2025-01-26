@@ -14,8 +14,9 @@ import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Phone, Mail, MapPin, User2, UserCheck } from "lucide-react";
-import { AreaStatusActions } from "@/components/area/area-status-actions";
 import { SuperadminAreaStatusActions } from "@/components/area/superadmin-area-status-actions";
+import { NepaliIdCard } from "@/app/(main)/account/_components/nepali-id-card";
+import { UserAvatarUpload } from "@/app/(main)/account/_components/user-avatar-upload";
 
 export default function EnumeratorDetailsPage({
   params,
@@ -109,6 +110,18 @@ export default function EnumeratorDetailsPage({
     >
       <div className="space-y-6 px-2 lg:px-10">
         <FormCard
+          title="Profile Photo"
+          description="Upload or update enumerator's profile photo"
+        >
+          <div className="flex items-center justify-center py-4">
+            <UserAvatarUpload
+              userId={params.id}
+              currentAvatar={enumerator.avatar}
+            />
+          </div>
+        </FormCard>
+
+        <FormCard
           title="Basic Information"
           description="Personal and contact details of the enumerator"
         >
@@ -166,6 +179,16 @@ export default function EnumeratorDetailsPage({
             </div>
           </div>
         </FormCard>
+
+        <NepaliIdCard
+          userId={params.id}
+          initialData={{
+            nepaliName: enumerator.nepaliName,
+            nepaliAddress: enumerator.nepaliAddress,
+            nepaliPhone: enumerator.nepaliPhone,
+          }}
+        />
+
         <SuperadminAreaStatusActions
           //@ts-ignore
           area={enumerator.area}

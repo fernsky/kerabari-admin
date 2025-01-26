@@ -41,7 +41,7 @@ export function UserAvatarUpload({
     },
   });
 
-  const { mutate: uploadPhoto } = api.enumerator.updateMyPhoto.useMutation({
+  const { mutate: uploadPhoto } = api.enumerator.uploadIdCardPhoto.useMutation({
     onSuccess: () => {
       toast.success("Photo uploaded successfully");
       setIsOpen(false);
@@ -85,7 +85,7 @@ export function UserAvatarUpload({
         });
 
         const croppedImage = croppedCanvas.toDataURL("image/jpeg", 0.8); // Specify format and quality
-        uploadPhoto({ photo: croppedImage });
+        uploadPhoto({ photo: croppedImage, enumeratorId: userId });
       } catch (error) {
         toast.error("Failed to process image");
       }

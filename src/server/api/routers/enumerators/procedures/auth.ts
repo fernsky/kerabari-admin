@@ -125,6 +125,10 @@ export const enumeratorAuthProcedures = {
           email: users.email,
           isActive: users.isActive,
           wardNumber: users.wardNumber,
+          avatar: users.avatar,
+          nepaliName: users.nepaliName,
+          nepaliAddress: users.nepaliAddress,
+          nepaliPhone: users.nepaliPhone,
           area: {
             id: areas.id,
             code: areas.code,
