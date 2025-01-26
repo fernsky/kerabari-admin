@@ -94,10 +94,10 @@ const CreateAreaMap = ({ onGeometryChange }: CreateAreaMapProps) => {
               key={`area-${area.id}`}
               data={area.geometry as GeoJsonObject}
               style={{
-                fillColor: "#00ff00",
+                fillColor: "#ffcccc",
                 weight: 1,
                 opacity: 0.6,
-                color: "green",
+                color: "red",
                 fillOpacity: 0.1,
               }}
             />
