@@ -8,6 +8,7 @@ import {
   json,
   primaryKey,
   boolean,
+  text,
 } from "drizzle-orm/pg-core";
 import { DATABASE_PREFIX as prefix } from "@/lib/constants";
 import { geometry } from "../geographical";
@@ -37,6 +38,9 @@ export const users = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdate(
       () => new Date(),
     ),
+    nepaliName: text("nepali_name"),
+    nepaliAddress: text("nepali_address"),
+    nepaliPhone: text("nepali_phone"),
   },
   (t) => ({
     usernameIdx: index("user_email_idx").on(t.userName),
