@@ -11,14 +11,37 @@ import { QuickActionsCard } from "./_components/quick-actions-card";
 import { HelpCard } from "./_components/help-card";
 import { NepaliIdCard } from "./_components/nepali-id-card";
 import { api } from "@/trpc/react";
+import { IdCardGenerator } from "@/components/id-card/id-card-generator";
+import React from "react";
+import { useIdCardStore } from "@/store/id-card-store";
 
 export default function AccountPage() {
+  const utils = api.useUtils();
   const { data: user } = api.user.get.useQuery();
+  const setDetails = useIdCardStore((state) => state.setDetails);
+  const resetDetails = useIdCardStore((state) => state.resetDetails);
+
+  // Initialize ID card store with user data
+  React.useEffect(() => {
+    if (user?.id) {
+      // Get enumerator details
+      utils.enumerator.getById.fetch(user.id).then((enumerator) => {
+        if (enumerator) {
+          setDetails({
+            nepaliName: enumerator.nepaliName || null,
+            nepaliAddress: enumerator.nepaliAddress || null,
+            nepaliPhone: enumerator.phoneNumber || null,
+          });
+        }
+      });
+    }
+    return () => resetDetails();
+  }, [user?.id, setDetails, resetDetails, utils.enumerator.getById]);
 
   return (
     <ContentLayout title="Account Settings">
       <main className="container mx-auto min-h-screen space-y-6 p-8">
-        <div className="mx-auto max-w-4xl space-y-8">
+        <div className="mx-auto max-w-6xl space-y-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">
@@ -37,19 +60,30 @@ export default function AccountPage() {
             </form>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            <ProfileCard user={user} />
+          <div className="grid gap-6 lg:grid-cols-2">
             <div className="space-y-6">
+              <ProfileCard user={user} />
               <QuickActionsCard />
+            </div>
+
+            <div className="space-y-6">
               {user && (
-                <NepaliIdCard
-                  userId={user.id}
-                  initialData={{
-                    nepaliName: null,
-                    nepaliAddress: null,
-                    nepaliPhone: user.phoneNumber,
-                  }}
-                />
+                <>
+                  <NepaliIdCard
+                    userId={user.id}
+                    initialData={{
+                      nepaliName: user?.nepaliName || null,
+                      nepaliAddress: user?.nepaliAddress || null,
+                      nepaliPhone: user?.nepaliPhone || null,
+                    }}
+                  />
+                  <div className="mt-4">
+                    <IdCardGenerator
+                      userId={user.id}
+                      className="max-w-[400px] mx-auto bg-white shadow-lg rounded-lg overflow-hidden"
+                    />
+                  </div>
+                </>
               )}
             </div>
           </div>

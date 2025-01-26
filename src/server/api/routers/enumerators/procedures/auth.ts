@@ -108,13 +108,6 @@ export const enumeratorAuthProcedures = {
   getById: protectedProcedure
     .input(z.string())
     .query(async ({ ctx, input }) => {
-      if (ctx.user.role !== "superadmin") {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Must be an admin to view enumerator details",
-        });
-      }
-
       const enumerator = await ctx.db
         .select({
           id: users.id,

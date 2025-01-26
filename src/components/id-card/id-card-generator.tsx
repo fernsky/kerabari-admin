@@ -9,6 +9,7 @@ import { PDFDocument, rgb } from "pdf-lib";
 import { useState } from "react";
 import React from "react";
 import { api } from "@/trpc/react";
+import { useIdCardStore } from "@/store/id-card-store";
 
 const getBase64FromUrl = async (url: string): Promise<string> => {
   const response = await fetch(url);
@@ -22,14 +23,15 @@ const getBase64FromUrl = async (url: string): Promise<string> => {
 };
 
 interface IdCardGeneratorProps {
-  details: IdCardDetails;
-  userId: string; // Change to userId instead of avatar
+  userId: string;
+  className?: string;
 }
 
-export function IdCardGenerator({ details, userId }: IdCardGeneratorProps) {
+export function IdCardGenerator({ userId, className }: IdCardGeneratorProps) {
   const [error, setError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(true);
 
   // Get avatar URL directly
   const { data: avatarUrl } = api.enumerator.getAvatarUrl.useQuery(userId, {
@@ -37,12 +39,21 @@ export function IdCardGenerator({ details, userId }: IdCardGeneratorProps) {
     staleTime: Infinity, // Cache the URL indefinitely
   });
 
-  // Validate if all required fields are present
-  const isValid =
-    details.nepaliName && details.nepaliAddress && details.nepaliPhone;
+  // Get details from store with safe default
+  const details = useIdCardStore((state) => state.details) || {
+    nepaliName: null,
+    nepaliAddress: null,
+    nepaliPhone: null,
+  };
+
+  // Validate if all required fields are present with safe access
+  const isValid = Boolean(
+    details?.nepaliName && details?.nepaliAddress && details?.nepaliPhone,
+  );
 
   const generateSvg = async () => {
-    if (!isValid || isGenerating) return null;
+    setIsPreviewLoading(true);
+    if (!isValid || isGenerating || !details) return null;
     setIsGenerating(true);
 
     try {
@@ -77,6 +88,7 @@ export function IdCardGenerator({ details, userId }: IdCardGeneratorProps) {
       const url = URL.createObjectURL(svgBlob);
       setPreviewUrl(url);
 
+      setIsPreviewLoading(false);
       return svgContent;
     } catch (err) {
       console.error("SVG generation error:", err);
@@ -231,37 +243,63 @@ export function IdCardGenerator({ details, userId }: IdCardGeneratorProps) {
 
   if (!isValid) {
     return (
-      <Alert variant="destructive">
-        <AlertDescription>
-          Please fill in all Nepali details (name, address, phone) to generate
-          ID card
-        </AlertDescription>
-      </Alert>
+      <div className="p-4 bg-white rounded-lg">
+        <Alert variant="destructive">
+          <AlertDescription>
+            Please fill in all Nepali details first to preview your ID card
+          </AlertDescription>
+        </Alert>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">ID Card Preview</h3>
-        <Button onClick={handleDownload} className="gap-2">
-          <Download className="h-4 w-4" />
-          Download ID Card
-        </Button>
+    <div className={`bg-white rounded-lg ${className}`}>
+      <div className="p-4 border-b">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-medium">Your ID Card</h3>
+          <Button
+            onClick={handleDownload}
+            className="gap-2"
+            disabled={isPreviewLoading}
+            size="sm"
+          >
+            <Download className="h-4 w-4" />
+            Download
+          </Button>
+        </div>
       </div>
 
       {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+        <div className="p-4">
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </div>
       )}
 
-      <div className="border rounded-lg p-4">
-        <img
-          src={previewUrl || idCardSvg.src}
-          alt="ID Card Preview"
-          className="w-full h-auto"
-        />
+      <div className="p-4">
+        <div className="relative w-full rounded-lg overflow-hidden">
+          {isPreviewLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-10">
+              <div className="flex flex-col items-center gap-2">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                <p className="text-sm text-muted-foreground animate-pulse">
+                  Updating preview...
+                </p>
+              </div>
+            </div>
+          )}
+          <img
+            src={previewUrl || idCardSvg.src}
+            alt="ID Card Preview"
+            className="w-full h-auto object-contain transition-opacity duration-300 rounded-lg"
+            style={{
+              maxHeight: "calc(100vh - 400px)",
+              opacity: isPreviewLoading ? 0.5 : 1,
+            }}
+          />
+        </div>
       </div>
     </div>
   );

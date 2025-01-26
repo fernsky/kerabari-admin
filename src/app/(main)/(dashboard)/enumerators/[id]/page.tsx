@@ -19,6 +19,7 @@ import { NepaliIdCard } from "@/app/(main)/account/_components/nepali-id-card";
 import { UserAvatarUpload } from "@/app/(main)/account/_components/user-avatar-upload";
 import { IdCardGenerator } from "@/components/id-card/id-card-generator";
 import React from "react";
+import { useIdCardStore } from "@/store/id-card-store";
 
 export default function EnumeratorDetailsPage({
   params,
@@ -30,10 +31,30 @@ export default function EnumeratorDetailsPage({
   const { data: enumerator, isLoading } = api.enumerator.getById.useQuery(
     params.id,
   );
+  const resetDetails = useIdCardStore((state) => state.resetDetails);
+  const setDetails = useIdCardStore((state) => state.setDetails);
+
+  React.useEffect(() => {
+    // Initialize store when enumerator data loads with safe defaults
+    if (enumerator) {
+      setDetails({
+        nepaliName: enumerator.nepaliName || null,
+        nepaliAddress: enumerator.nepaliAddress || null,
+        nepaliPhone: enumerator.nepaliPhone || null,
+      });
+    }
+    // Cleanup store on unmount
+    return () => resetDetails();
+  }, [enumerator, setDetails, resetDetails]);
 
   const handleUploadSuccess = () => {
     // Only invalidate the avatar URL
     utils.enumerator.getAvatarUrl.invalidate(params.id);
+  };
+
+  const handleIdCardDetailsUpdate = () => {
+    // Refetch enumerator data to update ID card details
+    utils.enumerator.getById.invalidate(params.id);
   };
 
   if (isLoading) {
@@ -189,28 +210,27 @@ export default function EnumeratorDetailsPage({
           </div>
         </FormCard>
 
-        <FormCard
-          title="ID Card"
-          description="Generate and download enumerator ID card"
-        >
-          <IdCardGenerator
-            details={{
-              nepaliName: enumerator?.nepaliName,
-              nepaliAddress: enumerator?.nepaliAddress,
-              nepaliPhone: enumerator?.nepaliPhone,
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <NepaliIdCard
+            userId={params.id}
+            initialData={{
+              nepaliName: enumerator.nepaliName,
+              nepaliAddress: enumerator.nepaliAddress,
+              nepaliPhone: enumerator.nepaliPhone,
             }}
-            userId={params.id} // Just pass the userId instead of avatar URL
+            onUpdate={handleIdCardDetailsUpdate}
           />
-        </FormCard>
 
-        <NepaliIdCard
-          userId={params.id}
-          initialData={{
-            nepaliName: enumerator.nepaliName,
-            nepaliAddress: enumerator.nepaliAddress,
-            nepaliPhone: enumerator.nepaliPhone,
-          }}
-        />
+          <FormCard
+            title="ID Card"
+            description="Generate and download enumerator ID card"
+          >
+            <IdCardGenerator
+              userId={params.id}
+              className="max-w-[400px] mx-auto"
+            />
+          </FormCard>
+        </div>
 
         <SuperadminAreaStatusActions
           //@ts-ignore

@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { IdCard, Loader2, Pencil, User, MapPin, Phone } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
+import { useIdCardStore } from "@/store/id-card-store";
 
 interface NepaliIdCardProps {
   userId: string;
@@ -15,9 +16,16 @@ interface NepaliIdCardProps {
     nepaliAddress?: string | null;
     nepaliPhone?: string | null;
   };
+  onUpdate?: () => void;
 }
 
-export function NepaliIdCard({ userId, initialData }: NepaliIdCardProps) {
+export function NepaliIdCard({
+  userId,
+  initialData,
+  onUpdate,
+}: NepaliIdCardProps) {
+  const utils = api.useUtils();
+  const setDetails = useIdCardStore((state) => state.setDetails);
   const [isEditing, setIsEditing] = useState(false);
   const [nepaliName, setNepaliName] = useState(initialData?.nepaliName || "");
   const [nepaliAddress, setNepaliAddress] = useState(
@@ -27,11 +35,40 @@ export function NepaliIdCard({ userId, initialData }: NepaliIdCardProps) {
     initialData?.nepaliPhone || "",
   );
 
+  useEffect(() => {
+    // Initialize store with initial data
+    if (initialData) {
+      setDetails({
+        nepaliName: initialData.nepaliName || null,
+        nepaliAddress: initialData.nepaliAddress || null,
+        nepaliPhone: initialData.nepaliPhone || null,
+      });
+    }
+  }, [initialData, setDetails]);
+
+  // Update store in real-time as user types
+  useEffect(() => {
+    setDetails({
+      nepaliName,
+      nepaliAddress,
+      nepaliPhone,
+    });
+  }, [nepaliName, nepaliAddress, nepaliPhone, setDetails]);
+
   const { mutate: updateDetails, isLoading } =
     api.enumerator.updateIdCardDetails.useMutation({
       onSuccess: () => {
         toast.success("ID card details updated successfully");
         setIsEditing(false);
+        // Update store with new values
+        setDetails({
+          nepaliName,
+          nepaliAddress,
+          nepaliPhone,
+        });
+        // Invalidate the enumerator query to refresh data
+        utils.enumerator.getById.invalidate(userId);
+        onUpdate?.(); // Call onUpdate callback after successful update
       },
       onError: (error) => {
         toast.error(error.message || "Failed to update details");
