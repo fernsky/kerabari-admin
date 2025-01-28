@@ -66,7 +66,7 @@ export default function AccountPage() {
               <QuickActionsCard />
             </div>
 
-            <div className="space-y-6">
+            {/*<div className="space-y-6">
               {user && (
                 <>
                   <NepaliIdCard
@@ -85,7 +85,7 @@ export default function AccountPage() {
                   </div>
                 </>
               )}
-            </div>
+            </div>*/}
           </div>
 
           <HelpCard />
