@@ -7,6 +7,9 @@ import { LayerControl } from "../map/layer-control";
 import { useLayerStore } from "@/store/use-layer-store";
 import { api } from "@/trpc/react";
 import { GeoJsonObject } from "geojson";
+import { Button } from "@/components/ui/button";
+import { MapIcon } from "lucide-react";
+import { useMapViewStore } from "@/store/toggle-layer-store";
 
 const Map = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
@@ -41,6 +44,8 @@ const isValidGeoJSON = (geometry: any) => {
 const CreateAreaMap = ({ onGeometryChange }: CreateAreaMapProps) => {
   const { geometry } = useMapContext();
   const { wards, areas, wardLayers } = useLayerStore();
+  const { isStreetView, toggleView } = useMapViewStore();
+
   console.log(areas, wards, wardLayers);
 
   React.useEffect(() => {
@@ -49,14 +54,32 @@ const CreateAreaMap = ({ onGeometryChange }: CreateAreaMapProps) => {
 
   return (
     <Card className="relative mt-4 min-h-[400px] h-[calc(100vh-400px)]">
+      <div className="absolute top-5 left-10 z-[400]">
+        <Button
+          variant="secondary"
+          size="sm"
+          className="bg-white"
+          onClick={toggleView}
+        >
+          <MapIcon className="h-4 w-4 mr-2" />
+          {isStreetView ? "Satellite View" : "Street View"}
+        </Button>
+      </div>
       <Map
         center={[26.92632339689546, 87.37272328644147]}
         zoom={13}
         className="h-full w-full rounded-md"
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          key={isStreetView ? "street" : "satellite"}
+          attribution={
+            isStreetView ? "© OpenStreetMap contributors" : "© Google"
+          }
+          url={
+            isStreetView
+              ? "https://mts1.google.com/vt/lyrs=m@186112443&hl=x-local&src=app&x={x}&y={y}&z={z}&s=Galile"
+              : "http://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}"
+          }
         />
 
         {/* Background Layers */}

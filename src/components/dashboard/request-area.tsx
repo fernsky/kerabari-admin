@@ -247,7 +247,7 @@ export default function RequestArea({ user }: { user: User }) {
                     }
                     url={
                       isStreetView
-                        ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        ? "https://mts1.google.com/vt/lyrs=m@186112443&hl=x-local&src=app&x={x}&y={y}&z={z}&s=Galile"
                         : "http://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}"
                     }
                   />
