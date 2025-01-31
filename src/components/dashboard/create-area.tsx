@@ -61,7 +61,7 @@ const CreateAreaMap = ({ onGeometryChange }: CreateAreaMapProps) => {
           className="bg-white"
           onClick={(e) => {
             e.preventDefault();
-            toggleView;
+            toggleView();
           }}
         >
           <MapIcon className="h-4 w-4 mr-2" />
