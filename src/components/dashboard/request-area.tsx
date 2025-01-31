@@ -226,7 +226,10 @@ export default function RequestArea({ user }: { user: User }) {
                     variant="secondary"
                     size="sm"
                     className="bg-white"
-                    onClick={toggleView}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      toggleView();
+                    }}
                   >
                     <Map className="h-4 w-4 mr-2" />
                     {isStreetView ? "Satellite View" : "Street View"}
