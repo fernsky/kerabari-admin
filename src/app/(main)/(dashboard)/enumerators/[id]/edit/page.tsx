@@ -269,7 +269,7 @@ export default function EditEnumeratorPage({
                           <SelectValue placeholder="Select ward" />
                         </SelectTrigger>
                         <SelectContent>
-                          {[...Array(7)].map((_, i) => (
+                          {[...Array(10)].map((_, i) => (
                             <SelectItem key={i + 1} value={(i + 1).toString()}>
                               Ward {i + 1}
                             </SelectItem>

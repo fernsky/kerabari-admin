@@ -59,7 +59,10 @@ const CreateAreaMap = ({ onGeometryChange }: CreateAreaMapProps) => {
           variant="secondary"
           size="sm"
           className="bg-white"
-          onClick={toggleView}
+          onClick={(e) => {
+            e.preventDefault();
+            toggleView();
+          }}
         >
           <MapIcon className="h-4 w-4 mr-2" />
           {isStreetView ? "Satellite View" : "Street View"}
