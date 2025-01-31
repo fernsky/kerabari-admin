@@ -67,7 +67,7 @@ export const AreaWithdrawCard: React.FC<AreaWithdrawCardProps> = ({
           dragging={false}
           scrollWheelZoom={false}
         >
-          <TileLayer url="http://mt2.google.com/vt/lyrs=s&x={x}&y={y}&z={z}" />
+          <TileLayer url="https://mts1.google.com/vt/lyrs=m@186112443&hl=x-local&src=app&x={x}&y={y}&z={z}&s=Galile" />
           <GeoJSON
             data={area.geometry}
             style={() => ({
