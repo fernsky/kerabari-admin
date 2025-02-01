@@ -286,8 +286,8 @@ export default function RequestArea({ user }: { user: User }) {
                     }
                     url={
                       isStreetView
-                        ? "https://mts1.google.com/vt/lyrs=m@186112443&hl=x-local&src=app&x={x}&y={y}&z={z}&s=Galile"
-                        : "http://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}"
+                        ? "https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                        : "https://mt1.google.com/vt/lyrs=y,h&x={x}&y={y}&z={z}"
                     }
                   />
                   {areas.data?.map((area) => (
