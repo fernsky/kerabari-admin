@@ -5,14 +5,14 @@ const config = {
   reactStrictMode: false,
   ignoreBuildErrors: true,
   images: {
-    domains: ["storage.digprofile.com"],
+    domains: ["minio-p4wwo448sowg8ck408gwgc08.intensivestudy.com.np"],
     //domains: ["localhost"],
     remotePatterns: [
       {
-        protocol: "http",
-        hostname: "storage.digprofile.com",
+        protocol: "https",
+        hostname: "minio-p4wwo448sowg8ck408gwgc08.intensivestudy.com.np",
         //hostname: "localhost",
-        port: "50000",
+        port: "443",
         //port: "9000",
         pathname: "/**",
       },
