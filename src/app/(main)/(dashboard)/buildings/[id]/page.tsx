@@ -13,7 +13,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { BuildingActions } from "@/components/building/building-actions";
 import { z } from "zod";
-import { AudioPlayer } from "@/components/ui/audio-player";
+import { CustomAudioPlayer } from "@/components/ui/audio-player";
 import { BuildingInvalidSection } from "@/components/building/building-invalid-section";
 
 const gpsSchema = z.object({
@@ -85,7 +85,7 @@ export default function BuildingDetails({
                     </p>
                   </div>
                   <div className="p-4">
-                    <AudioPlayer src={building.surveyAudioRecording} />
+                    <CustomAudioPlayer src={building.surveyAudioRecording} />
                   </div>
                 </div>
               )}

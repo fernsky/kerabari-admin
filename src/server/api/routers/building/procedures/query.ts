@@ -112,11 +112,12 @@ export const getById = publicProcedure
         }
       }
     } catch (error) {
-      throw new TRPCError({
+      /*throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to generate presigned URLs",
         cause: error,
-      });
+      });*/
+      console.error(error);
     }
 
     return building[0];

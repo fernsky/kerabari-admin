@@ -108,6 +108,41 @@
   }
 }
 
+/* Custom Audio Player Styles */
+.rhap_container {
+  padding: 1rem !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.rhap_main-controls-button,
+.rhap_volume-button,
+.rhap_volume-bar,
+.rhap_progress-bar {
+  color: hsl(var(--foreground)) !important;
+}
+
+.rhap_progress-filled,
+.rhap_volume-bar-filled {
+  background-color: hsl(var(--primary)) !important;
+}
+
+.rhap_download-progress,
+.rhap_volume-indicator {
+  background-color: hsl(var(--muted)) !important;
+}
+
+.rhap_progress-indicator,
+.rhap_volume-indicator {
+  background: hsl(var(--primary)) !important;
+}
+
+.rhap_time {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Add more custom styles as needed */
+
 .leaflet-pane {
     z-index: 0 !important;
 }

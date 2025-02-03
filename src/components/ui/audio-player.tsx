@@ -1,238 +1,137 @@
-import {
-  Pause,
-  Play,
-  Volume2,
-  VolumeX,
-  Forward,
-  Rewind,
-  Minus,
-  Plus,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { useRef, useState } from "react";
+import AudioPlayer, { RHAP_UI } from "react-h5-audio-player";
+import "react-h5-audio-player/lib/styles.css";
 import { cn } from "@/lib/utils";
 
-const formatTime = (seconds: number) => {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
-};
-
-const SpeedControl = ({
-  speed,
-  onSpeedChange,
+export const CustomAudioPlayer = ({
+  src,
+  className,
 }: {
-  speed: number;
-  onSpeedChange: (speed: number) => void;
+  src: string;
+  className?: string;
 }) => {
-  const presetSpeeds = [1, 2, 3, 4];
-
-  const adjustSpeed = (delta: number) => {
-    const newSpeed = Math.max(0.1, Math.round((speed + delta) * 10) / 10);
-    onSpeedChange(newSpeed);
-  };
-
   return (
-    <div className="flex items-center gap-2">
-      <div className="flex items-center rounded-md border p-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6"
-          onClick={() => adjustSpeed(-0.1)}
-        >
-          <Minus className="h-3 w-3" />
-        </Button>
-        <span className="min-w-[44px] text-center text-sm font-medium tabular-nums">
-          {speed.toFixed(1)}x
-        </span>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6"
-          onClick={() => adjustSpeed(0.1)}
-        >
-          <Plus className="h-3 w-3" />
-        </Button>
-      </div>
-      <div className="flex gap-1">
-        {presetSpeeds.map((presetSpeed) => (
-          <Button
-            key={presetSpeed}
-            variant={speed === presetSpeed ? "secondary" : "ghost"}
-            size="sm"
-            className={cn(
-              "h-6 w-8 px-0 text-xs",
-              speed === presetSpeed && "bg-secondary text-secondary-foreground",
-            )}
-            onClick={() => onSpeedChange(presetSpeed)}
-          >
-            {presetSpeed}x
-          </Button>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-export const AudioPlayer = ({ src }: { src: string }) => {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
-
-  const togglePlay = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
-  const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
-    }
-  };
-
-  const handleLoadedMetadata = () => {
-    if (audioRef.current) {
-      setDuration(audioRef.current.duration);
-    }
-  };
-
-  const handleSeek = (value: number[]) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = value[0];
-      setCurrentTime(value[0]);
-    }
-  };
-
-  const handleVolumeChange = (value: number[]) => {
-    if (audioRef.current) {
-      const newVolume = value[0];
-      audioRef.current.volume = newVolume;
-      setVolume(newVolume);
-      setIsMuted(newVolume === 0);
-    }
-  };
-
-  const toggleMute = () => {
-    if (audioRef.current) {
-      const newMutedState = !isMuted;
-      audioRef.current.muted = newMutedState;
-      setIsMuted(newMutedState);
-    }
-  };
-
-  const handleSpeedChange = (speed: number) => {
-    if (audioRef.current) {
-      audioRef.current.playbackRate = speed;
-      setPlaybackSpeed(speed);
-    }
-  };
-
-  const skip = (seconds: number) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = Math.min(
-        Math.max(currentTime + seconds, 0),
-        duration,
-      );
-    }
-  };
-
-  return (
-    <div className="w-full rounded-lg border bg-card p-4">
-      <audio
-        ref={audioRef}
+    <div className={cn("w-full rounded-lg border bg-card", className)}>
+      <AudioPlayer
         src={src}
-        onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleLoadedMetadata}
-        onEnded={() => setIsPlaying(false)}
+        autoPlay={false}
+        showJumpControls={true}
+        showFilledVolume={true}
+        customControlsSection={[
+          RHAP_UI.MAIN_CONTROLS,
+          RHAP_UI.VOLUME_CONTROLS,
+          RHAP_UI.PROGRESS_BAR,
+          RHAP_UI.CURRENT_TIME,
+          RHAP_UI.DURATION,
+        ]}
+        customProgressBarSection={[
+          RHAP_UI.PROGRESS_BAR,
+          RHAP_UI.CURRENT_TIME,
+          RHAP_UI.DURATION,
+        ]}
+        layout="horizontal"
+        style={{
+          background: "transparent",
+          boxShadow: "none",
+        }}
+        customIcons={{
+          play: (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+          ),
+          pause: (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="6" y="4" width="4" height="16"></rect>
+              <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+          ),
+          forward: (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polygon points="13 19 22 12 13 5 13 19"></polygon>
+              <polygon points="2 19 11 12 2 5 2 19"></polygon>
+            </svg>
+          ),
+          rewind: (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polygon points="11 19 2 12 11 5 11 19"></polygon>
+              <polygon points="22 19 13 12 22 5 22 19"></polygon>
+            </svg>
+          ),
+          volume: (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+          ),
+          volumeMute: (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <line x1="23" y1="9" x2="17" y2="15"></line>
+              <line x1="17" y1="9" x2="23" y2="15"></line>
+            </svg>
+          ),
+        }}
       />
-
-      {/* Progress bar */}
-      <div className="space-y-2">
-        <Slider
-          value={[currentTime]}
-          max={duration}
-          step={1}
-          onValueChange={handleSeek}
-        />
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span className="tabular-nums">{formatTime(currentTime)}</span>
-          <span className="tabular-nums">{formatTime(duration)}</span>
-        </div>
-      </div>
-
-      {/* Controls */}
-      <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => skip(-10)}
-              className="h-8 w-8"
-            >
-              <Rewind className="h-4 w-4" />
-            </Button>
-
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={togglePlay}
-              className="h-10 w-10 rounded-full"
-            >
-              {isPlaying ? (
-                <Pause className="h-4 w-4" />
-              ) : (
-                <Play className="h-4 w-4 pl-0.5" />
-              )}
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => skip(10)}
-              className="h-8 w-8"
-            >
-              <Forward className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleMute}
-              className="h-8 w-8"
-            >
-              {isMuted || volume === 0 ? (
-                <VolumeX className="h-4 w-4" />
-              ) : (
-                <Volume2 className="h-4 w-4" />
-              )}
-            </Button>
-            <Slider
-              value={[isMuted ? 0 : volume]}
-              max={1}
-              step={0.1}
-              onValueChange={handleVolumeChange}
-              className="w-[80px]"
-            />
-          </div>
-        </div>
-
-        <SpeedControl speed={playbackSpeed} onSpeedChange={handleSpeedChange} />
-      </div>
     </div>
   );
 };
