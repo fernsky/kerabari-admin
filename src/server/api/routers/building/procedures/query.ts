@@ -123,6 +123,32 @@ export const getById = publicProcedure
     return building[0];
   });
 
+export const getByAreaCode = publicProcedure
+  .input(z.object({ areaCode: z.string() }))
+  .query(async ({ ctx, input }) => {
+    const buildingDetails = await ctx.db
+      .select({
+        enumeratorName: buildings.enumeratorName,
+        locality: buildings.locality,
+        lat: sql<number>`ST_Y(${buildings.gps}::geometry)`,
+        lng: sql<number>`ST_X(${buildings.gps}::geometry)`,
+        gpsAccuracy: buildings.gpsAccuracy,
+      })
+      .from(buildings)
+      .where(eq(buildings.tmpAreaCode, input.areaCode));
+
+    return buildingDetails.map(building => ({
+      ...building,
+      gpsPoint: building.lat && building.lng ? {
+        lat: building.lat,
+        lng: building.lng
+      } : null,
+      lat: undefined,
+      lng: undefined
+      
+    }));
+  });
+
 export const getStats = publicProcedure.query(async ({ ctx }) => {
   const stats = await ctx.db
     .select({

@@ -1,6 +1,6 @@
 import { createTRPCRouter } from "@/server/api/trpc";
 import { create } from "./procedures/create";
-import { getAll, getById, getStats } from "./procedures/query";
+import { getAll, getById, getStats, getByAreaCode } from "./procedures/query";
 import { update, deleteBuilding } from "./procedures/update";
 import {
   approve,
@@ -17,6 +17,7 @@ export const buildingRouter = createTRPCRouter({
   create,
   getAll,
   getById,
+  getByAreaCode,
   update,
   delete: deleteBuilding,
   getStats,
