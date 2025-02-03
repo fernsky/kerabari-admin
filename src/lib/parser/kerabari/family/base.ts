@@ -84,7 +84,7 @@ export async function parseFamilyBase(r: RawFamily, ctx: any) {
     ),
     loaned_organizations: decodeMultipleChoices(
       r.hh.loaned_organization,
-      familyChoices.financial_organization,
+      familyChoices.loaned_organization,
     ),
     loan_use: decodeMultipleChoices(r.hh.loan_use, familyChoices.loan_use),
     has_bank: decodeMultipleChoices(
@@ -121,7 +121,6 @@ export async function parseFamilyBase(r: RawFamily, ctx: any) {
   );
 
   if (mainStatement) {
-    console.log("Inserting family data into staging database");
     await ctx.db.execute(sql.raw(mainStatement));
   }
 }

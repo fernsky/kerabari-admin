@@ -17,6 +17,7 @@ import {
   FileSpreadsheet,
   Users,
   Key,
+  Map,
 } from "lucide-react";
 import L from "leaflet";
 import { useUserStore } from "@/store/user";
@@ -25,6 +26,7 @@ import TokenStats from "@/components/token-stats";
 import { TokenList } from "../tokens/token-list";
 import { AreaStatusActions } from "@/components/area/area-status-actions";
 import dynamic from "next/dynamic";
+import { useMapViewStore } from "@/store/toggle-layer-store";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
@@ -48,6 +50,7 @@ export function EnumeratorArea() {
     { areaId: area?.id ?? "" },
     { enabled: !!area?.id },
   );
+  const { isStreetView, toggleView } = useMapViewStore();
 
   if (isLoading) {
     return (
@@ -114,8 +117,8 @@ export function EnumeratorArea() {
             <div className="grid gap-6 md:grid-cols-3">
               {[
                 {
-                  name: "Subash Subedi",
-                  phone: "9852080217",
+                  name: "Toshraj Thakur",
+                  phone: "9862768543",
                   role: "Team Lead",
                 },
                 {
@@ -285,9 +288,30 @@ export function EnumeratorArea() {
                   return bounds.getCenter();
                 })()}
               >
+                {/* Add the toggle button */}
+                <div className="absolute top-2 right-2 z-[400]">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="bg-white"
+                    onClick={toggleView}
+                  >
+                    <Map className="h-4 w-4 mr-2" />
+                    {isStreetView ? "Satellite View" : "Street View"}
+                  </Button>
+                </div>
+
+                {/* Replace the existing TileLayer with this conditional one */}
                 <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  key={isStreetView ? "street" : "satellite"}
+                  attribution={
+                    isStreetView ? "© OpenStreetMap contributors" : "© Google"
+                  }
+                  url={
+                    isStreetView
+                      ? "https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                      : "https://mt1.google.com/vt/lyrs=y,h&x={x}&y={y}&z={z}"
+                  }
                   className="z-0"
                 />
                 {area.geometry && (

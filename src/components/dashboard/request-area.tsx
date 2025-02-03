@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "@/trpc/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -41,6 +41,8 @@ import type { Session, User } from "lucia";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useMapViewStore } from "@/store/toggle-layer-store";
+import { useMap } from "react-leaflet";
+import { LatLngBounds, LatLng } from "leaflet";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
@@ -60,6 +62,38 @@ const TileLayer = dynamic(
 const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
   ssr: false,
 });
+
+// Add this component before the main RequestArea component
+const MapUpdater = ({ areas }: { areas: any[] }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (areas && areas.length > 0) {
+      const bounds = new LatLngBounds([]);
+
+      areas.forEach((area) => {
+        // For GeoJSON polygons/multipolygons, get all coordinates
+        const coordinates =
+          area.geometry.type === "Polygon"
+            ? area.geometry.coordinates[0]
+            : area.geometry.coordinates.flat(1);
+
+        coordinates.forEach((coord: number[]) => {
+          // GeoJSON uses [longitude, latitude]
+          bounds.extend(new LatLng(coord[1], coord[0]));
+        });
+      });
+
+      // Fit map to bounds with some padding
+      map.fitBounds(bounds, {
+        padding: [50, 50],
+        maxZoom: 16,
+      });
+    }
+  }, [areas, map]);
+
+  return null;
+};
 
 export default function RequestArea({ user }: { user: User }) {
   const [selectedArea, setSelectedArea] = useState<string | null>(null);
@@ -237,10 +271,12 @@ export default function RequestArea({ user }: { user: User }) {
                 </div>
                 <MapContainer
                   className="h-full w-full z-10"
-                  center={[26.92632339689546, 87.37272328644147]}
+                  center={[26.72069444681497, 88.04840072844279]}
                   zoom={13}
                   scrollWheelZoom={false}
                 >
+                  {/* Add MapUpdater component here */}
+                  {areas.data && <MapUpdater areas={areas.data} />}
                   <TileLayer
                     key={isStreetView ? "street" : "satellite"} // Add this key prop
                     attribution={
@@ -250,8 +286,8 @@ export default function RequestArea({ user }: { user: User }) {
                     }
                     url={
                       isStreetView
-                        ? "https://mts1.google.com/vt/lyrs=m@186112443&hl=x-local&src=app&x={x}&y={y}&z={z}&s=Galile"
-                        : "http://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}"
+                        ? "https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                        : "https://mt1.google.com/vt/lyrs=y,h&x={x}&y={y}&z={z}"
                     }
                   />
                   {areas.data?.map((area) => (
