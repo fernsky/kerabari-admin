@@ -210,3 +210,47 @@ export const getLayerAreas = protectedProcedure.query(async ({ ctx }) => {
     }
   }) as Area[];
 });
+
+export const getAreaBoundaryByCode = protectedProcedure
+  .input(z.object({ code: z.number() }))
+  .query(async ({ ctx, input }) => {
+    const area = await ctx.db.execute(
+      sql`SELECT 
+          ${areas.id} as "id",
+          ${areas.code} as "code",
+          ${areas.wardNumber} as "wardNumber",
+          ST_AsGeoJSON(${areas.geometry}) as "boundary"
+          FROM ${areas} 
+          WHERE ${areas.code} = ${input.code} 
+          LIMIT 1`
+    );
+
+    if (!area[0]) {
+      throw new Error("Area not found");
+    }
+
+    return {
+      ...area[0],
+      boundary: area[0].boundary ? JSON.parse(area[0].boundary as string) : null,
+    };
+  });
+
+export const getAreasWithSubmissionCounts = protectedProcedure
+  .input(z.object({ wardNumber: z.number().optional() }))
+  .query(async ({ ctx, input }) => {
+    const query = sql`
+      SELECT 
+        a.id,
+        a.code,
+        COUNT(b.id) as "submissionCount"
+      FROM ${areas} a
+      LEFT JOIN ${buildingTokens} b ON a.id = b.area_id
+      WHERE b.status = 'submitted'
+      ${input.wardNumber ? sql`AND a.ward_number = ${input.wardNumber}` : sql``}
+      GROUP BY a.id, a.code
+      ORDER BY a.code
+    `;
+
+    const result = await ctx.db.execute(query);
+    return result;
+  });

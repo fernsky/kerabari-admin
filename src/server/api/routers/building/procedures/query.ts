@@ -128,6 +128,7 @@ export const getByAreaCode = publicProcedure
   .query(async ({ ctx, input }) => {
     const buildingDetails = await ctx.db
       .select({
+        id: buildings.id,
         enumeratorName: buildings.enumeratorName,
         locality: buildings.locality,
         lat: sql<number>`ST_Y(${buildings.gps}::geometry)`,
@@ -138,14 +139,14 @@ export const getByAreaCode = publicProcedure
       .where(eq(buildings.tmpAreaCode, input.areaCode));
 
     return buildingDetails.map(building => ({
-      ...building,
+      id: building.id,
+      enumeratorName: building.enumeratorName,
+      locality: building.locality,
       gpsPoint: building.lat && building.lng ? {
         lat: building.lat,
-        lng: building.lng
-      } : null,
-      lat: undefined,
-      lng: undefined
-      
+        lng: building.lng,
+        accuracy: building.gpsAccuracy ?? 0
+      } : null
     }));
   });
 

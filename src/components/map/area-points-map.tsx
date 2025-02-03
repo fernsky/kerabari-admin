@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { MapIcon } from "lucide-react";
+import { Polygon } from "react-leaflet";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
@@ -30,6 +31,8 @@ const Tooltip = dynamic(
 
 interface Point {
   id: string;
+  enumeratorName?: string;
+  locality?: string;
   gpsPoint: {
     lat: number;
     lng: number;
@@ -37,7 +40,15 @@ interface Point {
   } | null;
 }
 
-export default function AreaPointsMap({ points }: { points: Point[] }) {
+interface AreaPointsMapProps {
+  points: Point[];
+  boundary: GeoJSON.Feature | GeoJSON.FeatureCollection;
+}
+
+export default function AreaPointsMap({
+  points,
+  boundary,
+}: AreaPointsMapProps) {
   const { isStreetView, toggleView } = useMapViewStore();
 
   const validPoints = useMemo(
@@ -107,11 +118,29 @@ export default function AreaPointsMap({ points }: { points: Point[] }) {
             <Tooltip permanent={false} direction="top" offset={[0, -5]}>
               <div className="px-2 py-1 text-xs bg-white rounded shadow">
                 <div>Point ID: {point.id}</div>
-                <div>Accuracy: {point.gpsPoint.accuracy.toFixed(2)}m</div>
+                <div>
+                  GPS Accuracy:{" "}
+                  {point.gpsPoint.accuracy
+                    ? `${point.gpsPoint.accuracy.toFixed(2)}m`
+                    : "N/A"}
+                </div>
+                {point.enumeratorName && (
+                  <div>Enumerator: {point.enumeratorName}</div>
+                )}
+                {point.locality && <div>Locality: {point.locality}</div>}
               </div>
             </Tooltip>
           </Marker>
         ))}
+        {boundary && (
+          <Polygon
+            positions={(boundary.type === "Feature"
+              ? (boundary.geometry as GeoJSON.Polygon).coordinates[0]
+              : (boundary as unknown as GeoJSON.Polygon).coordinates[0]
+            ).map((coord: number[]) => [coord[1], coord[0]])}
+            pathOptions={{ color: "red", weight: 2 }}
+          />
+        )}
       </MapContainer>
     </>
   );

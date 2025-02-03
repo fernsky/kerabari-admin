@@ -146,3 +146,15 @@
 .leaflet-pane {
     z-index: 0 !important;
 }
+
+.leaflet-control-layers-toggle {
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+}
+
+.leaflet-control-layers-expanded {
+  background-color: white;
+  border-radius: 4px;
+  padding: 6px 10px 6px 6px;
+}

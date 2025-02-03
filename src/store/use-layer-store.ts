@@ -36,44 +36,39 @@ export const useLayerStore = create<LayerState>()(
     setAreas: (areas) => set({ areas }),
 
     setWardVisibility: (wardNumber, visible) =>
-      set(
-        produce((state: LayerState) => {
-          if (!state.wardLayers[wardNumber]) {
-            state.wardLayers[wardNumber] = { visible, areas: {} };
-          } else {
-            state.wardLayers[wardNumber].visible = visible;
-          }
-        }),
-      ),
+      set((state) => ({
+        wardLayers: {
+          ...state.wardLayers,
+          [wardNumber]: {
+            ...state.wardLayers[wardNumber],
+            visible,
+          },
+        },
+      })),
 
     setAreaVisibility: (wardNumber, areaId, visible) =>
-      set(
-        produce((state: LayerState) => {
-          if (!state.wardLayers[wardNumber]) {
-            state.wardLayers[wardNumber] = { visible: false, areas: {} };
-          }
-          if (!state.wardLayers[wardNumber].areas) {
-            state.wardLayers[wardNumber].areas = {};
-          }
-
-          state.wardLayers[wardNumber].areas[areaId] = visible;
-        }),
-      ),
+      set((state) => ({
+        wardLayers: {
+          ...state.wardLayers,
+          [wardNumber]: {
+            ...state.wardLayers[wardNumber],
+            areas: {
+              ...state.wardLayers[wardNumber]?.areas,
+              [areaId]: visible,
+            },
+          },
+        },
+      })),
 
     initializeWardLayer: (wardNumber, areaIds) =>
-      set(
-        produce((state: LayerState) => {
-          state.wardLayers[wardNumber] = {
-            visible: false,
-            areas: areaIds.reduce(
-              (acc, id) => {
-                acc[id] = false;
-                return acc;
-              },
-              {} as Record<string, boolean>,
-            ),
-          };
-        }),
-      ),
+      set((state) => ({
+        wardLayers: {
+          ...state.wardLayers,
+          [wardNumber]: {
+            visible: true,
+            areas: Object.fromEntries(areaIds.map((id) => [id, true])),
+          },
+        },
+      })),
   })),
 );
