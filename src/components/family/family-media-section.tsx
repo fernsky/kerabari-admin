@@ -1,4 +1,4 @@
-import { AudioPlayer } from "../ui/audio-player";
+import { CustomAudioPlayer } from "../ui/audio-player";
 import Image from "next/image";
 
 interface FamilyMediaSectionProps {
@@ -44,7 +44,7 @@ export function FamilyMediaSection({
           </div>
           <div className="p-4">
             <div className="rounded-lg border bg-card/50 p-4">
-              <AudioPlayer src={audioUrl} />
+              <CustomAudioPlayer src={audioUrl} />
             </div>
           </div>
         </div>

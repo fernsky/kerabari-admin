@@ -24,7 +24,7 @@ import { AnimalProductsSection } from "@/components/family/animal-products-secti
 import { Card, CardContent } from "@/components/ui/card";
 import { CropsSection } from "@/components/family/crops-section";
 import { AnimalSection } from "@/components/family/animal-section";
-import { AudioPlayer } from "@/components/ui/audio-player";
+import { CustomAudioPlayer } from "@/components/ui/audio-player";
 import Image from "next/image";
 import { AgriculturalDetailsSection } from "@/components/family/agricultural-details-section";
 import { IndividualsSection } from "@/components/family/individuals-section";
@@ -94,7 +94,7 @@ export default function FamilyDetails({ params }: { params: { id: string } }) {
                     </p>
                   </div>
                   <div className="p-4">
-                    <AudioPlayer src={family.surveyAudioRecording} />
+                    <CustomAudioPlayer src={family.surveyAudioRecording} />
                   </div>
                 </div>
               )}

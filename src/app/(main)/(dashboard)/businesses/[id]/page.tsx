@@ -12,7 +12,7 @@ import { BusinessActions } from "@/components/business/business-actions";
 import { z } from "zod";
 import Image from "next/image";
 import { BusinessDetailsSection } from "@/components/business/business-details-section";
-import { AudioPlayer } from "@/components/ui/audio-player";
+import { CustomAudioPlayer } from "@/components/ui/audio-player";
 import { BusinessInvalidSection } from "@/components/business/business-invalid-section";
 
 const gpsSchema = z.object({
@@ -84,7 +84,7 @@ export default function BusinessDetails({
                     </p>
                   </div>
                   <div className="p-4">
-                    <AudioPlayer src={business.surveyAudioRecording} />
+                    <CustomAudioPlayer src={business.surveyAudioRecording} />
                   </div>
                 </div>
               )}
