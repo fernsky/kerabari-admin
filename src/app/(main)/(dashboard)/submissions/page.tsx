@@ -8,19 +8,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import AreaPointsMap from "@/components/map/area-points-map";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Building2, HomeIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import dynamic from "next/dynamic";
+
+const AreaPointsMap = dynamic(
+  () => import("@/components/map/area-points-map"),
+  {
+    ssr: false,
+  },
+);
 
 interface Point {
   id: string;
   enumeratorName: string | null;
   locality: string | null;
   gpsPoint: {
-    type: string;
-    coordinates: [number, number];
+    lat: number;
+    lng: number;
+    accuracy: number;
   } | null;
   [key: string]: any; // for other properties
 }
@@ -148,12 +156,14 @@ export default function SubmissionsPage() {
         <div className="h-[600px] w-full relative rounded-xl overflow-hidden bg-white shadow-md">
           {points && boundary && (
             <AreaPointsMap
+              //@ts-ignore
               points={points.map((point) => ({
                 ...point,
                 enumeratorName: point.enumeratorName || undefined,
                 locality: point.locality || undefined,
                 gpsPoint: point.gpsPoint || undefined,
               }))}
+              //@ts-ignore
               boundary={boundary.boundary}
             />
           )}
