@@ -7,8 +7,6 @@ export const adminRouter = createTRPCRouter({
   getEnumerators: protectedProcedure
     .input(
       z.object({
-        pageIndex: z.number().default(0),
-        pageSize: z.number().default(10),
         filters: z
           .object({
             search: z.string().optional(),
@@ -25,8 +23,7 @@ export const adminRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const { pageIndex, pageSize, filters, sorting } = input;
-      const offset = pageIndex * pageSize;
+      const { filters, sorting } = input;
 
       let conditions = [eq(users.role, "enumerator")];
 
@@ -47,10 +44,6 @@ export const adminRouter = createTRPCRouter({
         .from(users)
         .where(and(...conditions));
 
-      const [totalCount] = await ctx.db
-        .select({ count: sql<number>`count(${users.id})` })
-        .from(baseQuery.as("base"));
-
       const sortField = sorting?.field ?? "name";
       const sortOrder = sorting?.order ?? "asc";
       const sortFn = sortOrder === "desc" ? desc : asc;
@@ -63,14 +56,8 @@ export const adminRouter = createTRPCRouter({
       };
 
       const data = await baseQuery
-        .orderBy(sortFn(sortableFields[sortField]))
-        .limit(pageSize)
-        .offset(offset);
+        .orderBy(sortFn(sortableFields[sortField]));
 
-      return {
-        data,
-        pageCount: Math.ceil(Number(totalCount.count) / pageSize),
-        totalCount: Number(totalCount.count),
-      };
+      return data;
     }),
 });

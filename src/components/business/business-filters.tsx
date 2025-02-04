@@ -35,8 +35,6 @@ export function BusinessFilters({
 }: BusinessFiltersProps) {
   const { data: areas } = api.area.getAreas.useQuery({ status: "all" });
   const { data: enumerators } = api.admin.getEnumerators.useQuery({
-    pageIndex: 0,
-    pageSize: 10,
     filters: {},
     sorting: {
       field: "wardNumber",
@@ -126,7 +124,7 @@ export function BusinessFilters({
         <ComboboxSearchable
           options={[
             { value: "", label: "All Enumerators" },
-            ...(enumerators?.data.map((e) => ({
+            ...(enumerators?.map((e) => ({
               value: e.id,
               label: e.name,
             })) ?? []),

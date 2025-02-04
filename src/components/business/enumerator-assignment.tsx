@@ -26,8 +26,8 @@ export function EnumeratorAssignment({
   refetchBusiness: () => void;
 }) {
   const { data: enumerators, isLoading } = api.admin.getEnumerators.useQuery({
-    pageIndex: 0,
-    pageSize: 10,
+    // pageIndex: 0,
+    // pageSize: 10,
     filters: {},
     sorting: {
       field: "wardNumber",
@@ -76,7 +76,7 @@ export function EnumeratorAssignment({
             <SelectValue placeholder="Select an enumerator" />
           </SelectTrigger>
           <SelectContent>
-            {enumerators?.data.map((enumerator) => (
+            {enumerators?.map((enumerator) => (
               <SelectItem
                 key={enumerator.id}
                 value={enumerator.id}

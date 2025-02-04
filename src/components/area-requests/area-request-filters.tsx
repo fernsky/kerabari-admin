@@ -22,8 +22,8 @@ export function AreaRequestFilters({
   onFilterChange,
 }: AreaRequestFiltersProps) {
   const { data: enumerators } = api.admin.getEnumerators.useQuery({
-    pageIndex: 0,
-    pageSize: 10,
+    // pageIndex: 0,
+    // pageSize: 10,
     filters: {},
     sorting: {
       field: "wardNumber",
@@ -33,7 +33,7 @@ export function AreaRequestFilters({
 
   const enumeratorOptions = [
     { value: "all", label: "All Enumerators" },
-    ...(enumerators?.data.map((enumerator: { id: any; name: any }) => ({
+    ...(enumerators?.map((enumerator: { id: any; name: any }) => ({
       value: enumerator.id,
       label: enumerator.name,
       searchTerms: [enumerator.name],

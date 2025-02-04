@@ -15,6 +15,14 @@ import {
 } from "@/components/ui/select";
 import { UserCheck, Users } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Key,
+  ReactElement,
+  JSXElementConstructor,
+  ReactNode,
+  ReactPortal,
+  AwaitedReactNode,
+} from "react";
 
 export function EnumeratorAssignment({
   familyId,
@@ -26,8 +34,8 @@ export function EnumeratorAssignment({
   refetchFamily: () => void;
 }) {
   const { data: enumerators, isLoading } = api.admin.getEnumerators.useQuery({
-    pageIndex: 0,
-    pageSize: 10,
+    // pageIndex: 0,
+    // pageSize: 10,
     filters: {},
     sorting: {
       field: "wardNumber",
@@ -76,18 +84,33 @@ export function EnumeratorAssignment({
             <SelectValue placeholder="Select an enumerator" />
           </SelectTrigger>
           <SelectContent>
-            {enumerators?.data.map((enumerator) => (
-              <SelectItem
-                key={enumerator.id}
-                value={enumerator.id}
-                className="focus:bg-primary/5"
-              >
-                <span className="flex items-center gap-2">
-                  <UserCheck className="h-3.5 w-3.5 text-muted-foreground" />
-                  {enumerator.name}
-                </span>
-              </SelectItem>
-            ))}
+            {enumerators?.map(
+              (enumerator: {
+                id: Key | null | undefined;
+                name:
+                  | string
+                  | number
+                  | bigint
+                  | boolean
+                  | ReactElement<any, string | JSXElementConstructor<any>>
+                  | Iterable<ReactNode>
+                  | ReactPortal
+                  | Promise<AwaitedReactNode>
+                  | null
+                  | undefined;
+              }) => (
+                <SelectItem
+                  key={enumerator.id}
+                  value={String(enumerator.id)}
+                  className="focus:bg-primary/5"
+                >
+                  <span className="flex items-center gap-2">
+                    <UserCheck className="h-3.5 w-3.5 text-muted-foreground" />
+                    {enumerator.name}
+                  </span>
+                </SelectItem>
+              ),
+            )}
           </SelectContent>
         </Select>
       </CardContent>

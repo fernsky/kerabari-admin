@@ -71,7 +71,7 @@ export default function AreaPointsMap({
   if (!bounds || validPoints.length === 0) {
     return (
       <div className="h-full flex items-center justify-center bg-gray-50">
-        No valid GPS points
+        No valid GPS points. No Submissions for this area.
       </div>
     );
   }
@@ -120,7 +120,7 @@ export default function AreaPointsMap({
                 <div>Point ID: {point.id}</div>
                 <div>
                   GPS Accuracy:{" "}
-                  {point.gpsPoint.accuracy
+                  {typeof point.gpsPoint.accuracy === "number"
                     ? `${point.gpsPoint.accuracy.toFixed(2)}m`
                     : "N/A"}
                 </div>

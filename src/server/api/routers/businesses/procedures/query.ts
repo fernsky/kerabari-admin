@@ -156,6 +156,33 @@ export const getById = publicProcedure
     return result;
   });
 
+export const getByAreaCode = publicProcedure
+  .input(z.object({ areaCode: z.string() }))
+  .query(async ({ ctx, input }) => {
+    const businessDetails = await ctx.db
+      .select({
+        id: business.id,
+        businessName: business.businessName,
+        wardId: business.wardId,
+        lat: sql<number>`ST_Y(${business.gps}::geometry)`,
+        lng: sql<number>`ST_X(${business.gps}::geometry)`,
+        gpsAccuracy: business.gpsAccuracy,
+      })
+      .from(business)
+      .where(eq(business.areaCode, parseInt(input.areaCode)));
+
+    return businessDetails.map(business => ({
+      id: business.id,
+      businessName: business.businessName,
+      wardId: business.wardId,
+      gpsPoint: business.lat && business.lng ? {
+        lat: business.lat,
+        lng: business.lng,
+        accuracy: business.gpsAccuracy ?? 0
+      } : null
+    }));
+  });
+
 export const getStats = publicProcedure.query(async ({ ctx }) => {
   const stats = await ctx.db
     .select({

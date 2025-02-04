@@ -26,8 +26,8 @@ export function EnumeratorAssignment({
   refetchBuilding: () => void;
 }) {
   const { data: enumerators } = api.admin.getEnumerators.useQuery({
-    pageIndex: 0,
-    pageSize: 10,
+    // pageIndex: 0,
+    // pageSize: 10,
     filters: {},
     sorting: {
       field: "wardNumber",
@@ -76,20 +76,18 @@ export function EnumeratorAssignment({
             <SelectValue placeholder="Select an enumerator" />
           </SelectTrigger>
           <SelectContent>
-            {enumerators?.data.map(
-              (enumerator: { id: string; name: string }) => (
-                <SelectItem
-                  key={enumerator.id}
-                  value={enumerator.id}
-                  className="focus:bg-primary/5"
-                >
-                  <span className="flex items-center gap-2">
-                    <UserCheck className="h-3.5 w-3.5 text-muted-foreground" />
-                    {enumerator.name}
-                  </span>
-                </SelectItem>
-              ),
-            )}
+            {enumerators?.map((enumerator: { id: string; name: string }) => (
+              <SelectItem
+                key={enumerator.id}
+                value={enumerator.id}
+                className="focus:bg-primary/5"
+              >
+                <span className="flex items-center gap-2">
+                  <UserCheck className="h-3.5 w-3.5 text-muted-foreground" />
+                  {enumerator.name}
+                </span>
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </CardContent>

@@ -43,8 +43,8 @@ export function AssignmentDialog({
   );
 
   const { data: enumerators } = api.admin.getEnumerators.useQuery({
-    pageIndex: 0,
-    pageSize: 10,
+    // pageIndex: 0,
+    // pageSize: 10,
     filters: {},
     sorting: {
       field: "wardNumber",
@@ -113,7 +113,7 @@ export function AssignmentDialog({
         );
       case "enumerator":
         return (
-          enumerators?.data.map((enumerator) => ({
+          enumerators?.map((enumerator) => ({
             value: enumerator.id,
             label: enumerator.name,
             searchTerms: [enumerator.name],

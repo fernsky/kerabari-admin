@@ -40,8 +40,6 @@ export function BuildingFilters({
 }: BuildingFiltersProps) {
   const { data: areas } = api.area.getAreas.useQuery({ status: "all" });
   const { data: enumerators } = api.admin.getEnumerators.useQuery({
-    pageIndex: 0,
-    pageSize: 10,
     filters: {},
     sorting: {
       field: "wardNumber",
@@ -51,7 +49,7 @@ export function BuildingFilters({
 
   const wardOptions = [
     { value: "all", label: "All Wards" },
-    ...Array.from({ length: 10 }, (_, i) => ({
+    ...Array.from({ length: 11 }, (_, i) => ({
       value: (i + 1).toString(),
       label: `Ward ${i + 1}`,
       searchTerms: [`${i + 1}`, `ward ${i + 1}`],
@@ -69,7 +67,7 @@ export function BuildingFilters({
 
   const enumeratorOptions = [
     { value: "all", label: "All Enumerators" },
-    ...(enumerators?.data.map((enumerator: { id: string; name: string }) => ({
+    ...(enumerators?.map((enumerator) => ({
       value: enumerator.id,
       label: enumerator.name,
       searchTerms: [enumerator.name],
@@ -120,7 +118,7 @@ export function BuildingFilters({
         {enumeratorId && (
           <Badge variant="secondary" className="gap-2">
             <Users className="h-3 w-3" />
-            {enumerators?.data.find((e) => e.id === enumeratorId)?.name ||
+            {enumerators?.find((e) => e.id === enumeratorId)?.name ||
               "Enumerator"}
             <X
               className="h-3 w-3 cursor-pointer"

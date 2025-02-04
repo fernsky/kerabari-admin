@@ -34,8 +34,6 @@ export function FamilyFilters({
 }: FamilyFiltersProps) {
   const { data: areas } = api.area.getAreas.useQuery({ status: "all" });
   const { data: enumerators } = api.admin.getEnumerators.useQuery({
-    pageIndex: 0,
-    pageSize: 10,
     filters: {},
     sorting: {
       field: "wardNumber",
@@ -78,9 +76,12 @@ export function FamilyFilters({
           Ward Number
         </Label>
         <Select
-          value={wardNo?.toString()}
+          value={wardNo?.toString() || "all"}
           onValueChange={(value) =>
-            onFilterChange("wardNo", value ? parseInt(value) : undefined)
+            onFilterChange(
+              "wardNo",
+              value === "all" ? undefined : parseInt(value),
+            )
           }
         >
           <SelectTrigger>
@@ -110,7 +111,7 @@ export function FamilyFilters({
               label: `Area ${area.code} (Ward ${area.wardNumber})`,
             })) ?? []),
           ]}
-          value={areaCode || "areaCode"}
+          value={areaCode || ""}
           onChange={(value) => onFilterChange("areaCode", value || undefined)}
           placeholder="Select area..."
           className={""}
@@ -125,7 +126,7 @@ export function FamilyFilters({
         <ComboboxSearchable
           options={[
             { value: "", label: "All Enumerators" },
-            ...(enumerators?.data.map((e) => ({
+            ...(enumerators?.map((e) => ({
               value: e.id,
               label: e.name,
             })) ?? []),
@@ -145,9 +146,9 @@ export function FamilyFilters({
           Status
         </Label>
         <Select
-          value={status || ""}
-          onValueChange={(value: any) =>
-            onFilterChange("status", value || undefined)
+          value={status || "all"}
+          onValueChange={(value) =>
+            onFilterChange("status", value === "all" ? undefined : value)
           }
         >
           <SelectTrigger>

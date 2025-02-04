@@ -34,21 +34,12 @@ import type {
   SortField,
   SortOrder,
 } from "@/types/enumerator";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { Button } from "../ui/button";
 
 export function EnumeratorsList() {
   const router = useRouter();
   const isMobile = useMediaQuery({ maxWidth: 767 });
 
-  const [pageIndex, setPageIndex] = useState(0);
   const [filters, setFilters] = useState<Filters>({});
   const [sorting, setSorting] = useState<{
     field: SortField;
@@ -59,8 +50,6 @@ export function EnumeratorsList() {
   });
 
   const { data, isLoading } = api.admin.getEnumerators.useQuery({
-    pageIndex,
-    pageSize: 10,
     filters,
     sorting,
   });
@@ -120,7 +109,7 @@ export function EnumeratorsList() {
       );
     }
 
-    if (!data?.data.length) {
+    if (!data?.length) {
       return (
         <div className="flex flex-col items-center justify-center py-10 text-center">
           <User2 className="h-12 w-12 text-muted-foreground/50" />
@@ -141,13 +130,13 @@ export function EnumeratorsList() {
                 <User2 className="h-4 w-4 text-primary" />
                 <CardTitle className="text-base">Enumerators List</CardTitle>
               </div>
-              <Badge variant="secondary">{data?.totalCount || 0} Records</Badge>
+              <Badge variant="secondary">{data.length} Records</Badge>
             </div>
           </CardHeader>
           <CardContent className="p-0">
             {isMobile ? (
               <div className="space-y-4 px-2">
-                {data.data.map((enumerator) => (
+                {data.map((enumerator) => (
                   <Card
                     key={enumerator.id}
                     className="overflow-hidden transition-all hover:shadow-md cursor-pointer"
@@ -205,7 +194,7 @@ export function EnumeratorsList() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {data.data.map((enumerator) => (
+                    {data.map((enumerator) => (
                       <TableRow
                         key={enumerator.id}
                         className="hover:bg-muted/50 cursor-pointer"
@@ -255,45 +244,6 @@ export function EnumeratorsList() {
             )}
           </CardContent>
         </Card>
-
-        {/* Pagination */}
-        {data.pageCount > 1 && (
-          <div className="flex justify-center">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
-                    className={pageIndex === 0 ? "disabled" : ""}
-                    href={""}
-                  />
-                </PaginationItem>
-                {Array.from({ length: data.pageCount }, (_, i) => (
-                  <PaginationItem key={i}>
-                    <PaginationLink
-                      isActive={pageIndex === i}
-                      onClick={() => setPageIndex(i)}
-                      href={""}
-                    >
-                      {i + 1}
-                    </PaginationLink>
-                  </PaginationItem>
-                ))}
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() =>
-                      setPageIndex((p) => Math.min(data.pageCount - 1, p + 1))
-                    }
-                    className={
-                      pageIndex === data.pageCount - 1 ? "disabled" : ""
-                    }
-                    href={""}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
-        )}
       </>
     );
   };
