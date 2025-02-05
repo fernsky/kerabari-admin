@@ -37,6 +37,7 @@ export const createArea = protectedProcedure
     await ctx.db.insert(buildingTokens).values(tokens);
     return newArea;
   });
+  
 export const getAreas = protectedProcedure
   .input(areaQuerySchema)
   .query(async ({ ctx, input }) => {
