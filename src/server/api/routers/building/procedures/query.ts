@@ -140,6 +140,7 @@ export const getByAreaCode = publicProcedure
 
     return buildingDetails.map(building => ({
       id: building.id,
+      type: "building",
       enumeratorName: building.enumeratorName,
       locality: building.locality,
       gpsPoint: building.lat && building.lng ? {
