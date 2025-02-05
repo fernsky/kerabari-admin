@@ -89,7 +89,7 @@ export function AreaFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Wards</SelectItem>
-              {[1, 2, 3, 4, 5, 6, 7].map((ward) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((ward) => (
                 <SelectItem key={ward} value={ward.toString()}>
                   Ward {ward}
                 </SelectItem>

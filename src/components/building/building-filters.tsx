@@ -49,7 +49,7 @@ export function BuildingFilters({
 
   const wardOptions = [
     { value: "all", label: "All Wards" },
-    ...Array.from({ length: 11 }, (_, i) => ({
+    ...Array.from({ length: 10 }, (_, i) => ({
       value: (i + 1).toString(),
       label: `Ward ${i + 1}`,
       searchTerms: [`${i + 1}`, `ward ${i + 1}`],
