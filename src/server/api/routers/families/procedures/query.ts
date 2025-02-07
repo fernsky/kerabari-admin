@@ -181,14 +181,17 @@ export const getByAreaCode = publicProcedure
         lat: sql<number>`ST_Y(${family.gps}::geometry)`,
         lng: sql<number>`ST_X(${family.gps}::geometry)`,
         gpsAccuracy: family.gpsAccuracy,
+        enumeratorName: family.enumeratorName,  // Add this line
       })
       .from(family)
       .where(eq(family.areaCode, input.areaCode));
 
     return familyDetails.map(family => ({
       id: family.id,
-      headName: family.headName,
+      type: "family",  // Add this line
+      familyHeadName: family.headName,
       wardNo: family.wardNo,
+      enumeratorName: family.enumeratorName,  // Add this line
       gpsPoint: family.lat && family.lng ? {
         lat: family.lat,
         lng: family.lng,

@@ -8,6 +8,7 @@ import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { MapIcon } from "lucide-react";
 import { Polygon } from "react-leaflet";
+import { useRouter } from "next/navigation";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
@@ -31,13 +32,16 @@ const Tooltip = dynamic(
 
 interface Point {
   id: string;
-  enumeratorName?: string;
-  locality?: string;
+  name?: string | null; // This can be businessName or headName
+  wardNo?: string | null;
+  enumeratorName?: string | null; // Add this line
+  type: "family" | "business" | "building"; // Add this line
   gpsPoint: {
     lat: number;
     lng: number;
     accuracy: number;
   } | null;
+  [key: string]: any;
 }
 
 interface AreaPointsMapProps {
@@ -49,6 +53,7 @@ export default function AreaPointsMap({
   points,
   boundary,
 }: AreaPointsMapProps) {
+  const router = useRouter();
   const { isStreetView, toggleView } = useMapViewStore();
 
   const validPoints = useMemo(
@@ -67,6 +72,21 @@ export default function AreaPointsMap({
     );
     return L.latLngBounds(latLngs);
   }, [validPoints]);
+
+  const handleMarkerClick = (point: Point) => {
+    console.log("Marker clicked", point.type);
+    switch (point.type) {
+      case "family":
+        router.push(`/families/${point.id}`);
+        break;
+      case "business":
+        router.push(`/businesses/${point.id}`);
+        break;
+      case "building":
+        router.push(`/buildings/${point.id}`);
+        break;
+    }
+  };
 
   if (!bounds || validPoints.length === 0) {
     return (
@@ -111,23 +131,28 @@ export default function AreaPointsMap({
             key={point.id}
             position={[point.gpsPoint.lat, point.gpsPoint.lng]}
             icon={L.divIcon({
-              className: "bg-blue-500 w-2 h-2 rounded-full border border-white",
+              className:
+                "bg-blue-500 w-2 h-2 rounded-full border border-white cursor-pointer",
               iconSize: [8, 8],
             })}
+            eventHandlers={{
+              click: () => handleMarkerClick(point),
+            }}
           >
             <Tooltip permanent={false} direction="top" offset={[0, -5]}>
-              <div className="px-2 py-1 text-xs bg-white rounded shadow">
-                <div>Point ID: {point.id}</div>
-                <div>
-                  GPS Accuracy:{" "}
-                  {typeof point.gpsPoint.accuracy === "number"
-                    ? `${point.gpsPoint.accuracy.toFixed(2)}m`
-                    : "N/A"}
-                </div>
+              <div className="px-2 py-1 text-xs bg-white rounded shadow space-y-0.5">
+                {/* <div>ID: {point.id}</div> */}
+                {point.name && <div>Name: {point.name}</div>}
+                {point.gpsPoint && (
+                  <div>GPS Accuracy: {point.gpsPoint.accuracy || 0}m</div>
+                )}
                 {point.enumeratorName && (
                   <div>Enumerator: {point.enumeratorName}</div>
                 )}
-                {point.locality && <div>Locality: {point.locality}</div>}
+                {point.familyHeadName && (
+                  <div>Family Head Name: {point.familyHeadName}</div>
+                )}
+                {point.wardNo && <div>Ward: {point.wardNo}</div>}
               </div>
             </Tooltip>
           </Marker>

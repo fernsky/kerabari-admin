@@ -156,6 +156,8 @@ export const getById = publicProcedure
     return result;
   });
 
+  
+
 export const getByAreaCode = publicProcedure
   .input(z.object({ areaCode: z.string() }))
   .query(async ({ ctx, input }) => {
@@ -167,14 +169,17 @@ export const getByAreaCode = publicProcedure
         lat: sql<number>`ST_Y(${business.gps}::geometry)`,
         lng: sql<number>`ST_X(${business.gps}::geometry)`,
         gpsAccuracy: business.gpsAccuracy,
+        enumeratorName: business.enumeratorName,  // Add this line
       })
       .from(business)
       .where(eq(business.areaCode, parseInt(input.areaCode)));
 
     return businessDetails.map(business => ({
       id: business.id,
-      businessName: business.businessName,
-      wardId: business.wardId,
+      type:"business",
+      name: business.businessName,
+      wardNo: business.wardId?.toString(),
+      enumeratorName: business.enumeratorName,  // Add this line
       gpsPoint: business.lat && business.lng ? {
         lat: business.lat,
         lng: business.lng,

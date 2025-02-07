@@ -62,6 +62,13 @@ const menuConfig: Menu[] = [
     roles: ["enumerator"],
   },
   {
+    href: "/collections",
+    label: "My Collections", 
+    icon: Paperclip,
+    roles: ["enumerator"],
+  },
+  
+  {
     href: "/ward",
     label: "Wards",
     icon: AreaChart,
