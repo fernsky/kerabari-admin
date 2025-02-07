@@ -224,7 +224,10 @@ export const areaManagementRouter = createTRPCRouter({
           .set({
             areaStatus: input.newStatus,
             assignedTo:
-              input.newStatus === "unassigned" ? null : area.assignedTo,
+              input.newStatus === "unassigned" ||
+              input.newStatus === "completed"
+                ? null
+                : area.assignedTo,
           })
           .where(eq(areas.id, input.areaId));
 
