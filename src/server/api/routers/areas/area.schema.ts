@@ -69,6 +69,7 @@ export interface Area {
   assignedTo?: string | null;
   geometry: GeoJSON | null;
   centroid?: GeoJSON | null;
+  status: "unassigned" | "assigned" | "completed";
 }
 
 export interface AreaRequest {

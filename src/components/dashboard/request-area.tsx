@@ -294,12 +294,32 @@ export default function RequestArea({ user }: { user: User }) {
                     <GeoJSON
                       key={area.code}
                       data={area.geometry as GeoJsonObject}
+                      eventHandlers={{
+                        click: (e) => {
+                          console.log(area);
+                          if (area.areaStatus === "completed") {
+                            e.originalEvent.stopPropagation();
+                            return;
+                          }
+                        },
+                      }}
                       style={{
-                        color: area.assignedTo ? "#9ca3af" : "#2563eb",
+                        color:
+                          area.areaStatus === "completed"
+                            ? "#dc2626"
+                            : area.assignedTo
+                              ? "#9ca3af"
+                              : "#2563eb",
                         weight: 2,
                         opacity: 0.6,
-                        fillColor: area.assignedTo ? "#d1d5db" : "#3b82f6",
-                        fillOpacity: 0.1,
+                        fillColor:
+                          area.areaStatus === "completed"
+                            ? "#ef4444"
+                            : area.assignedTo
+                              ? "#d1d5db"
+                              : "#3b82f6",
+                        fillOpacity:
+                          area.areaStatus === "completed" ? 0.3 : 0.1,
                       }}
                     >
                       <Popup className="z-[10000]">
@@ -321,7 +341,12 @@ export default function RequestArea({ user }: { user: User }) {
                           </div>
                         </div>
                         <div className="p-3">
-                          {!area.assignedTo ? (
+                          {area.areaStatus === "completed" ? (
+                            <div className="flex items-center gap-2 text-sm text-red-600">
+                              <AlertTriangle className="h-4 w-4" />
+                              <span>Area is completed</span>
+                            </div>
+                          ) : !area.assignedTo ? (
                             <Button
                               className="w-full"
                               size="sm"

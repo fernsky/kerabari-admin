@@ -48,7 +48,7 @@ export const handleActionSchema = z.object({
   areaId: z.string(),
   action: z.enum(["approve", "reject"]),
   message: z.string().optional(),
-  newStatus: z.enum(["unassigned", "ongoing_survey", "revision"]),
+  newStatus: z.enum(["unassigned", "ongoing_survey", "revision", "completed"]),
 });
 
 export type GetAreaActionsInput = z.infer<typeof getAreaActionsSchema>;

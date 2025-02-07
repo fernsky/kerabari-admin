@@ -247,8 +247,8 @@ export default function AreaActionHandler() {
                     message,
                     newStatus:
                       selectedAction.action === "approve"
-                        ? "unassigned"
-                        : "ongoing_survey",
+                        ? "completed"
+                        : "revision",
                   });
                   refetchPendingActions();
                 }

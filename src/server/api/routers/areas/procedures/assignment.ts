@@ -77,6 +77,7 @@ export const getAreasByWardforRequest = protectedProcedure
         a.code as "code",
         a.ward as "wardNumber",
         a.assigned_to as "assignedTo",
+        a.area_status as "areaStatus",
         ST_AsGeoJSON(a.geometry) as "geometry"
       FROM ${areas} a
       LEFT JOIN ${areaRequests} ar 
