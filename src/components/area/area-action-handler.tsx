@@ -146,7 +146,7 @@ export default function AreaActionHandler() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Wards</SelectItem>
-                {Array.from({ length: 10 }, (_, i) => (
+                {Array.from({ length: 7 }, (_, i) => (
                   <SelectItem key={i + 1} value={(i + 1).toString()}>
                     Ward {i + 1}
                   </SelectItem>
@@ -241,14 +241,14 @@ export default function AreaActionHandler() {
             <AlertDialogAction
               onClick={async () => {
                 if (selectedAction) {
-                  await handleAction({
+                  handleAction({
                     areaId: selectedAction.areaId,
                     action: selectedAction.action,
                     message,
                     newStatus:
                       selectedAction.action === "approve"
-                        ? "unassigned"
-                        : "ongoing_survey",
+                        ? "completed"
+                        : "revision",
                   });
                   refetchPendingActions();
                 }

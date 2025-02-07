@@ -1,14 +1,12 @@
 import { fetchSubmissionsSchema, surveyFormSchema } from "./superadmin.schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { areas, surveyForms } from "@/server/db/schema";
 import { createTRPCRouter, superAdminProcedure } from "../../trpc";
-import axios from "axios";
-import dotenv from "dotenv";
 import { FormAttachment } from "@/types";
 import * as z from "zod";
 import { fetchSurveySubmissions } from "@/server/utils";
-import { updateSyncInterval } from "@/server/jobs";
 import { TRPCError } from "@trpc/server";
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -79,11 +77,6 @@ export const superadminRouter = createTRPCRouter({
         .where(eq(surveyForms.id, input.id))
         .returning();
 
-      // Update job interval if updateInterval has changed
-      if (input.updateInterval) {
-        await updateSyncInterval(input.id, input.updateInterval);
-      }
-
       return updatedSurveyForm;
     }),
 
@@ -110,11 +103,6 @@ export const superadminRouter = createTRPCRouter({
           .values(input)
           .returning();
 
-        // Set up initial job interval
-        if (input.updateInterval) {
-          await updateSyncInterval(input.id, input.updateInterval);
-        }
-
         return newForm[0];
       } else {
         // Form exists, update it
@@ -123,11 +111,6 @@ export const superadminRouter = createTRPCRouter({
           .set(input)
           .where(eq(surveyForms.id, input.id))
           .returning();
-
-        // Update job interval if updateInterval has changed
-        if (input.updateInterval) {
-          await updateSyncInterval(input.id, input.updateInterval);
-        }
 
         return updatedForm[0];
       }

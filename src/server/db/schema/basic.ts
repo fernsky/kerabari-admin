@@ -101,6 +101,7 @@ export const areaStatusEnum = pgEnum("area_status_enum", [
   "asked_for_completion",
   "asked_for_revision_completion",
   "asked_for_withdrawl",
+  "completed"
 ]);
 
 export const areas = pgTable("areas", {
