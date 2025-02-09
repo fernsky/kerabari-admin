@@ -146,6 +146,7 @@ export function AreaStatusActions({ area }: AreaStatusActionsProps) {
       "relative transition-all duration-200 h-9 text-sm gap-2 px-3";
 
     switch (area.areaStatus) {
+      case "revision":
       case "newly_assigned":
       case "ongoing_survey":
         return (
