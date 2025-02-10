@@ -55,8 +55,26 @@ export default function AreaActionHandler() {
     limit: 10,
   });
 
+  const { mutate: approveCompletion, isLoading: isApprovingCompletion } =
+    api.areaManagement.approveCompletion.useMutation({
+      onSuccess: () => {
+        setDialogOpen(false);
+        setMessage("");
+        refetchPendingActions();
+      },
+    });
+
   const { mutate: handleAction, isLoading: isHandlingAction } =
     api.areaManagement.handleAction.useMutation({
+      onSuccess: () => {
+        setDialogOpen(false);
+        setMessage("");
+        refetchPendingActions();
+      },
+    });
+
+  const { mutate: handleWithdrawal, isLoading: isHandlingWithdrawal } =
+    api.areaManagement.handleWithdrawal.useMutation({
       onSuccess: () => {
         setDialogOpen(false);
         setMessage("");
@@ -71,7 +89,6 @@ export default function AreaActionHandler() {
   ) => {
     setSelectedAction({ areaId, type, action });
     setDialogOpen(true);
-    refetchPendingActions();
   };
 
   const Pagination = () => {
@@ -240,7 +257,23 @@ export default function AreaActionHandler() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={async () => {
-                if (selectedAction) {
+                if (!selectedAction) return;
+
+                if (
+                  selectedAction.type === "asked_for_completion" &&
+                  selectedAction.action === "approve"
+                ) {
+                  approveCompletion({
+                    areaId: selectedAction.areaId,
+                    message,
+                  });
+                } else if (selectedAction.type === "asked_for_withdrawl") {
+                  handleWithdrawal({
+                    areaId: selectedAction.areaId,
+                    approved: selectedAction.action === "approve",
+                    message,
+                  });
+                } else {
                   handleAction({
                     areaId: selectedAction.areaId,
                     action: selectedAction.action,
@@ -250,7 +283,6 @@ export default function AreaActionHandler() {
                         ? "completed"
                         : "revision",
                   });
-                  refetchPendingActions();
                 }
               }}
               className={
@@ -259,7 +291,9 @@ export default function AreaActionHandler() {
                   : "bg-red-600 hover:bg-red-700"
               }
             >
-              {isHandlingAction ? (
+              {isHandlingAction ||
+              isApprovingCompletion ||
+              isHandlingWithdrawal ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : selectedAction?.action === "approve" ? (
                 "Approve"

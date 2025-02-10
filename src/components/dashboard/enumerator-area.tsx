@@ -63,7 +63,7 @@ export function EnumeratorArea() {
     );
   }
 
-  if (!area || area.areaStatus === "completed") {
+  if (!area) {
     return (
       <div className="container mx-auto max-w-4xl space-y-6 px-4">
         <Card className="overflow-hidden">
