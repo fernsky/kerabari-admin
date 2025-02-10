@@ -1,5 +1,5 @@
 import { createTRPCRouter } from "@/server/api/trpc";
-import { getAll, getById, getStats, getByAreaCode, getByEnumeratorName } from "./procedures/query";
+import { getAll, getById, getStats, getByAreaCode, getByEnumeratorName, getEnumeratorNames, getAreaCodesByEnumeratorName } from "./procedures/query";
 import { assignEnumerator } from "./procedures/assign";
 import { assignAreaUpdate } from "./procedures/assignArea";
 import { assignWardUpdate } from "./procedures/assignWard";
@@ -16,6 +16,8 @@ export const familyRouter = createTRPCRouter({
   getAll,
   getById,
   getByEnumeratorName,
+  getAreaCodesByEnumeratorName,
+  getEnumeratorNames,
   getByAreaCode,
   getStats,
   assignEnumerator,

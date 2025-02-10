@@ -235,3 +235,34 @@ export const getStats = publicProcedure.query(async ({ ctx }) => {
 
   return stats[0];
 });
+
+export const getEnumeratorNames = publicProcedure.query(async ({ ctx }) => {
+  const results = await ctx.db
+    .selectDistinct({
+      enumeratorName: business.enumeratorName,
+    })
+    .from(business)
+    .where(sql`${business.enumeratorName} IS NOT NULL`)
+    .orderBy(business.enumeratorName);
+
+  return results.map(result => result.enumeratorName);
+});
+
+export const getAreaCodesByEnumeratorName = publicProcedure
+  .input(z.object({ enumeratorName: z.string() }))
+  .query(async ({ ctx, input }) => {
+    const results = await ctx.db
+      .selectDistinct({
+        areaCode: business.areaCode,
+      })
+      .from(business)
+      .where(
+        and(
+          eq(business.enumeratorName, input.enumeratorName),
+          sql`${business.areaCode} IS NOT NULL`
+        )
+      )
+      .orderBy(business.areaCode);
+
+    return results.map(result => result.areaCode);
+  });

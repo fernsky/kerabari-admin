@@ -9,7 +9,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import {
+  AwaitedReactNode,
+  JSXElementConstructor,
+  Key,
+  ReactElement,
+  ReactNode,
+  useState,
+} from "react";
 import { Card } from "@/components/ui/card";
 import {
   Building2,
@@ -78,8 +85,16 @@ export default function SubmissionsPage() {
   const [selectedType, setSelectedType] = useState<string>("building");
   const [selectedEnumerator, setSelectedEnumerator] = useState<string>("");
 
-  // Fetch enumerators
-  const { data: enumeratorNames } = api.building.getEnumeratorNames.useQuery(
+  // Modify enumerator names query to use correct procedure based on type
+  const queryProcedureForEnumerators =
+    selectedType === "family"
+      ? api.family.getEnumeratorNames
+      : selectedType === "business"
+        ? api.business.getEnumeratorNames
+        : api.building.getEnumeratorNames;
+
+  //@ts-ignore
+  const { data: enumeratorNames } = queryProcedureForEnumerators.useQuery(
     undefined,
     {
       enabled: filterType === "enumerator",
@@ -91,6 +106,12 @@ export default function SubmissionsPage() {
     setFilterType(value);
     setSelectedWard(undefined);
     setSelectedArea(undefined);
+    setSelectedEnumerator("");
+  };
+
+  // Reset enumerator when type changes
+  const handleTypeChange = (value: string) => {
+    setSelectedType(value);
     setSelectedEnumerator("");
   };
 
@@ -127,17 +148,28 @@ export default function SubmissionsPage() {
     },
   );
 
-  const { data: areaCodes } =
-    api.building.getAreaCodesByEnumeratorName.useQuery({
-      enumeratorName: selectedEnumerator,
-    });
+  // Modify area codes query to use correct procedure based on type
+  const areaCodesQuery =
+    selectedType === "family"
+      ? api.family.getAreaCodesByEnumeratorName
+      : selectedType === "business"
+        ? api.business.getAreaCodesByEnumeratorName
+        : api.building.getAreaCodesByEnumeratorName;
+
+  //@ts-ignore
+  const { data: areaCodes } = areaCodesQuery.useQuery(
+    { enumeratorName: selectedEnumerator },
+    {
+      enabled: !!selectedEnumerator && filterType === "enumerator",
+    },
+  );
 
   console.log(areaCodes);
 
   const { data: areaBoundaries } = api.area.getAreaBoundariesByCodes.useQuery({
     codes: (areaCodes ?? [])
-      .filter((code): code is string => code !== null)
-      .map((code) => parseInt(code)),
+      .filter((code: string | null): code is string => code !== null)
+      .map((code: string) => parseInt(code)),
   });
 
   // Fetch boundary for selected area
@@ -231,8 +263,10 @@ export default function SubmissionsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {enumeratorNames
-                      ?.filter((name): name is string => name !== null)
-                      .map((name) => (
+                      ?.filter(
+                        (name: string | null): name is string => name !== null,
+                      )
+                      .map((name: string) => (
                         <SelectItem key={name} value={name}>
                           {name}
                         </SelectItem>
@@ -241,7 +275,7 @@ export default function SubmissionsPage() {
                 </Select>
               )}
 
-              <Select value={selectedType} onValueChange={setSelectedType}>
+              <Select value={selectedType} onValueChange={handleTypeChange}>
                 <SelectTrigger
                   className={cn(
                     "w-[200px] border-gray-200",
@@ -386,14 +420,19 @@ export default function SubmissionsPage() {
                         ) : (
                           <div className="flex flex-wrap gap-1.5">
                             {areaCodes?.length ? (
-                              areaCodes.map((code) => (
-                                <span
-                                  key={code}
-                                  className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-sm font-medium"
-                                >
-                                  Area {code}
-                                </span>
-                              ))
+                              areaCodes
+                                .filter(
+                                  (code: any): code is string =>
+                                    typeof code === "string",
+                                )
+                                .map((code: string) => (
+                                  <span
+                                    key={code}
+                                    className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-sm font-medium"
+                                  >
+                                    Area {code}
+                                  </span>
+                                ))
                             ) : (
                               <p className="text-sm text-purple-700">
                                 No areas assigned

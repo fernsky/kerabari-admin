@@ -241,3 +241,34 @@ export const getStats = publicProcedure.query(async ({ ctx }) => {
 
   return stats[0];
 });
+
+export const getEnumeratorNames = publicProcedure.query(async ({ ctx }) => {
+  const results = await ctx.db
+    .selectDistinct({
+      enumeratorName: family.enumeratorName,
+    })
+    .from(family)
+    .where(sql`${family.enumeratorName} IS NOT NULL`)
+    .orderBy(family.enumeratorName);
+
+  return results.map(result => result.enumeratorName);
+});
+
+export const getAreaCodesByEnumeratorName = publicProcedure
+  .input(z.object({ enumeratorName: z.string() }))
+  .query(async ({ ctx, input }) => {
+    const results = await ctx.db
+      .selectDistinct({
+        areaCode: family.areaCode,
+      })
+      .from(family)
+      .where(
+        and(
+          eq(family.enumeratorName, input.enumeratorName),
+          sql`${family.areaCode} IS NOT NULL`
+        )
+      )
+      .orderBy(family.areaCode);
+
+    return results.map(result => result.areaCode);
+  });
