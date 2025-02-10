@@ -84,6 +84,8 @@ export default function SubmissionsPage() {
   const [selectedArea, setSelectedArea] = useState<string>();
   const [selectedType, setSelectedType] = useState<string>("building");
   const [selectedEnumerator, setSelectedEnumerator] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   // Modify enumerator names query to use correct procedure based on type
   const queryProcedureForEnumerators =
@@ -100,6 +102,13 @@ export default function SubmissionsPage() {
       enabled: filterType === "enumerator",
     },
   );
+
+  // Filter enumerator names based on search query
+  const filteredEnumeratorNames = enumeratorNames
+    ?.filter((name: string | null): name is string => name !== null)
+    .filter((name: string) =>
+      name.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
 
   // Reset filters when switching filter type
   const handleFilterTypeChange = (value: "area" | "enumerator") => {
@@ -254,25 +263,57 @@ export default function SubmissionsPage() {
                   </Select>
                 </>
               ) : (
-                <Select
-                  value={selectedEnumerator}
-                  onValueChange={setSelectedEnumerator}
-                >
-                  <SelectTrigger className="w-[200px] border-gray-200">
-                    <SelectValue placeholder="Select Enumerator" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {enumeratorNames
-                      ?.filter(
-                        (name: string | null): name is string => name !== null,
-                      )
-                      .map((name: string) => (
+                <div className="flex flex-col gap-2 w-[200px] relative">
+                  <Input
+                    type="text"
+                    placeholder="Search enumerator..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setIsSearchFocused(true)}
+                    onBlur={() => {
+                      // Delay hiding recommendations to allow clicking
+                      setTimeout(() => setIsSearchFocused(false), 200);
+                    }}
+                    className="border-gray-200"
+                  />
+                  {isSearchFocused &&
+                    searchQuery &&
+                    filteredEnumeratorNames?.length > 0 && (
+                      <div className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-[200px] overflow-y-auto">
+                        {filteredEnumeratorNames.map((name: string) => (
+                          <div
+                            key={name}
+                            className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => {
+                              setSelectedEnumerator(name);
+                              setSearchQuery(name);
+                              setIsSearchFocused(false);
+                            }}
+                          >
+                            {name}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  <Select
+                    value={selectedEnumerator}
+                    onValueChange={(value) => {
+                      setSelectedEnumerator(value);
+                      setSearchQuery(value);
+                    }}
+                  >
+                    <SelectTrigger className="border-gray-200">
+                      <SelectValue placeholder="Select Enumerator" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filteredEnumeratorNames?.map((name: string) => (
                         <SelectItem key={name} value={name}>
                           {name}
                         </SelectItem>
                       ))}
-                  </SelectContent>
-                </Select>
+                    </SelectContent>
+                  </Select>
+                </div>
               )}
 
               <Select value={selectedType} onValueChange={handleTypeChange}>
