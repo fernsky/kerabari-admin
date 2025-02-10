@@ -295,6 +295,24 @@ export default function SubmissionsPage() {
                 </p>
               </div>
             </motion.div>
+          ) : filterType === "enumerator" && !selectedEnumerator ? (
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="flex flex-col items-center justify-center p-8 bg-white rounded-lg shadow-sm space-y-4 text-center"
+            >
+              <UsersIcon className="w-16 h-16 text-gray-400" />
+              <div className="space-y-2">
+                <h2 className="text-xl font-semibold text-gray-700">
+                  Enumerator Submissions
+                </h2>
+                <p className="text-gray-500 max-w-md">
+                  Select an enumerator to view their submissions across
+                  different areas.
+                </p>
+              </div>
+              <ArrowDownCircle className="w-6 h-6 text-blue-500 animate-bounce mt-4" />
+            </motion.div>
           ) : (
             <>
               {pointsLoading ? (
@@ -355,13 +373,34 @@ export default function SubmissionsPage() {
                       <div className="p-2 bg-white rounded-lg">
                         <HomeIcon className="w-6 h-6 text-purple-600" />
                       </div>
-                      <div>
-                        <p className="text-xs font-medium mb-0.5 text-purple-600">
-                          Selected Area
+                      <div className="flex-1">
+                        <p className="text-xs font-medium mb-1 text-purple-600">
+                          {filterType === "area"
+                            ? "Selected Area"
+                            : "Areas Covered"}
                         </p>
-                        <p className="text-2xl font-bold leading-none text-purple-700">
-                          {selectedArea ? `Area ${selectedArea}` : "None"}
-                        </p>
+                        {filterType === "area" ? (
+                          <p className="text-2xl font-bold leading-none text-purple-700">
+                            {selectedArea ? `Area ${selectedArea}` : "None"}
+                          </p>
+                        ) : (
+                          <div className="flex flex-wrap gap-1.5">
+                            {areaCodes?.length ? (
+                              areaCodes.map((code) => (
+                                <span
+                                  key={code}
+                                  className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-sm font-medium"
+                                >
+                                  Area {code}
+                                </span>
+                              ))
+                            ) : (
+                              <p className="text-sm text-purple-700">
+                                No areas assigned
+                              </p>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </Card>
