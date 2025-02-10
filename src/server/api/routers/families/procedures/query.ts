@@ -200,6 +200,36 @@ export const getByAreaCode = publicProcedure
     }));
   });
 
+export const getByEnumeratorName = publicProcedure
+  .input(z.object({ enumeratorName: z.string() }))
+  .query(async ({ ctx, input }) => {
+    const familyDetails = await ctx.db
+      .select({
+        id: family.id,
+        headName: family.headName,
+        wardNo: family.wardNo,
+        lat: sql<number>`ST_Y(${family.gps}::geometry)`,
+        lng: sql<number>`ST_X(${family.gps}::geometry)`,
+        gpsAccuracy: family.gpsAccuracy,
+        enumeratorName: family.enumeratorName,
+      })
+      .from(family)
+      .where(ilike(family.enumeratorName, `%${input.enumeratorName}%`));
+
+    return familyDetails.map(family => ({
+      id: family.id,
+      type: "family",
+      name: family.headName,
+      wardNo: family.wardNo,
+      enumeratorName: family.enumeratorName,
+      gpsPoint: family.lat && family.lng ? {
+        lat: family.lat,
+        lng: family.lng,
+        accuracy: family.gpsAccuracy ?? 0
+      } : null
+    }));
+  });
+
 export const getStats = publicProcedure.query(async ({ ctx }) => {
   const stats = await ctx.db
     .select({

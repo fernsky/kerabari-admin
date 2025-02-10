@@ -151,6 +151,55 @@ export const getByAreaCode = publicProcedure
     }));
   });
 
+export const getByEnumeratorName = publicProcedure
+  .input(z.object({ enumeratorName: z.string() }))
+  .query(async ({ ctx, input }) => {
+    const buildingDetails = await ctx.db
+      .select({
+        id: buildings.id,
+        enumeratorName: buildings.enumeratorName,
+        locality: buildings.locality,
+        lat: sql<number>`ST_Y(${buildings.gps}::geometry)`,
+        lng: sql<number>`ST_X(${buildings.gps}::geometry)`,
+        gpsAccuracy: buildings.gpsAccuracy,
+        areaCode: buildings.tmpAreaCode
+      })
+      .from(buildings)
+      .where(ilike(buildings.enumeratorName, `%${input.enumeratorName}%`));
+
+    return buildingDetails.map(building => ({
+      id: building.id,
+      type: "building",
+      enumeratorName: building.enumeratorName,
+      areaCode: building.areaCode,
+      locality: building.locality,
+      gpsPoint: building.lat && building.lng ? {
+        lat: building.lat,
+        lng: building.lng,
+        accuracy: building.gpsAccuracy ?? 0
+      } : null
+    }));
+  });
+
+export const getAreaCodesByEnumeratorName = publicProcedure
+  .input(z.object({ enumeratorName: z.string() }))
+  .query(async ({ ctx, input }) => {
+    const results = await ctx.db
+      .selectDistinct({
+        areaCode: buildings.tmpAreaCode,
+      })
+      .from(buildings)
+      .where(
+        and(
+          eq(buildings.enumeratorName, input.enumeratorName),
+          sql`${buildings.tmpAreaCode} IS NOT NULL`
+        )
+      )
+      .orderBy(buildings.tmpAreaCode);
+
+    return results.map(result => result.areaCode);
+  });
+
 export const getStats = publicProcedure.query(async ({ ctx }) => {
   const stats = await ctx.db
     .select({
@@ -161,4 +210,16 @@ export const getStats = publicProcedure.query(async ({ ctx }) => {
     .from(buildings);
 
   return stats[0];
+});
+
+export const getEnumeratorNames = publicProcedure.query(async ({ ctx }) => {
+  const results = await ctx.db
+    .selectDistinct({
+      enumeratorName: buildings.enumeratorName,
+    })
+    .from(buildings)
+    .where(sql`${buildings.enumeratorName} IS NOT NULL`)
+    .orderBy(buildings.enumeratorName);
+
+  return results.map(result => result.enumeratorName);
 });

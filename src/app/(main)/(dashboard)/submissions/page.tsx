@@ -25,6 +25,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 const AreaPointsMap = dynamic(
   () => import("@/components/map/area-points-map"),
@@ -69,9 +72,27 @@ const calculatePolygonCenter = (coordinates: number[][][]) => {
 };
 
 export default function SubmissionsPage() {
+  const [filterType, setFilterType] = useState<"area" | "enumerator">("area");
   const [selectedWard, setSelectedWard] = useState<string>();
   const [selectedArea, setSelectedArea] = useState<string>();
   const [selectedType, setSelectedType] = useState<string>("building");
+  const [selectedEnumerator, setSelectedEnumerator] = useState<string>("");
+
+  // Fetch enumerators
+  const { data: enumeratorNames } = api.building.getEnumeratorNames.useQuery(
+    undefined,
+    {
+      enabled: filterType === "enumerator",
+    },
+  );
+
+  // Reset filters when switching filter type
+  const handleFilterTypeChange = (value: "area" | "enumerator") => {
+    setFilterType(value);
+    setSelectedWard(undefined);
+    setSelectedArea(undefined);
+    setSelectedEnumerator("");
+  };
 
   // Fetch areas for selected ward
   const { data: areas } = api.area.getAreas.useQuery(
@@ -79,22 +100,45 @@ export default function SubmissionsPage() {
     { enabled: !!selectedWard },
   );
 
-  // Fetch points for selected area and type
+  // Modify the query to handle enumerator-based filtering
   const queryProcedure =
-    selectedType === "family"
-      ? api.family.getByAreaCode
-      : selectedType === "business"
-        ? api.business.getByAreaCode
-        : api.building.getByAreaCode;
+    filterType === "area"
+      ? selectedType === "family"
+        ? api.family.getByAreaCode
+        : selectedType === "business"
+          ? api.business.getByAreaCode
+          : api.building.getByAreaCode
+      : selectedType === "family"
+        ? api.family.getByEnumeratorName
+        : selectedType === "business"
+          ? api.business.getByEnumeratorName
+          : api.building.getByEnumeratorName;
 
   //@ts-ignore
   const { data: points, isLoading: pointsLoading } = queryProcedure.useQuery(
-    { areaCode: selectedArea ?? "" },
+    filterType === "area"
+      ? { areaCode: selectedArea ?? "" }
+      : { enumeratorName: selectedEnumerator },
     {
-      enabled: !!selectedArea,
+      enabled:
+        (filterType === "area" && !!selectedArea) ||
+        (filterType === "enumerator" && !!selectedEnumerator),
       retry: 1,
     },
   );
+
+  const { data: areaCodes } =
+    api.building.getAreaCodesByEnumeratorName.useQuery({
+      enumeratorName: selectedEnumerator,
+    });
+
+  console.log(areaCodes);
+
+  const { data: areaBoundaries } = api.area.getAreaBoundariesByCodes.useQuery({
+    codes: (areaCodes ?? [])
+      .filter((code): code is string => code !== null)
+      .map((code) => parseInt(code)),
+  });
 
   // Fetch boundary for selected area
   const { data: boundary } = api.area.getAreaBoundaryByCode.useQuery<{
@@ -122,58 +166,102 @@ export default function SubmissionsPage() {
           <motion.div
             initial={{ y: -20 }}
             animate={{ y: 0 }}
-            className="flex flex-col md:flex-row flex-wrap items-center gap-3 bg-white p-3 md:p-4 rounded-lg shadow-sm"
+            className="flex flex-col gap-4 bg-white p-3 md:p-4 rounded-lg shadow-sm"
           >
-            <Select value={selectedWard} onValueChange={setSelectedWard}>
-              <SelectTrigger className="w-[200px] border-gray-200">
-                <SelectValue placeholder="Select Ward" />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.from({ length: 11 }, (_, i) => i + 1).map((ward) => (
-                  <SelectItem key={ward} value={ward.toString()}>
-                    Ward {ward}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={selectedArea}
-              onValueChange={setSelectedArea}
-              disabled={!selectedWard}
+            <RadioGroup
+              defaultValue="area"
+              value={filterType}
+              onValueChange={(value: "area" | "enumerator") =>
+                handleFilterTypeChange(value)
+              }
+              className="flex flex-wrap gap-4"
             >
-              <SelectTrigger className="w-[200px] border-gray-200">
-                <SelectValue placeholder="Select Area" />
-              </SelectTrigger>
-              <SelectContent>
-                {areas?.map((area) => (
-                  <SelectItem key={area.id} value={area.code.toString()}>
-                    Area {area.code}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="area" id="area" />
+                <Label htmlFor="area">Filter by Area</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="enumerator" id="enumerator" />
+                <Label htmlFor="enumerator">Filter by Enumerator</Label>
+              </div>
+            </RadioGroup>
 
-            <Select value={selectedType} onValueChange={setSelectedType}>
-              <SelectTrigger
-                className={cn(
-                  "w-[200px] border-gray-200",
-                  selectedType === "family" && "text-blue-600",
-                  selectedType === "business" && "text-green-600",
-                  selectedType === "building" && "text-purple-600",
-                )}
-              >
-                <SelectValue placeholder="Select Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="family">Family</SelectItem>
-                <SelectItem value="business">Business</SelectItem>
-                <SelectItem value="building">Buildings</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex flex-wrap items-center gap-3">
+              {filterType === "area" ? (
+                <>
+                  <Select value={selectedWard} onValueChange={setSelectedWard}>
+                    <SelectTrigger className="w-[200px] border-gray-200">
+                      <SelectValue placeholder="Select Ward" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 11 }, (_, i) => i + 1).map(
+                        (ward) => (
+                          <SelectItem key={ward} value={ward.toString()}>
+                            Ward {ward}
+                          </SelectItem>
+                        ),
+                      )}
+                    </SelectContent>
+                  </Select>
+
+                  <Select
+                    value={selectedArea}
+                    onValueChange={setSelectedArea}
+                    disabled={!selectedWard}
+                  >
+                    <SelectTrigger className="w-[200px] border-gray-200">
+                      <SelectValue placeholder="Select Area" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {areas?.map((area) => (
+                        <SelectItem key={area.id} value={area.code.toString()}>
+                          Area {area.code}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </>
+              ) : (
+                <Select
+                  value={selectedEnumerator}
+                  onValueChange={setSelectedEnumerator}
+                >
+                  <SelectTrigger className="w-[200px] border-gray-200">
+                    <SelectValue placeholder="Select Enumerator" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {enumeratorNames
+                      ?.filter((name): name is string => name !== null)
+                      .map((name) => (
+                        <SelectItem key={name} value={name}>
+                          {name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              )}
+
+              <Select value={selectedType} onValueChange={setSelectedType}>
+                <SelectTrigger
+                  className={cn(
+                    "w-[200px] border-gray-200",
+                    selectedType === "family" && "text-blue-600",
+                    selectedType === "business" && "text-green-600",
+                    selectedType === "building" && "text-purple-600",
+                  )}
+                >
+                  <SelectValue placeholder="Select Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="family">Family</SelectItem>
+                  <SelectItem value="business">Business</SelectItem>
+                  <SelectItem value="building">Buildings</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </motion.div>
           {/* Content Section */}
-          {!selectedWard ? (
+          {!selectedWard && filterType === "area" && !selectedEnumerator ? (
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -191,7 +279,7 @@ export default function SubmissionsPage() {
               </div>
               <ArrowDownCircle className="w-6 h-6 text-blue-500 animate-bounce mt-4" />
             </motion.div>
-          ) : !selectedArea ? (
+          ) : !selectedArea && filterType === "area" && !selectedEnumerator ? (
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -293,9 +381,10 @@ export default function SubmissionsPage() {
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="h-[400px] md:h-[600px] w-full relative rounded-xl overflow-hidden bg-white shadow-sm" // lighter shadow
+                className="h-[400px] md:h-[600px] w-full relative rounded-xl overflow-hidden bg-white shadow-sm"
               >
-                {points && boundary ? (
+                {points &&
+                (filterType === "area" ? boundary : areaBoundaries) ? (
                   <AreaPointsMap
                     //@ts-ignore
                     points={points.map((point) => ({
@@ -304,8 +393,17 @@ export default function SubmissionsPage() {
                       wardNo: point.wardNo || undefined,
                       gpsPoint: point.gpsPoint || undefined,
                     }))}
+                    boundaries={
+                      filterType === "area"
+                        ? boundary?.boundary
+                          ? [{ ...boundary.boundary, areaCode: selectedArea }]
+                          : []
+                        : (areaBoundaries?.map((area, index) => ({
+                            ...area.boundary,
+                            areaCode: areaCodes?.[index] ?? "",
+                          })) ?? [])
+                    }
                     //@ts-ignore
-                    boundary={boundary.boundary}
                     center={mapCenter}
                     defaultZoom={15}
                   />

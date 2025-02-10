@@ -1,7 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from "../../../trpc";
 import { z } from "zod";
 import { areas, users } from "@/server/db/schema/basic";
-import { and, eq, sql } from "drizzle-orm";
+import { and, cosineDistance, eq, sql } from "drizzle-orm";
 import {
   Area,
   areaQuerySchema,
@@ -234,6 +234,38 @@ export const getAreaBoundaryByCode = protectedProcedure
       ...area[0],
       boundary: area[0].boundary ? JSON.parse(area[0].boundary as string) : null,
     };
+  });
+
+export const getAreaBoundariesByCodes = protectedProcedure
+  .input(z.object({ codes: z.array(z.number()) }))
+  .query(async ({ ctx, input }) => {
+    if (!input.codes.length) return [];
+
+    const boundaries = await Promise.all(
+      input.codes.map(async (code) => {
+        const areaResult = await ctx.db.execute(
+          sql`SELECT 
+              ${areas.id} as "id",
+              ${areas.code} as "code",
+              ${areas.wardNumber} as "wardNumber",
+              ST_AsGeoJSON(${areas.geometry}) as "boundary"
+              FROM ${areas} 
+              WHERE ${areas.code} = ${code}
+              LIMIT 1`
+        );
+
+        if (!areaResult[0]) return null;
+
+        return {
+          id: areaResult[0].id,
+          code: areaResult[0].code,
+          wardNumber: areaResult[0].wardNumber,
+          boundary: areaResult[0].boundary ? JSON.parse(areaResult[0].boundary as string) : null
+        };
+      })
+    );
+
+    return boundaries.filter((b): b is NonNullable<typeof b> => b !== null);
   });
 
 export const getAreasWithSubmissionCounts = protectedProcedure

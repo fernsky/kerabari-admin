@@ -2,7 +2,7 @@ import { publicProcedure } from "@/server/api/trpc";
 import { businessQuerySchema } from "../business.schema";
 import { business } from "@/server/db/schema/business/business";
 import { surveyAttachments } from "@/server/db/schema";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, sql, ilike } from "drizzle-orm";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { env } from "@/env";
@@ -180,6 +180,36 @@ export const getByAreaCode = publicProcedure
       name: business.businessName,
       wardNo: business.wardId?.toString(),
       enumeratorName: business.enumeratorName,  // Add this line
+      gpsPoint: business.lat && business.lng ? {
+        lat: business.lat,
+        lng: business.lng,
+        accuracy: business.gpsAccuracy ?? 0
+      } : null
+    }));
+  });
+
+export const getByEnumeratorName = publicProcedure
+  .input(z.object({ enumeratorName: z.string() }))
+  .query(async ({ ctx, input }) => {
+    const businessDetails = await ctx.db
+      .select({
+        id: business.id,
+        businessName: business.businessName,
+        wardId: business.wardId,
+        lat: sql<number>`ST_Y(${business.gps}::geometry)`,
+        lng: sql<number>`ST_X(${business.gps}::geometry)`,
+        gpsAccuracy: business.gpsAccuracy,
+        enumeratorName: business.enumeratorName,
+      })
+      .from(business)
+      .where(ilike(business.enumeratorName, `%${input.enumeratorName}%`));
+
+    return businessDetails.map(business => ({
+      id: business.id,
+      type: "business",
+      name: business.businessName,
+      wardNo: business.wardId?.toString(),
+      enumeratorName: business.enumeratorName,
       gpsPoint: business.lat && business.lng ? {
         lat: business.lat,
         lng: business.lng,
