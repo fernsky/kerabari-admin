@@ -15,7 +15,8 @@ import {
   getLayerAreas,
   getAreaBoundaryByCode,
   getAreasWithSubmissionCounts,
-  getAreaBoundariesByCodes
+  getAreaBoundariesByCodes,
+  getAreaCodesByUserId
 } from "./procedures/basic";
 import {
   requestArea,
@@ -29,6 +30,7 @@ export const areaRouter = createTRPCRouter({
   getAreas,
   getLayerAreas,
   getAreaById,
+  getAreaCodesByUserId,
   updateArea,
   requestArea,
   getUserAreaRequests,

@@ -287,3 +287,20 @@ export const getAreasWithSubmissionCounts = protectedProcedure
     const result = await ctx.db.execute(query);
     return result;
   });
+
+export const getAreaCodesByUserId = protectedProcedure
+  .input(z.object({ userId: z.string() }))
+  .query(async ({ ctx, input }) => {
+    const assignedAreas = await ctx.db
+      .select({
+        code: areas.code
+      })
+      .from(areas)
+      .where(eq(areas.assignedTo, input.userId))
+      .orderBy(areas.code);
+
+    return assignedAreas.map(area => area.code);
+  });
+
+
+
