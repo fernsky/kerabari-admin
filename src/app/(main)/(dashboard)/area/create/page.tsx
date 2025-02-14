@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -32,11 +33,45 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
-import {
-  CreateAreaMap,
-  MapStateProvider,
-} from "@/components/dashboard/create-area";
-import { MapPin, ArrowLeft, Save, Home, Hash } from "lucide-react";
+import { MapPin, ArrowLeft, Save, Home, Hash, Loader2 } from "lucide-react";
+import dynamic from "next/dynamic";
+
+// Replace static import with dynamic imports
+const MapStateProvider = dynamic(
+  () =>
+    import("@/components/dashboard/create-area").then(
+      (mod) => mod.MapStateProvider,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-[600px] items-center justify-center bg-muted/10">
+        <div className="text-center space-y-2">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mx-auto" />
+          <p className="text-muted-foreground">Loading map components...</p>
+        </div>
+      </div>
+    ),
+  },
+);
+
+const DynamicCreateAreaMap = dynamic(
+  () =>
+    import("@/components/dashboard/create-area").then(
+      (mod) => mod.CreateAreaMap,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-[600px] items-center justify-center bg-muted/10">
+        <div className="text-center space-y-2">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mx-auto" />
+          <p className="text-muted-foreground">Loading map...</p>
+        </div>
+      </div>
+    ),
+  },
+);
 
 const wards = [
   { value: "1", label: "1" },
@@ -58,7 +93,6 @@ const createAreaSchema = z.object({
 });
 
 const CreateAreaPage = () => {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedWard, setSelectedWard] = useState<number | null>(null);
   const { data: availableAreaCodes } = api.area.getAvailableAreaCodes.useQuery(
@@ -66,6 +100,7 @@ const CreateAreaPage = () => {
     { enabled: !!selectedWard },
   );
   const createArea = api.area.createArea.useMutation();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof createAreaSchema>>({
     resolver: zodResolver(createAreaSchema),
@@ -97,9 +132,11 @@ const CreateAreaPage = () => {
       title="Create New Area"
       subtitle="Add a new area with its ward number and geographical boundaries"
       actions={
-        <Button variant="outline" onClick={() => router.push("/area")}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Areas
+        <Button variant="outline" asChild>
+          <Link href="/area">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Areas
+          </Link>
         </Button>
       }
     >
@@ -214,7 +251,7 @@ const CreateAreaPage = () => {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <CreateAreaMap
+                      <DynamicCreateAreaMap
                         id="new-area"
                         onGeometryChange={(geometry) =>
                           form.setValue("geometry", geometry)
@@ -224,12 +261,8 @@ const CreateAreaPage = () => {
                   </Card>
 
                   <div className="flex justify-end gap-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => router.push("/area")}
-                    >
-                      Cancel
+                    <Button variant="outline" asChild>
+                      <Link href="/area">Cancel</Link>
                     </Button>
                     <Button type="submit" disabled={isLoading}>
                       {isLoading ? (
