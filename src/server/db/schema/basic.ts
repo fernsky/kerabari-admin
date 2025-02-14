@@ -233,3 +233,22 @@ export const stagingToProduction = pgTable(
     pk: primaryKey(t.staging_table, t.production_table, t.recordId),
   }),
 );
+
+export const pointRequests = pgTable('point_requests', {
+  id: text('id').primaryKey().$defaultFn(() => nanoid()),
+  wardNumber: integer('ward_number').notNull(),
+  enumeratorId: text('enumerator_id').notNull().references(() => users.id),
+  coordinates: geometry('coordinates', { type: 'Point' }),
+  message: text('message').notNull(),
+  status: text('status', { enum: ['pending', 'approved', 'rejected'] }).notNull().default('pending'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// Add this type for TypeScript support
+export type PointRequest = typeof pointRequests.$inferSelect;
+export type NewPointRequest = typeof pointRequests.$inferInsert;
+function nanoid(): string | import("drizzle-orm").SQL<unknown> {
+  throw new Error("Function not implemented.");
+}
+

@@ -236,6 +236,15 @@ export default function RequestArea({ user }: { user: User }) {
                 ))}
               </SelectContent>
             </Select>
+
+            <Button
+              variant="link"
+              className="text-primary flex items-center gap-2 mt-2"
+              onClick={() => router.push("/area/request/request-point")}
+            >
+              <Plus className="h-4 w-4" />
+              No Required Area? Request by Point
+            </Button>
           </div>
         </InfoCard>
 

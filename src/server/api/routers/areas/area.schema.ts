@@ -59,6 +59,20 @@ export const areaQuerySchema = z.object({
   assignedTo: z.string().optional(),
 });
 
+export const createPointRequestSchema = z.object({
+  wardNumber: z.number().int().positive(),
+  coordinates: z.object({
+    lat: z.number(),
+    lng: z.number()
+  }),
+  message: z.string().min(1, "Message is required").max(500),
+});
+
+export const updatePointRequestStatusSchema = z.object({
+  requestId: z.string(),
+  status: z.enum(["pending", "approved", "rejected"]),
+});
+
 export type AreaQueryInput = z.infer<typeof areaQuerySchema>;
 
 export interface Area {
@@ -80,4 +94,18 @@ export interface AreaRequest {
   message?: string;
   createdAt: Date;
   updatedAt?: Date;
+}
+
+export interface PointRequest {
+  id: string;
+  wardNumber: number;
+  enumeratorId: string;
+  coordinates: {
+    lat: number;
+    lng: number;
+  };
+  message: string;
+  status: "pending" | "approved" | "rejected";
+  createdAt: Date;
+  updatedAt: Date;
 }

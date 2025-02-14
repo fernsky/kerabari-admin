@@ -1,11 +1,12 @@
 import { createTRPCRouter, protectedProcedure } from "../../../trpc";
 import { z } from "zod";
-import { areas, users } from "@/server/db/schema/basic";
+import { areas, users, pointRequests } from "@/server/db/schema/basic";
 import { and, cosineDistance, eq, sql } from "drizzle-orm";
 import {
   Area,
   areaQuerySchema,
   createAreaSchema,
+  createPointRequestSchema,
   updateAreaSchema,
 } from "../area.schema";
 import { nanoid } from "nanoid";
@@ -301,6 +302,59 @@ export const getAreaCodesByUserId = protectedProcedure
 
     return assignedAreas.map(area => area.code);
   });
+
+export const createPointRequest = protectedProcedure
+  .input(createPointRequestSchema)
+  .mutation(async ({ ctx, input }) => {
+    // Create a Point geometry from coordinates
+    const point = {
+      type: "Point",
+      coordinates: [input.coordinates.lng, input.coordinates.lat] // GeoJSON uses [longitude, latitude]
+    };
+
+    const pointGeojson = JSON.stringify(point);
+
+    try {
+      const newRequest = await ctx.db.insert(pointRequests).values({
+        id: nanoid(),
+        wardNumber: input.wardNumber,
+        enumeratorId: ctx.user!.id,
+        coordinates: sql`ST_GeomFromGeoJSON(${pointGeojson})`,
+        message: input.message,
+        status: 'pending',
+      }).returning({ id: pointRequests.id });
+
+      return { success: true, id: newRequest[0].id };
+    } catch (error) {
+      throw new Error("Failed to create point request");
+    }
+  });
+
+export const getPointRequestsByWard = protectedProcedure
+  .input(z.object({ wardNumber: z.number() }))
+  .query(async ({ ctx, input }) => {
+    const requests = await ctx.db.execute(
+      sql`SELECT 
+          p.id,
+          p.ward_number as "wardNumber",
+          p.enumerator_id as "enumeratorId",
+          u.name as "enumeratorName",
+          ST_AsGeoJSON(p.coordinates) as coordinates,
+          p.message,
+          p.status,
+          p.created_at as "createdAt"
+        FROM ${pointRequests} p
+        LEFT JOIN ${users} u ON p.enumerator_id = u.id
+        WHERE p.ward_number = ${input.wardNumber}
+        ORDER BY p.created_at DESC`
+    );
+
+    return requests.map(request => ({
+      ...request,
+      coordinates: request.coordinates && typeof request.coordinates === 'string' ? JSON.parse(request.coordinates) : null
+    }));
+  });
+
 
 
 
