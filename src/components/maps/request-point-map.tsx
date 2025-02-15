@@ -24,8 +24,17 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Dialog } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { MapPin } from "lucide-react";
+import { Label } from "recharts";
+import { LoadingButton } from "../loading-button";
 
 // Fix Leaflet's default icon path issues
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -394,7 +403,51 @@ const RequestPointMap = () => {
 
       {/* Request Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        {/* ...existing dialog content... */}
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request New Area</DialogTitle>
+          </DialogHeader>
+          {isSubmitting ? (
+            <div className="flex flex-col items-center justify-center py-8 space-y-4">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground">
+                Submitting your request...
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Message</Label>
+                  <Textarea
+                    placeholder="Describe why you need an area here..."
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                  />
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  GPS: {selectedPoint?.lat.toFixed(6)},{" "}
+                  {selectedPoint?.lng.toFixed(6)}
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleRequestConfirm}
+                  disabled={isSubmitting || !message.trim()}
+                >
+                  Submit Request
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
       </Dialog>
     </div>
   );
