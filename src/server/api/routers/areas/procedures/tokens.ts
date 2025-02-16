@@ -37,7 +37,7 @@ export const getAreaTokens = protectedProcedure
     z.object({
       areaId: z.string(),
       status: z.enum(["allocated", "unallocated"]).optional(),
-      limit: z.number().min(1).max(200).default(100),
+      limit: z.number().min(1).max(200).default(200),
       offset: z.number().min(0).default(0),
     }),
   )
