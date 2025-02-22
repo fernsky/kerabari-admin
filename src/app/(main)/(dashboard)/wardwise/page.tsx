@@ -35,6 +35,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { BarChartIcon, PieChartIcon } from "lucide-react";
 
 const COLORS = [
   "#0088FE",
@@ -145,47 +147,80 @@ const WardwisePage = () => {
 
   const ChartCard = ({
     title,
-    children,
-    isLoading,
     data,
+    isLoading,
     nameKey,
   }: {
     title: string;
-    children: React.ReactNode;
-    isLoading: boolean;
     data: any[];
+    isLoading: boolean;
     nameKey: string;
-  }) => (
-    <Card className="w-full h-[400px]">
-      <CardHeader className="space-y-4">
-        <CardTitle className="text-lg font-semibold text-gray-800">
-          {title}
-        </CardTitle>
-        {!isLoading && data && (
-          <Tabs defaultValue="chart" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="chart">Chart</TabsTrigger>
-              <TabsTrigger value="table">Table</TabsTrigger>
-            </TabsList>
-            <TabsContent value="chart" className="h-[280px]">
-              {children}
-            </TabsContent>
-            <TabsContent value="table" className="h-[280px]">
-              <TableComponent data={data} nameKey={nameKey} />
-            </TabsContent>
-          </Tabs>
-        )}
-      </CardHeader>
-      <CardContent className="h-[320px] flex items-center justify-center">
-        {isLoading && (
-          <div className="flex flex-col items-center gap-2">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-            <p className="text-sm text-gray-500">Loading data...</p>
+  }) => {
+    const [chartType, setChartType] = useState<"pie" | "bar">("pie");
+
+    const ChartView = () =>
+      chartType === "pie" ? (
+        <PieChartComponent data={data} nameKey={nameKey} />
+      ) : (
+        <BarChartComponent data={data} dataKey={nameKey} />
+      );
+
+    return (
+      <Card className="w-full min-h-[400px] lg:h-[400px]">
+        <CardHeader className="space-y-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <CardTitle className="text-lg font-semibold text-gray-800">
+              {title}
+            </CardTitle>
+            {!isLoading && data && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setChartType((prev) => (prev === "pie" ? "bar" : "pie"))
+                }
+                className="flex items-center gap-2"
+              >
+                {chartType === "pie" ? (
+                  <>
+                    <BarChartIcon className="h-4 w-4" />
+                    <span className="hidden sm:inline">Bar Chart</span>
+                  </>
+                ) : (
+                  <>
+                    <PieChartIcon className="h-4 w-4" />
+                    <span className="hidden sm:inline">Pie Chart</span>
+                  </>
+                )}
+              </Button>
+            )}
           </div>
-        )}
-      </CardContent>
-    </Card>
-  );
+          {!isLoading && data && (
+            <Tabs defaultValue="chart" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="chart">Chart</TabsTrigger>
+                <TabsTrigger value="table">Table</TabsTrigger>
+              </TabsList>
+              <TabsContent value="chart" className="h-[280px]">
+                <ChartView />
+              </TabsContent>
+              <TabsContent value="table" className="h-[280px] overflow-auto">
+                <TableComponent data={data} nameKey={nameKey} />
+              </TabsContent>
+            </Tabs>
+          )}
+        </CardHeader>
+        <CardContent className="h-[320px] flex items-center justify-center">
+          {isLoading && (
+            <div className="flex flex-col items-center gap-2">
+              <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+              <p className="text-sm text-gray-500">Loading data...</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
 
   const PieChartComponent = ({
     data,
@@ -257,15 +292,15 @@ const WardwisePage = () => {
     <ContentLayout
       title={`Ward Analysis ${selectedWard ? `- Ward ${selectedWard}` : ""}`}
     >
-      <div className="container mx-auto p-4 space-y-6">
+      <div className="container mx-auto p-2 sm:p-4 space-y-4 sm:space-y-6">
         {/* Ward Selector */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white p-4 rounded-lg shadow-sm"
+          className="bg-white p-3 sm:p-4 rounded-lg shadow-sm"
         >
           <Select value={selectedWard} onValueChange={setSelectedWard}>
-            <SelectTrigger className="w-[200px]">
+            <SelectTrigger className="w-[180px] sm:w-[200px]">
               <SelectValue placeholder="Select Ward" />
             </SelectTrigger>
             <SelectContent>
@@ -299,109 +334,70 @@ const WardwisePage = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6"
           >
             <ChartCard
               title="Gender Distribution"
               isLoading={isLoadingGender}
               data={genderData || []}
               nameKey="gender"
-            >
-              {genderData && (
-                <PieChartComponent data={genderData} nameKey="gender" />
-              )}
-            </ChartCard>
+            />
 
             <ChartCard
               title="Age Distribution"
               isLoading={isLoadingAge}
               data={ageData || []}
               nameKey="age_group"
-            >
-              {ageData && (
-                <BarChartComponent data={ageData} dataKey="age_group" />
-              )}
-            </ChartCard>
+            />
 
             <ChartCard
               title="Caste Distribution"
               isLoading={isLoadingCaste}
               data={casteData || []}
               nameKey="caste"
-            >
-              {casteData && (
-                <PieChartComponent data={casteData} nameKey="caste" />
-              )}
-            </ChartCard>
+            />
 
             <ChartCard
               title="Religion Distribution"
               isLoading={isLoadingReligion}
               data={religionData || []}
               nameKey="religion"
-            >
-              {religionData && (
-                <PieChartComponent data={religionData} nameKey="religion" />
-              )}
-            </ChartCard>
+            />
 
             <ChartCard
               title="Marital Status"
               isLoading={isLoadingMarital}
               data={maritalData || []}
               nameKey="status"
-            >
-              {maritalData && (
-                <PieChartComponent data={maritalData} nameKey="status" />
-              )}
-            </ChartCard>
+            />
 
             <ChartCard
               title="Marriage Age"
               isLoading={isLoadingMarriageAge}
               data={marriageAgeData || []}
               nameKey="age_group"
-            >
-              {marriageAgeData && (
-                <BarChartComponent data={marriageAgeData} dataKey="age_group" />
-              )}
-            </ChartCard>
+            />
 
             <ChartCard
               title="Mother Tongue Distribution"
               isLoading={isLoadingMotherTongue}
               data={motherTongueData || []}
               nameKey="language"
-            >
-              {motherTongueData && (
-                <PieChartComponent data={motherTongueData} nameKey="language" />
-              )}
-            </ChartCard>
+            />
 
             <ChartCard
               title="Ancestor Language"
               isLoading={isLoadingAncestorLanguage}
               data={ancestorLanguageData || []}
               nameKey="language"
-            >
-              {ancestorLanguageData && (
-                <PieChartComponent
-                  data={ancestorLanguageData}
-                  nameKey="language"
-                />
-              )}
-            </ChartCard>
+            />
 
             <ChartCard
               title="Disability Distribution"
               isLoading={isLoadingDisability}
               data={disabilityData || []}
               nameKey="isDisabled"
-            >
-              {disabilityData && (
-                <PieChartComponent data={disabilityData} nameKey="isDisabled" />
-              )}
-            </ChartCard>
+            />
           </motion.div>
         )}
       </div>
