@@ -11,6 +11,7 @@ import {
   Store,
   User2Icon,
   Paperclip,
+  Home,
 } from "lucide-react";
 
 export type Role = "admin" | "superadmin" | "enumerator";
@@ -107,7 +108,13 @@ const menuConfig: Menu[] = [
     roles: ["admin", "superadmin"],
     submenus: [],
   },
-
+  {
+    href:"/wardwise",
+    label: "Wardwise Data",
+    icon:Home,
+    roles: ["admin", "superadmin"],
+    submenus:[],
+  },
   {
     href: "/individuals",
     label: "Individuals",
