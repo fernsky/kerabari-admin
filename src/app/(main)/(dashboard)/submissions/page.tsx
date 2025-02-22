@@ -235,7 +235,7 @@ export default function SubmissionsPage() {
                       <SelectValue placeholder="Select Ward" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.from({ length: 11 }, (_, i) => i + 1).map(
+                      {Array.from({ length: 10 }, (_, i) => i + 1).map(
                         (ward) => (
                           <SelectItem key={ward} value={ward.toString()}>
                             Ward {ward}
