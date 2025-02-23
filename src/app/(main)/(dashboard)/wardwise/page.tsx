@@ -39,15 +39,21 @@ import { Button } from "@/components/ui/button";
 import { BarChartIcon, PieChartIcon } from "lucide-react";
 
 const COLORS = [
-  "#0088FE",
-  "#00C49F",
-  "#FFBB28",
-  "#FF8042",
-  "#8884D8",
-  "#82CA9D",
-  "#FFC658",
-  "#AFB4FF",
-  "#A7D2CB",
+  "#FF6B6B", // Bright red
+  "#4ECDC4", // Turquoise
+  "#45B7D1", // Sky blue
+  "#96CEB4", // Sage green
+  "#FFEEAD", // Light yellow
+  "#D4A5A5", // Dusty rose
+  "#9B5DE5", // Purple
+  "#F15BB5", // Pink
+  "#00BBF9", // Bright blue
+  "#00F5D4", // Mint
+  "#FF9F1C", // Orange
+  "#2EC4B6", // Teal
+  "#E71D36", // Bright coral
+  "#662E9B", // Deep purple
+  "#43AA8B", // Sea green
 ];
 
 const WardwisePage = () => {
@@ -288,6 +294,67 @@ const WardwisePage = () => {
     </ResponsiveContainer>
   );
 
+  const PopulationStats = () => {
+    if (isLoadingGender) {
+      return (
+        <div className="flex items-center justify-center p-4">
+          <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+        </div>
+      );
+    }
+
+    if (!genderData) return null;
+
+    // Log the data to see what we're getting
+    console.log("Gender Data:", genderData);
+
+    const total = genderData.reduce((sum, item) => sum + item.count, 0);
+    const maleCount =
+      genderData.find(
+        (item) =>
+          item.gender.toLowerCase().trim() === "पुरुष" ||
+          item.gender.toLowerCase().trim() === "m",
+      )?.count || 0;
+    const femaleCount =
+      genderData.find(
+        (item) =>
+          item.gender.toLowerCase().trim() === "महिला" ||
+          item.gender.toLowerCase().trim() === "f",
+      )?.count || 0;
+    const othersCount =
+      genderData.find(
+        (item) =>
+          item.gender.toLowerCase().trim() === "अन्य" ||
+          item.gender.toLowerCase().trim() === "o",
+      )?.count || 0;
+
+    return (
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold text-gray-800">
+          Ward {selectedWard} Population Statistics
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div className="p-4 bg-blue-50 rounded-lg">
+            <p className="text-sm text-blue-600">Total Population</p>
+            <p className="text-2xl font-bold text-blue-700">{total}</p>
+          </div>
+          <div className="p-4 bg-green-50 rounded-lg">
+            <p className="text-sm text-green-600">Male Population</p>
+            <p className="text-2xl font-bold text-green-700">{maleCount}</p>
+          </div>
+          <div className="p-4 bg-purple-50 rounded-lg">
+            <p className="text-sm text-purple-600">Female Population</p>
+            <p className="text-2xl font-bold text-purple-700">{femaleCount}</p>
+          </div>
+          <div className="p-4 bg-orange-50 rounded-lg">
+            <p className="text-sm text-orange-600">Others Population</p>
+            <p className="text-2xl font-bold text-orange-700">{othersCount}</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <ContentLayout
       title={`Ward Analysis ${selectedWard ? `- Ward ${selectedWard}` : ""}`}
@@ -331,74 +398,85 @@ const WardwisePage = () => {
             </div>
           </motion.div>
         ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6"
-          >
-            <ChartCard
-              title="Gender Distribution"
-              isLoading={isLoadingGender}
-              data={genderData || []}
-              nameKey="gender"
-            />
+          <>
+            {/* Population Stats Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white p-4 rounded-lg shadow-sm"
+            >
+              <PopulationStats />
+            </motion.div>
 
-            <ChartCard
-              title="Age Distribution"
-              isLoading={isLoadingAge}
-              data={ageData || []}
-              nameKey="age_group"
-            />
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6"
+            >
+              <ChartCard
+                title="Gender Distribution"
+                isLoading={isLoadingGender}
+                data={genderData || []}
+                nameKey="gender"
+              />
 
-            <ChartCard
-              title="Caste Distribution"
-              isLoading={isLoadingCaste}
-              data={casteData || []}
-              nameKey="caste"
-            />
+              <ChartCard
+                title="Age Distribution"
+                isLoading={isLoadingAge}
+                data={ageData || []}
+                nameKey="age_group"
+              />
 
-            <ChartCard
-              title="Religion Distribution"
-              isLoading={isLoadingReligion}
-              data={religionData || []}
-              nameKey="religion"
-            />
+              <ChartCard
+                title="Caste Distribution"
+                isLoading={isLoadingCaste}
+                data={casteData || []}
+                nameKey="caste"
+              />
 
-            <ChartCard
-              title="Marital Status"
-              isLoading={isLoadingMarital}
-              data={maritalData || []}
-              nameKey="status"
-            />
+              <ChartCard
+                title="Religion Distribution"
+                isLoading={isLoadingReligion}
+                data={religionData || []}
+                nameKey="religion"
+              />
 
-            <ChartCard
-              title="Marriage Age"
-              isLoading={isLoadingMarriageAge}
-              data={marriageAgeData || []}
-              nameKey="age_group"
-            />
+              <ChartCard
+                title="Marital Status"
+                isLoading={isLoadingMarital}
+                data={maritalData || []}
+                nameKey="status"
+              />
 
-            <ChartCard
-              title="Mother Tongue Distribution"
-              isLoading={isLoadingMotherTongue}
-              data={motherTongueData || []}
-              nameKey="language"
-            />
+              <ChartCard
+                title="Marriage Age"
+                isLoading={isLoadingMarriageAge}
+                data={marriageAgeData || []}
+                nameKey="age_group"
+              />
 
-            <ChartCard
-              title="Ancestor Language"
-              isLoading={isLoadingAncestorLanguage}
-              data={ancestorLanguageData || []}
-              nameKey="language"
-            />
+              <ChartCard
+                title="Mother Tongue Distribution"
+                isLoading={isLoadingMotherTongue}
+                data={motherTongueData || []}
+                nameKey="language"
+              />
 
-            <ChartCard
-              title="Disability Distribution"
-              isLoading={isLoadingDisability}
-              data={disabilityData || []}
-              nameKey="isDisabled"
-            />
-          </motion.div>
+              <ChartCard
+                title="Ancestor Language"
+                isLoading={isLoadingAncestorLanguage}
+                data={ancestorLanguageData || []}
+                nameKey="language"
+              />
+
+              <ChartCard
+                title="Disability Distribution"
+                isLoading={isLoadingDisability}
+                data={disabilityData || []}
+                nameKey="isDisabled"
+              />
+            </motion.div>
+          </>
         )}
       </div>
     </ContentLayout>
