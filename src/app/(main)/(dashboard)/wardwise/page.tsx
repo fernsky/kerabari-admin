@@ -58,6 +58,8 @@ const COLORS = [
 
 const WardwisePage = () => {
   const [selectedWard, setSelectedWard] = useState<string>();
+  const [selectedCategory, setSelectedCategory] =
+    useState<string>("individual");
 
   // Add all analytics queries
   const { data: genderData, isLoading: isLoadingGender } =
@@ -114,6 +116,43 @@ const WardwisePage = () => {
       { enabled: !!selectedWard },
     );
 
+  // Add agricultural analytics queries
+  const { data: agricultureOverview, isLoading: isLoadingAgricultureOverview } =
+    api.analytics.getAgricultureOverview.useQuery(
+      { wardNumber: selectedWard ? parseInt(selectedWard) : undefined },
+      { enabled: !!selectedWard && selectedCategory === "agriculture" },
+    );
+
+  const { data: landStats, isLoading: isLoadingLandStats } =
+    api.analytics.getAgriculturalLandStats.useQuery(
+      { wardNumber: selectedWard ? parseInt(selectedWard) : undefined },
+      { enabled: !!selectedWard && selectedCategory === "agriculture" },
+    );
+
+  const { data: irrigationStats, isLoading: isLoadingIrrigationStats } =
+    api.analytics.getIrrigationStats.useQuery(
+      { wardNumber: selectedWard ? parseInt(selectedWard) : undefined },
+      { enabled: !!selectedWard && selectedCategory === "agriculture" },
+    );
+
+  const { data: cropStats, isLoading: isLoadingCropStats } =
+    api.analytics.getCropStats.useQuery(
+      { wardNumber: selectedWard ? parseInt(selectedWard) : undefined },
+      { enabled: !!selectedWard && selectedCategory === "agriculture" },
+    );
+
+  const { data: animalStats, isLoading: isLoadingAnimalStats } =
+    api.analytics.getAnimalStats.useQuery(
+      { wardNumber: selectedWard ? parseInt(selectedWard) : undefined },
+      { enabled: !!selectedWard && selectedCategory === "agriculture" },
+    );
+
+  const { data: animalProductStats, isLoading: isLoadingAnimalProductStats } =
+    api.analytics.getAnimalProductStats.useQuery(
+      { wardNumber: selectedWard ? parseInt(selectedWard) : undefined },
+      { enabled: !!selectedWard && selectedCategory === "agriculture" },
+    );
+
   const TableComponent = ({
     data,
     nameKey,
@@ -162,7 +201,10 @@ const WardwisePage = () => {
     isLoading: boolean;
     nameKey: string;
   }) => {
-    const [chartType, setChartType] = useState<"pie" | "bar">("pie");
+    // Force bar chart for Crop Distribution
+    const [chartType, setChartType] = useState<"pie" | "bar">(
+      title === "Crop Distribution" ? "bar" : "pie",
+    );
 
     const ChartView = () =>
       chartType === "pie" ? (
@@ -178,7 +220,7 @@ const WardwisePage = () => {
             <CardTitle className="text-lg font-semibold text-gray-800">
               {title}
             </CardTitle>
-            {!isLoading && data && (
+            {!isLoading && data && title !== "Crop Distribution" && (
               <Button
                 variant="outline"
                 size="sm"
@@ -202,7 +244,10 @@ const WardwisePage = () => {
             )}
           </div>
           {!isLoading && data && (
-            <Tabs defaultValue="chart" className="w-full">
+            <Tabs
+              defaultValue={title === "Crop Distribution" ? "table" : "chart"}
+              className="w-full"
+            >
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="chart">Chart</TabsTrigger>
                 <TabsTrigger value="table">Table</TabsTrigger>
@@ -355,17 +400,98 @@ const WardwisePage = () => {
     );
   };
 
+  // Add Agricultural Overview component
+  const AgricultureOverview = () => {
+    if (isLoadingAgricultureOverview) {
+      return (
+        <div className="flex items-center justify-center p-4">
+          <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+        </div>
+      );
+    }
+
+    if (!agricultureOverview) return null;
+
+    const { crops, animals, animalProducts } = agricultureOverview;
+
+    return (
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold text-gray-800">
+          Ward {selectedWard} Agricultural Overview
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="p-4 bg-green-50 rounded-lg space-y-2">
+            <p className="text-sm text-green-600">Crop Statistics</p>
+            <div className="space-y-1">
+              <p className="text-2xl font-bold text-green-700">
+                {Number(crops.total_households).toString()} Households
+              </p>
+              <p className="text-sm text-green-600">
+                Area: {(crops.total_area as number)?.toFixed(2) || 0} Hectares
+              </p>
+              <p className="text-sm text-green-600">
+                Revenue: Rs. {((crops.total_revenue as number) || 0).toFixed(2)}
+              </p>
+            </div>
+          </div>
+
+          <div className="p-4 bg-blue-50 rounded-lg space-y-2">
+            <p className="text-sm text-blue-600">Animal Husbandry</p>
+            <div className="space-y-1">
+              <p className="text-2xl font-bold text-blue-700">
+                {Number(animals.total_households).toString()} Households
+              </p>
+              <p className="text-sm text-blue-600">
+                Total Animals: {Number(animals.total_count || 0).toString()}
+              </p>
+              <p className="text-sm text-blue-600">
+                Revenue: Rs. {Number(animals.total_revenue || 0).toFixed(2)}
+              </p>
+            </div>
+          </div>
+
+          <div className="p-4 bg-purple-50 rounded-lg space-y-2">
+            <p className="text-sm text-purple-600">Animal Products</p>
+            <div className="space-y-1">
+              <p className="text-2xl font-bold text-purple-700">
+                {Number(animalProducts.total_households || 0).toString()}{" "}
+                Households
+              </p>
+              <p className="text-sm text-purple-600">
+                Revenue: Rs.{" "}
+                {Number(animalProducts.total_revenue || 0).toFixed(2)}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <ContentLayout
       title={`Ward Analysis ${selectedWard ? `- Ward ${selectedWard}` : ""}`}
     >
       <div className="container mx-auto p-2 sm:p-4 space-y-4 sm:space-y-6">
-        {/* Ward Selector */}
+        {/* Category and Ward Selector */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white p-3 sm:p-4 rounded-lg shadow-sm"
+          className="bg-white p-3 sm:p-4 rounded-lg shadow-sm flex flex-col sm:flex-row gap-4"
         >
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-[180px] sm:w-[200px]">
+              <SelectValue placeholder="Select Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="individual">Individual</SelectItem>
+              <SelectItem value="family" disabled>
+                Family (Coming Soon)
+              </SelectItem>
+              <SelectItem value="agriculture">Agriculture</SelectItem>
+            </SelectContent>
+          </Select>
+
           <Select value={selectedWard} onValueChange={setSelectedWard}>
             <SelectTrigger className="w-[180px] sm:w-[200px]">
               <SelectValue placeholder="Select Ward" />
@@ -397,7 +523,8 @@ const WardwisePage = () => {
               </p>
             </div>
           </motion.div>
-        ) : (
+        ) : // Only show data if category is individual for now
+        selectedCategory === "individual" ? (
           <>
             {/* Population Stats Card */}
             <motion.div
@@ -477,6 +604,117 @@ const WardwisePage = () => {
               />
             </motion.div>
           </>
+        ) : selectedCategory === "agriculture" ? (
+          <>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white p-4 rounded-lg shadow-sm"
+            >
+              <AgricultureOverview />
+            </motion.div>
+
+            {/* First grid with other charts */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6"
+            >
+              <ChartCard
+                title="Land Ownership Distribution"
+                isLoading={isLoadingLandStats}
+                data={
+                  landStats?.map((item) => ({
+                    type: item.ownershipType,
+                    count: item.count,
+                    area: item.totalArea,
+                  })) || []
+                }
+                nameKey="type"
+              />
+
+              <ChartCard
+                title="Irrigation Status"
+                isLoading={isLoadingIrrigationStats}
+                data={
+                  irrigationStats?.map((item) => ({
+                    status: item.isIrrigated ? "Irrigated" : "Non-Irrigated",
+                    count: item.count,
+                    area: item.totalArea,
+                  })) || []
+                }
+                nameKey="status"
+              />
+
+              <ChartCard
+                title="Animal Distribution"
+                isLoading={isLoadingAnimalStats}
+                data={
+                  animalStats?.map((item) => ({
+                    name: item.animalName,
+                    count: item.totalCount,
+                    households: item.householdCount,
+                    revenue: item.totalRevenue,
+                  })) || []
+                }
+                nameKey="name"
+              />
+
+              <ChartCard
+                title="Animal Products"
+                isLoading={isLoadingAnimalProductStats}
+                data={
+                  animalProductStats?.map((item) => ({
+                    name: `${item.productName} (${item.unit})`,
+                    count: item.householdCount,
+                    production: item.totalProduction,
+                    revenue: item.totalRevenue,
+                  })) || []
+                }
+                nameKey="name"
+              />
+            </motion.div>
+
+            {/* Separate full-width Crop Distribution chart */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="w-full"
+            >
+              <ChartCard
+                title="Crop Distribution"
+                isLoading={isLoadingCropStats}
+                data={
+                  cropStats?.map((item) => ({
+                    name: `${item.cropName} (${item.cropType})`,
+                    count: item.count,
+                    area: item.totalArea,
+                    production: item.totalProduction,
+                    revenue: item.totalRevenue,
+                  })) || []
+                }
+                nameKey="name"
+              />
+            </motion.div>
+          </>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center justify-center p-12 bg-white rounded-lg shadow-sm space-y-4"
+          >
+            <Loader2 className="h-16 w-16 text-gray-400" />
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl font-semibold text-gray-700">
+                Coming Soon
+              </h2>
+              <p className="text-gray-500 max-w-md">
+                {selectedCategory.charAt(0).toUpperCase() +
+                  selectedCategory.slice(1)}{" "}
+                analytics are currently under development.
+              </p>
+            </div>
+          </motion.div>
         )}
       </div>
     </ContentLayout>

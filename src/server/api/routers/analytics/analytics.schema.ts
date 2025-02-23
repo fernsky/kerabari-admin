@@ -64,6 +64,35 @@ export const disabilityDistributionSchema = z.array(
   })
 );
 
+// Agricultural distribution schemas
+export const farmingTypeDistributionSchema = z.array(
+  z.object({
+    type: z.string(),
+    count: z.number().int(),
+  })
+);
+
+export const irrigationSourceDistributionSchema = z.array(
+  z.object({
+    source: z.string(),
+    count: z.number().int(),
+  })
+);
+
+export const agricultureProductDistributionSchema = z.array(
+  z.object({
+    product: z.string(),
+    count: z.number().int(),
+  })
+);
+
+export const livestockDistributionSchema = z.array(
+  z.object({
+    animal: z.string(),
+    count: z.number().int(),
+  })
+);
+
 // Combined schema for all demographics
 export const allDemographicAnalyticsSchema = z.object({
   gender: genderDistributionSchema,
@@ -77,6 +106,13 @@ export const allDemographicAnalyticsSchema = z.object({
   disability: disabilityDistributionSchema,
 });
 
+export const allAgriculturalAnalyticsSchema = z.object({
+  farmingTypes: farmingTypeDistributionSchema,
+  irrigationSources: irrigationSourceDistributionSchema,
+  agricultureProducts: agricultureProductDistributionSchema,
+  livestock: livestockDistributionSchema,
+});
+
 // Types
 export type GenderDistribution = z.infer<typeof genderDistributionSchema>;
 export type AgeDistribution = z.infer<typeof ageDistributionSchema>;
@@ -87,3 +123,9 @@ export type MaritalStatusDistribution = z.infer<typeof maritalStatusDistribution
 export type MarriageAgeDistribution = z.infer<typeof marriageAgeDistributionSchema>;
 export type DisabilityDistribution = z.infer<typeof disabilityDistributionSchema>;
 export type AllDemographicAnalytics = z.infer<typeof allDemographicAnalyticsSchema>;
+
+export type FarmingTypeDistribution = z.infer<typeof farmingTypeDistributionSchema>;
+export type IrrigationSourceDistribution = z.infer<typeof irrigationSourceDistributionSchema>;
+export type AgricultureProductDistribution = z.infer<typeof agricultureProductDistributionSchema>;
+export type LivestockDistribution = z.infer<typeof livestockDistributionSchema>;
+export type AllAgriculturalAnalytics = z.infer<typeof allAgriculturalAnalyticsSchema>;
