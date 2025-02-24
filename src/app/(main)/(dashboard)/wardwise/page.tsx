@@ -68,6 +68,12 @@ const WardwisePage = () => {
       { enabled: !!selectedWard },
     );
 
+  const { data: mainFamilyData, isLoading: isLoadingMainFamily } =
+    api.analytics.getFamilyStats.useQuery(
+      { wardNumber: selectedWard ? parseInt(selectedWard) : undefined },
+      { enabled: !!selectedWard },
+    );
+
   const { data: ageData, isLoading: isLoadingAge } =
     api.analytics.getAgeDistribution.useQuery(
       { wardNumber: selectedWard ? parseInt(selectedWard) : undefined },
@@ -321,11 +327,8 @@ const WardwisePage = () => {
             `${value} (${((Number(value) / data.reduce((sum, item) => sum + item.count, 0)) * 100).toFixed(1)}%)`,
             name,
           ]}
-          contentStyle={{ color: "black" }}
         />
-        <Legend
-          formatter={(value) => <span style={{ color: "black" }}>{value}</span>}
-        />
+        <Legend />
       </PieChart>
     </ResponsiveContainer>
   );
@@ -342,23 +345,20 @@ const WardwisePage = () => {
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey={dataKey}
-          tick={{ fontSize: 12, fill: "black" }}
+          tick={{ fontSize: 12 }}
           interval={0}
           angle={-45}
           textAnchor="end"
           height={60}
         />
-        <YAxis tick={{ fill: "black" }} />
+        <YAxis />
         <Tooltip
           formatter={(value) => [
             `${value} (${((Number(value) / data.reduce((sum, item) => sum + item.count, 0)) * 100).toFixed(1)}%)`,
             "Count",
           ]}
-          contentStyle={{ color: "black" }}
         />
-        <Legend
-          formatter={(value) => <span style={{ color: "black" }}>{value}</span>}
-        />
+        <Legend />
         <Bar dataKey="count" fill="#8884d8" />
       </BarChart>
     </ResponsiveContainer>
@@ -541,7 +541,7 @@ const WardwisePage = () => {
           <div className="p-6 bg-green-50 rounded-lg">
             <p className="text-lg text-green-600 mb-2">Total Families</p>
             <p className="text-4xl font-bold text-green-700">
-              {buildingStats.totalFamilies}
+              {mainFamilyData?.totalFamilies}
             </p>
             <p className="mt-2 text-sm text-green-500">
               Average{" "}

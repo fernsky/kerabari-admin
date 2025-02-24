@@ -15,6 +15,9 @@ import {
   getReligionDistribution
 } from "./procedures/basic";
 
+
+import { getFamilyStats, getFamiliesByWard, getFamilyStatusDistribution, getFamilyHousingOwnership } from "./procedures/families";
+
 import {
   getAgriculturalLandStats,
   getIrrigationStats,
@@ -46,6 +49,7 @@ export const analyticsRouter = createTRPCRouter({
   getMarriageAgeDistribution,
   getMotherTongueDistribution,
   getReligionDistribution,
+  
   // Agricultural procedures
   getAgriculturalLandStats,
   getIrrigationStats,
@@ -58,5 +62,11 @@ export const analyticsRouter = createTRPCRouter({
   getBuildingStats,
   getBuildingsByWard,
   getEmptyBuildingsStats,
-  getBuildingsByStatus
+  getBuildingsByStatus,
+
+  // Family procedures
+  getFamilyStats,
+  getFamiliesByWard,
+  getFamilyStatusDistribution,
+  getFamilyHousingOwnership
 });

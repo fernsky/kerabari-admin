@@ -93,6 +93,36 @@ export const livestockDistributionSchema = z.array(
   })
 );
 
+// Family analytics schemas
+export const familyStatsSchema = z.object({
+  totalFamilies: z.number().int(),
+  totalMembers: z.number().int(),
+  sanitizedFamilies: z.number().int(),
+});
+
+export const familyStatusDistributionSchema = z.array(
+  z.object({
+    status: z.string(),
+    count: z.number().int(),
+  })
+);
+
+export const familyHousingOwnershipSchema = z.array(
+  z.object({
+    ownership: z.string(),
+    count: z.number().int(),
+  })
+);
+
+export const familiesByWardSchema = z.array(
+  z.object({
+    wardNumber: z.number().int(),
+    totalFamilies: z.number().int(),
+    totalMembers: z.number().int(),
+    sanitizedFamilies: z.number().int(),
+  })
+);
+
 // Combined schema for all demographics
 export const allDemographicAnalyticsSchema = z.object({
   gender: genderDistributionSchema,
@@ -129,3 +159,8 @@ export type IrrigationSourceDistribution = z.infer<typeof irrigationSourceDistri
 export type AgricultureProductDistribution = z.infer<typeof agricultureProductDistributionSchema>;
 export type LivestockDistribution = z.infer<typeof livestockDistributionSchema>;
 export type AllAgriculturalAnalytics = z.infer<typeof allAgriculturalAnalyticsSchema>;
+
+export type FamilyStats = z.infer<typeof familyStatsSchema>;
+export type FamilyStatusDistribution = z.infer<typeof familyStatusDistributionSchema>;
+export type FamilyHousingOwnership = z.infer<typeof familyHousingOwnershipSchema>;
+export type FamiliesByWard = z.infer<typeof familiesByWardSchema>;
