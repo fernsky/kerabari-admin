@@ -153,6 +153,25 @@ const WardwisePage = () => {
       { enabled: !!selectedWard && selectedCategory === "agriculture" },
     );
 
+  // Add building queries after existing queries
+  const { data: buildingStats, isLoading: isLoadingBuildingStats } =
+    api.analytics.getBuildingStats.useQuery(
+      { wardNumber: selectedWard ? parseInt(selectedWard) : undefined },
+      { enabled: !!selectedWard && selectedCategory === "buildings" },
+    );
+
+  const { data: emptyBuildingsStats, isLoading: isLoadingEmptyBuildings } =
+    api.analytics.getEmptyBuildingsStats.useQuery(
+      { wardNumber: selectedWard ? parseInt(selectedWard) : undefined },
+      { enabled: !!selectedWard && selectedCategory === "buildings" },
+    );
+
+  const { data: buildingsByStatus, isLoading: isLoadingBuildingStatus } =
+    api.analytics.getBuildingsByStatus.useQuery(
+      { wardNumber: selectedWard ? parseInt(selectedWard) : undefined },
+      { enabled: !!selectedWard && selectedCategory === "buildings" },
+    );
+
   const TableComponent = ({
     data,
     nameKey,
@@ -302,8 +321,11 @@ const WardwisePage = () => {
             `${value} (${((Number(value) / data.reduce((sum, item) => sum + item.count, 0)) * 100).toFixed(1)}%)`,
             name,
           ]}
+          contentStyle={{ color: "black" }}
         />
-        <Legend />
+        <Legend
+          formatter={(value) => <span style={{ color: "black" }}>{value}</span>}
+        />
       </PieChart>
     </ResponsiveContainer>
   );
@@ -320,20 +342,23 @@ const WardwisePage = () => {
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey={dataKey}
-          tick={{ fontSize: 12 }}
+          tick={{ fontSize: 12, fill: "black" }}
           interval={0}
           angle={-45}
           textAnchor="end"
           height={60}
         />
-        <YAxis />
+        <YAxis tick={{ fill: "black" }} />
         <Tooltip
           formatter={(value) => [
             `${value} (${((Number(value) / data.reduce((sum, item) => sum + item.count, 0)) * 100).toFixed(1)}%)`,
             "Count",
           ]}
+          contentStyle={{ color: "black" }}
         />
-        <Legend />
+        <Legend
+          formatter={(value) => <span style={{ color: "black" }}>{value}</span>}
+        />
         <Bar dataKey="count" fill="#8884d8" />
       </BarChart>
     </ResponsiveContainer>
@@ -468,6 +493,119 @@ const WardwisePage = () => {
     );
   };
 
+  // Replace the BuildingOverview component with this updated version
+  const BuildingOverview = () => {
+    if (
+      isLoadingBuildingStats ||
+      isLoadingEmptyBuildings ||
+      isLoadingBuildingStatus
+    ) {
+      return (
+        <div className="flex items-center justify-center p-4">
+          <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+        </div>
+      );
+    }
+
+    if (!buildingStats || !emptyBuildingsStats || !buildingsByStatus)
+      return null;
+
+    const statusCounts = buildingsByStatus.reduce(
+      (acc, item) => {
+        if (item.status) {
+          acc[item.status] = item.count;
+        }
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+
+    return (
+      <div className="space-y-6">
+        <h2 className="text-xl font-semibold text-gray-800">
+          Ward {selectedWard} Building Statistics
+        </h2>
+
+        {/* Main statistics cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-6 bg-blue-50 rounded-lg">
+            <p className="text-lg text-blue-600 mb-2">Total Buildings</p>
+            <p className="text-4xl font-bold text-blue-700">
+              {buildingStats.totalBuildings}
+            </p>
+            <p className="mt-2 text-sm text-blue-500">
+              Registered structures in Ward {selectedWard}
+            </p>
+          </div>
+
+          <div className="p-6 bg-green-50 rounded-lg">
+            <p className="text-lg text-green-600 mb-2">Total Families</p>
+            <p className="text-4xl font-bold text-green-700">
+              {buildingStats.totalFamilies}
+            </p>
+            <p className="mt-2 text-sm text-green-500">
+              Average{" "}
+              {(
+                buildingStats.totalFamilies / buildingStats.totalBuildings
+              ).toFixed(1)}{" "}
+              families per building
+            </p>
+          </div>
+
+          <div className="p-6 bg-purple-50 rounded-lg">
+            <p className="text-lg text-purple-600 mb-2">Total Businesses</p>
+            <p className="text-4xl font-bold text-purple-700">
+              {buildingStats.totalBusinesses}
+            </p>
+            <p className="mt-2 text-sm text-purple-500">
+              Average{" "}
+              {(
+                buildingStats.totalBusinesses / buildingStats.totalBuildings
+              ).toFixed(1)}{" "}
+              businesses per building
+            </p>
+          </div>
+
+          <div className="p-6 bg-orange-50 rounded-lg">
+            <p className="text-lg text-orange-600 mb-2">Empty Buildings</p>
+            <p className="text-4xl font-bold text-orange-700">
+              {emptyBuildingsStats.emptyBuildings}
+            </p>
+            <p className="mt-2 text-sm text-orange-500">
+              {(
+                (emptyBuildingsStats.emptyBuildings /
+                  buildingStats.totalBuildings) *
+                100
+              ).toFixed(1)}
+              % of total buildings
+            </p>
+          </div>
+        </div>
+
+        {/* Status breakdown */}
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            Building Status Breakdown
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {Object.entries(statusCounts).map(([status, count]) => (
+              <div key={status} className="p-4 bg-gray-50 rounded-lg">
+                <p className="text-gray-600 capitalize">
+                  {status.replace(/_/g, " ")}
+                </p>
+                <p className="text-2xl font-semibold text-gray-800">{count}</p>
+                <p className="text-sm text-gray-500">
+                  {((count / buildingStats.totalBuildings) * 100).toFixed(1)}%
+                  of total
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <ContentLayout
       title={`Ward Analysis ${selectedWard ? `- Ward ${selectedWard}` : ""}`}
@@ -485,6 +623,7 @@ const WardwisePage = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="individual">Individual</SelectItem>
+              <SelectItem value="buildings">Buildings and Family</SelectItem>
               <SelectItem value="family" disabled>
                 Family (Coming Soon)
               </SelectItem>
@@ -604,6 +743,14 @@ const WardwisePage = () => {
               />
             </motion.div>
           </>
+        ) : selectedCategory === "buildings" ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white p-4 rounded-lg shadow-sm"
+          >
+            <BuildingOverview />
+          </motion.div>
         ) : selectedCategory === "agriculture" ? (
           <>
             <motion.div

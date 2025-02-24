@@ -25,6 +25,13 @@ import {
   getAgricultureOverview
 } from "./procedures/agricultural";
 
+import{
+  getBuildingStats,
+  getBuildingsByWard,
+  getEmptyBuildingsStats,
+  getBuildingsByStatus
+} from "./procedures/buildings";
+
 export const analyticsRouter = createTRPCRouter({
   getSubmissionStats,
   getAreaStats,
@@ -46,5 +53,10 @@ export const analyticsRouter = createTRPCRouter({
   getAnimalStats,
   getAnimalProductStats,
   getAgriculturalLandOverview,
-  getAgricultureOverview
+  getAgricultureOverview,
+  //Buildings Procedures
+  getBuildingStats,
+  getBuildingsByWard,
+  getEmptyBuildingsStats,
+  getBuildingsByStatus
 });
