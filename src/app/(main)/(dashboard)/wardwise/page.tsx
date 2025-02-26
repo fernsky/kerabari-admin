@@ -328,7 +328,9 @@ const WardwisePage = () => {
             name,
           ]}
         />
-        <Legend />
+        <Legend
+          formatter={(value) => <span style={{ color: "#000" }}>{value}</span>}
+        />
       </PieChart>
     </ResponsiveContainer>
   );
