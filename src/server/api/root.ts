@@ -12,6 +12,7 @@ import { familyRouter } from "./routers/families/families.procedure";
 import { individualRouter } from "./routers/individuals/individuals.procedure";
 import { deathRouter } from "./routers/deaths/deaths.procedure";
 import { analyticsRouter } from "./routers/analytics/analytics.procedure";
+import { enumwiseRouter } from "./routers/enumwise/enumwise.procedure";
 
 export const appRouter = createTRPCRouter({
   user: userRouter,
@@ -26,7 +27,8 @@ export const appRouter = createTRPCRouter({
   family: familyRouter,
   individual: individualRouter,
   death: deathRouter,
-  analytics:analyticsRouter
+  analytics:analyticsRouter,
+  enumWise:enumwiseRouter
 });
 
 export type AppRouter = typeof appRouter;

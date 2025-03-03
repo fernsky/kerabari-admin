@@ -1,3 +1,4 @@
+import { PersonIcon } from "@radix-ui/react-icons";
 import {
   LayoutGrid,
   LucideIcon,
@@ -12,6 +13,7 @@ import {
   User2Icon,
   Paperclip,
   Home,
+  PersonStanding,
 } from "lucide-react";
 
 export type Role = "admin" | "superadmin" | "enumerator";
@@ -112,6 +114,13 @@ const menuConfig: Menu[] = [
     href:"/wardwise",
     label: "Wardwise Data",
     icon:Home,
+    roles: ["admin", "superadmin"],
+    submenus:[],
+  },
+ {
+    href:"/enumeratorwise",
+    label: "Enumerator Wise Data",
+    icon:PersonStanding,
     roles: ["admin", "superadmin"],
     submenus:[],
   },
