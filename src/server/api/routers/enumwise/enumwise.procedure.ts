@@ -1,9 +1,10 @@
 import { createTRPCRouter } from "@/server/api/trpc";
-import { getUniqueEnumeratorsWardWise, buildingsRouter, getTotalBuildingsByEnumerator, getAllUniqueEnumerators, getBuildingsByAreaCode } from "./procedures/buildings";
+import { buildingsRouter } from "./procedures/buildings";
+import { businessRouter } from "./procedures/business";
+import { familyRouter } from "./procedures/family";
 
 export const enumwiseRouter = createTRPCRouter({
-  getUniqueEnumeratorsWardWise,
-  getTotalBuildingsByEnumerator,
-  getAllUniqueEnumerators,
-  getBuildingsByAreaCode
+  buildings: buildingsRouter,
+  business: businessRouter,
+  family: familyRouter,
 });

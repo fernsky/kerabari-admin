@@ -39,10 +39,10 @@ const BuildingsAnalysisPage = () => {
   const router = useRouter();
 
   const { data: enumerators, isLoading: loadingEnumerators } =
-    api.enumWise.getAllUniqueEnumerators.useQuery();
+    api.enumWise.buildings.getAllUniqueEnumerators.useQuery();
 
   const { data: buildingStats, isLoading: loadingStats } =
-    api.enumWise.getTotalBuildingsByEnumerator.useQuery(
+    api.enumWise.buildings.getTotalBuildingsByEnumerator.useQuery(
       {
         wardId: wardFromUrl ? parseInt(wardFromUrl) : undefined,
       },
@@ -52,7 +52,7 @@ const BuildingsAnalysisPage = () => {
     );
 
   const { data: areaWiseStats, isLoading: loadingAreaStats } =
-    api.enumWise.getBuildingsByAreaCode.useQuery(
+    api.enumWise.buildings.getBuildingsByAreaCode.useQuery(
       {
         enumeratorName: selectedEnumerator,
         wardId: wardFromUrl ? parseInt(wardFromUrl) : undefined,

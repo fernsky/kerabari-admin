@@ -4,26 +4,30 @@ import { sql } from "drizzle-orm";
 import { z } from "zod";
 
 export const getUniqueEnumeratorsWardWise = publicProcedure
-  .input(z.object({ wardId: z.number().optional() }))
-  .query(async ({ ctx, input }) => {
-    const query = ctx.db
-      .select({
-        wardId: buildingsWithUpdatedNames.wardId,
-        enumeratorName: buildingsWithUpdatedNames.mainEnumeratorName,
-        count: sql<number>`count(*)::int`,
-        areaCodes: sql<string[]>`array_agg(DISTINCT ${buildingsWithUpdatedNames.tmpAreaCode})`,
-      })
-      .from(buildingsWithUpdatedNames)
-      .where(
-        input.wardId
-          ? sql`${buildingsWithUpdatedNames.mainEnumeratorName} IS NOT NULL AND ${buildingsWithUpdatedNames.wardId} = ${input.wardId}`
-          : sql`${buildingsWithUpdatedNames.mainEnumeratorName} IS NOT NULL`
-      )
-      .groupBy(buildingsWithUpdatedNames.wardId, buildingsWithUpdatedNames.mainEnumeratorName)
-      .orderBy(buildingsWithUpdatedNames.wardId);
+    .input(z.object({ wardId: z.number().optional() }))
+    .query(async ({ ctx, input }) => {
+        const query = ctx.db
+            .select({
+                wardId: buildingsWithUpdatedNames.wardId,
+                enumeratorName: buildingsWithUpdatedNames.mainEnumeratorName,
+                count: sql<number>`count(*)::int`,
+                areaCodes: sql<string[]>`array_agg(DISTINCT ${buildingsWithUpdatedNames.tmpAreaCode})`,
+            })
+            .from(buildingsWithUpdatedNames)
+            .where(
+                input.wardId
+                    ? sql`${buildingsWithUpdatedNames.mainEnumeratorName} IS NOT NULL AND ${buildingsWithUpdatedNames.wardId} = ${input.wardId}`
+                    : sql`${buildingsWithUpdatedNames.mainEnumeratorName} IS NOT NULL`
+            )
+            .groupBy(buildingsWithUpdatedNames.wardId, buildingsWithUpdatedNames.mainEnumeratorName)
+            .orderBy(buildingsWithUpdatedNames.wardId);
 
-    return await query;
-  });
+        // Print the raw SQL query
+        console.log('Raw SQL Query:', query.toSQL());
+    
+
+        return await query;
+    });
 
 export const getTotalBuildingsByEnumerator = publicProcedure
   .input(z.object({ wardId: z.number().optional() }))

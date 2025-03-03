@@ -36,7 +36,7 @@ const EnumeratorwisePage = () => {
   const router = useRouter();
 
   const { data: enumerators, isLoading } =
-    api.enumWise.getUniqueEnumeratorsWardWise.useQuery(
+    api.enumWise.buildings.getUniqueEnumeratorsWardWise.useQuery(
       {
         wardId: selectedWard ? parseInt(selectedWard) : undefined,
       },
