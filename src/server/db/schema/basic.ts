@@ -117,6 +117,20 @@ export const areas = pgTable("areas", {
 
 export type Area = typeof areas.$inferSelect;
 
+export const areaWithStatus=pgTable("area_status_view",{
+   id: varchar("area_id", { length: 36 }).primaryKey(),
+  code: integer("code").notNull(),
+  wardNumber: integer("ward")
+    .notNull()
+    .references(() => wards.wardNumber),
+  assignedTo: varchar("assigned_to", { length: 21 }).references(() => users.id),
+  areaStatus: areaStatusEnum("area_status").default("unassigned"),
+  completedBy: varchar("completed_by", { length: 21 }).references(() => users.id),
+  completed_by_name: varchar("completed_by_name", { length: 255 }),
+  assigned_to_name: varchar("assigned_to_name", { length: 255 }),
+})
+
+
 /*
 I need a table that stores the following things:
 1. List of all the assignments that have ever occurred for all enumerators.
