@@ -226,7 +226,7 @@ export default function EnumeratorDetailsPage({
             <InfoItem
               icon={UserCheck}
               label="Assigned Area"
-              value={assignedArea?.[0] || "Not Assigned"}
+              value={assignedArea ? assignedArea.join(", ") : null}
             />
 
             <div className="flex items-start space-x-3">
