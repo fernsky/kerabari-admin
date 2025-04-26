@@ -30,8 +30,8 @@ export const createArea = protectedProcedure
       geometry: sql`ST_GeomFromGeoJSON(${geoJson})`,
     });
     // Create 200 tokens for the newly created area
-    const tokens = Array.from({ length: 200 }, () => ({
-      token: nanoid(),
+    const tokens = Array.from({ length: 200 }, (_, index) => ({
+      token: `0${input.wardNumber}L${input.code}G${(index + 1).toString().padStart(3, '0')}`,
       areaId: id as string,
       status: "unallocated",
     })) as BuildingToken[];
@@ -426,5 +426,22 @@ export const getAllAreasWithStatus = protectedProcedure
 
 
 
+export const getAreaCodesByEnumeratorId = protectedProcedure
+  .input(z.object({ enumeratorId: z.string() }))
+  .query(async ({ ctx, input }) => {
+    const assignedAreas = await ctx.db
+      .select({
+        code: areas.code
+      })
+      .from(areas)
+      .where(eq(areas.assignedTo, input.enumeratorId))
+      .orderBy(areas.code);
 
+    // Return "Not Assigned" if no areas are found
+    if (assignedAreas.length === 0) {
+      return ["Not Assigned"];
+    }
 
+    // Return array of area codes
+    return assignedAreas.map(area => area.code);
+  });

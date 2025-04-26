@@ -60,7 +60,7 @@ const BuildingForm = ({ areaId }: BuildingFormProps) => {
 
       const tableRows = tokensData.map((token, index) => ({
         sn: (index + 1).toString(),
-        token: token.slice(0, 8),
+        token: token,
         families: "",
         businesses: "",
         location: "",

@@ -20,6 +20,7 @@ import { UserAvatarUpload } from "@/app/(main)/account/_components/user-avatar-u
 import { IdCardGenerator } from "@/components/id-card/id-card-generator";
 import React from "react";
 import { useIdCardStore } from "@/store/id-card-store";
+import Link from "next/link";
 
 export default function EnumeratorDetailsPage({
   params,
@@ -31,6 +32,13 @@ export default function EnumeratorDetailsPage({
   const { data: enumerator, isLoading } = api.enumerator.getById.useQuery(
     params.id,
   );
+
+  const { data: assignedArea } = api.area.getAreaCodesByEnumeratorId.useQuery({
+    enumeratorId: params.id,
+  });
+
+  console.log("Assigned Area: ", assignedArea);
+
   const resetDetails = useIdCardStore((state) => state.resetDetails);
   const setDetails = useIdCardStore((state) => state.setDetails);
 
@@ -210,7 +218,40 @@ export default function EnumeratorDetailsPage({
           </div>
         </FormCard>
 
-        {/*<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <FormCard
+          title="Area Status"
+          description="Details about the enumerator's area status"
+        >
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <InfoItem
+              icon={UserCheck}
+              label="Assigned Area"
+              value={assignedArea?.[0] || "Not Assigned"}
+            />
+
+            <div className="flex items-start space-x-3">
+              <div className="mt-0.5">
+                <User2 className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Assign the Area
+                </p>
+                <div className="mt-2">
+                  {typeof assignedArea?.[0] !== "number" ? (
+                    <Link href={`/enumerators/${params.id}/manual-assign`}>
+                      <Button>Assign Area</Button>
+                    </Link>
+                  ) : (
+                    <Button disabled>Assign Area</Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </FormCard>
+
+        {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <NepaliIdCard
             userId={params.id}
             initialData={{
@@ -230,7 +271,7 @@ export default function EnumeratorDetailsPage({
               className="max-w-[400px] mx-auto"
             />
           </FormCard>
-        </div>*/}
+        </div>  */}
 
         <SuperadminAreaStatusActions
           //@ts-ignore
