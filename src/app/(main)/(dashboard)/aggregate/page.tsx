@@ -6,16 +6,16 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "समग्र डाटा | बुद्धशान्ति नगरपालिका सर्वेक्षण",
+  title: "समग्र डाटा | केराबारी नगरपालिका सर्वेक्षण",
   description:
-    "बुद्धशान्ति नगरपालिकाको समग्र सर्वेक्षण डाटा हेर्नुहोस् र विश्लेषण गर्नुहोस्",
+    "केराबारी नगरपालिकाको समग्र सर्वेक्षण डाटा हेर्नुहोस् र विश्लेषण गर्नुहोस्",
 };
 
 export default function AggregatePage() {
   return (
     <ContentLayout
       title="समग्र डाटा"
-      subtitle="बुद्धशान्ति नगरपालिकाको सबै सर्वेक्षण डाटाको एकीकृत दृष्टिकोण"
+      subtitle="केराबारी नगरपालिकाको सबै सर्वेक्षण डाटाको एकीकृत दृष्टिकोण"
       actions={
         <Button variant="outline" asChild>
           <Link href="/dashboard">
