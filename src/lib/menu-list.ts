@@ -14,6 +14,8 @@ import {
   Paperclip,
   Home,
   PersonStanding,
+  Watch,
+  Gauge,
 } from "lucide-react";
 
 export type Role = "admin" | "superadmin" | "enumerator";
@@ -107,6 +109,13 @@ const menuConfig: Menu[] = [
     href: "/submissions",
     label: "Submissions",
     icon: Paperclip, 
+    roles: ["admin", "superadmin"],
+    submenus: [],
+  },
+  {
+    href: "/cbs-comparison",
+    label: "CBS Comparison",
+    icon: Gauge, 
     roles: ["admin", "superadmin"],
     submenus: [],
   },
