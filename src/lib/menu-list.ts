@@ -15,6 +15,7 @@ import {
   Home,
   PersonStanding,
   Cloud,
+  Gauge,
 } from "lucide-react";
 
 export type Role = "admin" | "superadmin" | "enumerator";
@@ -129,6 +130,13 @@ const menuConfig: Menu[] = [
     href: "/aggregate",
     label: "Aggregate Data",
     icon: Cloud,
+    roles: ["admin", "superadmin"],
+    submenus: [],
+  },
+  {
+    href: "/cbs-comparison",
+    label: "CBS Comparison",
+    icon: Gauge,
     roles: ["admin", "superadmin"],
     submenus: [],
   },
