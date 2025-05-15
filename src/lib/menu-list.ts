@@ -14,8 +14,7 @@ import {
   Paperclip,
   Home,
   PersonStanding,
-  Watch,
-  Gauge,
+  Cloud,
 } from "lucide-react";
 
 export type Role = "admin" | "superadmin" | "enumerator";
@@ -62,17 +61,17 @@ const menuConfig: Menu[] = [
   },
   {
     href: "/account",
-    label: "User Account", 
+    label: "User Account",
     icon: User2Icon,
     roles: ["enumerator"],
   },
   {
     href: "/collections",
-    label: "My Collections", 
+    label: "My Collections",
     icon: Paperclip,
     roles: ["enumerator"],
   },
-  
+
   {
     href: "/ward",
     label: "Wards",
@@ -81,7 +80,7 @@ const menuConfig: Menu[] = [
     submenus: [],
   },
   {
-    href: "/area", 
+    href: "/area",
     label: "Areas",
     icon: LandPlot,
     roles: ["admin", "superadmin"],
@@ -95,7 +94,7 @@ const menuConfig: Menu[] = [
   },
   {
     href: "/businesses",
-    label: "Businesses", 
+    label: "Businesses",
     icon: Store,
     roles: ["admin", "superadmin"],
   },
@@ -105,33 +104,33 @@ const menuConfig: Menu[] = [
     icon: UsersRound,
     roles: ["admin", "superadmin"],
   },
-{
+  {
     href: "/submissions",
-    label: "Submissions",
-    icon: Paperclip, 
+    label: "Submitted Data",
+    icon: Paperclip,
     roles: ["admin", "superadmin"],
     submenus: [],
   },
   {
-    href: "/cbs-comparison",
-    label: "CBS Comparison",
-    icon: Gauge, 
+    href: "/wardwise",
+    label: "Ward-wise Data",
+    icon: Home,
     roles: ["admin", "superadmin"],
     submenus: [],
   },
   {
-    href:"/wardwise",
-    label: "Wardwise Data",
-    icon:Home,
+    href: "/enumeratorwise",
+    label: "Enumerator-wise Data",
+    icon: PersonStanding,
     roles: ["admin", "superadmin"],
-    submenus:[],
+    submenus: [],
   },
- {
-    href:"/enumeratorwise",
-    label: "Enumerator Wise Data",
-    icon:PersonStanding,
+  {
+    href: "/aggregate",
+    label: "Aggregate Data",
+    icon: Cloud,
     roles: ["admin", "superadmin"],
-    submenus:[],
+    submenus: [],
   },
   {
     href: "/individuals",
@@ -148,7 +147,7 @@ const menuConfig: Menu[] = [
   {
     href: "/enumerators",
     label: "Enumerators",
-    icon: UsersRound, 
+    icon: UsersRound,
     roles: ["admin", "superadmin"],
     submenus: [],
   },
