@@ -15,6 +15,9 @@ import {
   Home,
   PersonStanding,
   Cloud,
+  Gauge,
+  PlusCircle,
+  Clock
 } from "lucide-react";
 
 export type Role = "admin" | "superadmin" | "enumerator";
@@ -111,6 +114,26 @@ const menuConfig: Menu[] = [
     roles: ["admin", "superadmin"],
     submenus: [],
   },
+   {
+    href: "/aggregate",
+    label: "Aggregate Data",
+    icon: PlusCircle,
+    roles: ["admin", "superadmin", "enumerator"],
+  },
+  {
+    href: "/remaining-locations",
+    label: "Remaining Areas",
+    icon: Clock,
+    roles: ["admin", "superadmin"],
+    submenus: [],
+  },
+  {
+    href: "/cbs-comparison",
+    label: "CBS Comparison",
+    icon: Gauge, 
+    roles: ["admin", "superadmin"],
+    submenus: [],
+  },
   {
     href: "/wardwise",
     label: "Ward-wise Data",
@@ -129,6 +152,13 @@ const menuConfig: Menu[] = [
     href: "/aggregate",
     label: "Aggregate Data",
     icon: Cloud,
+    roles: ["admin", "superadmin"],
+    submenus: [],
+  },
+  {
+    href: "/cbs-comparison",
+    label: "CBS Comparison",
+    icon: Gauge,
     roles: ["admin", "superadmin"],
     submenus: [],
   },

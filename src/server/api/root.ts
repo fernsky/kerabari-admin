@@ -14,6 +14,8 @@ import { deathRouter } from "./routers/deaths/deaths.procedure";
 import { analyticsRouter } from "./routers/analytics/analytics.procedure";
 import { enumwiseRouter } from "./routers/enumwise/enumwise.procedure";
 import { aggregateRouter } from "./routers/aggregate";
+import { householdCBSRouter } from "./cbs/households/households.procedure";
+import { populationCBSRouter } from "./cbs/population/population.procedure";
 
 export const appRouter = createTRPCRouter({
   user: userRouter,
@@ -28,8 +30,10 @@ export const appRouter = createTRPCRouter({
   family: familyRouter,
   individual: individualRouter,
   death: deathRouter,
-  analytics: analyticsRouter,
-  enumWise: enumwiseRouter,
+  analytics:analyticsRouter,
+  enumWise:enumwiseRouter,
+  cbsHousehold: householdCBSRouter,
+  cbsPopulation: populationCBSRouter,
   aggregate: aggregateRouter,
 });
 
