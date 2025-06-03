@@ -124,7 +124,7 @@ const menuConfig: Menu[] = [
     href: "/remaining-locations",
     label: "Remaining Areas",
     icon: Clock,
-    roles: ["admin", "superadmin"],
+    roles: ["admin", "superadmin", "enumerator"],
     submenus: [],
   },
   {
