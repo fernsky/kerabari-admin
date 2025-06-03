@@ -47,21 +47,27 @@ export const getAreaTokens = protectedProcedure
       conditions.push(eq(buildingTokens.status, input.status));
     }
 
-    const [tokens, totalCount] = await Promise.all([
+    const [tokensData, totalCount] = await Promise.all([
       ctx.db
-        .select()
-        .from(buildingTokens)
-        .where(and(...conditions))
-        .limit(input.limit)
-        .offset(input.offset)
-        .orderBy(buildingTokens.token),
+      .select()
+      .from(buildingTokens)
+      .where(and(...conditions))
+      .limit(input.limit)
+      .offset(input.offset)
+      .orderBy(buildingTokens.token),
 
       ctx.db
-        .select({ count: sql<number>`count(*)` })
-        .from(buildingTokens)
-        .where(and(...conditions))
-        .then((result) => result[0].count),
+      .select({ count: sql<number>`count(*)` })
+      .from(buildingTokens)
+      .where(and(...conditions))
+      .then((result) => result[0].count),
     ]);
+
+    // Transform tokens to include only the first 8 characters
+    const tokens = tokensData.map(token => ({
+      ...token,
+      token: token.token.substring(0, 4)
+    }));
 
     return {
       tokens,
