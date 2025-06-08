@@ -66,7 +66,7 @@ export const getAreaTokens = protectedProcedure
     // Transform tokens to include only the first 8 characters
     const tokens = tokensData.map(token => ({
       ...token,
-      token: token.token.substring(0, 4)
+      token: token.token
     }));
 
     return {
