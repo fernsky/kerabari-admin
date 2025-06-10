@@ -19,6 +19,7 @@ import {
   PlusCircle,
   Clock
 } from "lucide-react";
+import { Form } from "react-hook-form";
 
 export type Role = "admin" | "superadmin" | "enumerator";
 
@@ -111,6 +112,13 @@ const menuConfig: Menu[] = [
     href: "/submissions",
     label: "Submitted Data",
     icon: Paperclip,
+    roles: ["admin", "superadmin", "enumerator"],
+    submenus: [],
+  },
+  {
+    href: "/form-archive",
+    label: "Physical Form Submission",
+    icon: FormInput,
     roles: ["admin", "superadmin", "enumerator"],
     submenus: [],
   },
