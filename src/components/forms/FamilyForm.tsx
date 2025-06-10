@@ -44,7 +44,7 @@ const FamilyForm = ({ areaId }: FamilyFormProps) => {
       ];
 
       // Hardcoded symbol numbers from 1 to 100
-      const tableRows = Array.from({ length: 100 }, (_, index) => [
+      const tableRows = Array.from({ length: 200 }, (_, index) => [
         (index + 1).toString().padStart(3, "0"), // Symbol numbers like 001, 002, etc.
         "", // Building Token
         "", // Name

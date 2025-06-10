@@ -229,3 +229,4 @@ export type GeometryTypes = {
   MultiPolygon: GeoJSON.MultiPolygon;
   GeometryCollection: GeoJSON.GeometryCollection;
 };
+

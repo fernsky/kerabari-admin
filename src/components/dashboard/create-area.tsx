@@ -8,9 +8,13 @@ import { useLayerStore } from "@/store/use-layer-store";
 import { api } from "@/trpc/react";
 import { GeoJsonObject } from "geojson";
 import { Button } from "@/components/ui/button";
-import { MapIcon } from "lucide-react";
+import { MapIcon, MapPinned } from "lucide-react";
 import { useMapViewStore } from "@/store/toggle-layer-store";
 import { LayerControlWrapper } from "../map/layer-control-wrapper";
+import { Marker, Popup } from "react-leaflet";
+import L from "leaflet";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const Map = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
@@ -46,8 +50,39 @@ const CreateAreaMap = ({ onGeometryChange }: CreateAreaMapProps) => {
   const { geometry } = useMapContext();
   const { wards, areas, wardLayers } = useLayerStore();
   const { isStreetView, toggleView } = useMapViewStore();
+  const [showPointRequests, setShowPointRequests] = React.useState(false);
+  const [selectedWard, setSelectedWard] = React.useState<number | null>(null);
 
-  console.log(areas, wards, wardLayers);
+  interface PointRequest {
+    id: string;
+    coordinates: any;
+    enumeratorName: string;
+    status: string;
+    message: string;
+    createdAt: Date;
+  }
+
+  // Add query for point requests
+  const pointRequests = api.area.getPointRequestsByWard.useQuery<
+    PointRequest[]
+  >(
+    { wardNumber: selectedWard! },
+    {
+      enabled: !!selectedWard && showPointRequests,
+    },
+  );
+
+  // Effect to set selected ward based on visible ward layers
+  React.useEffect(() => {
+    const visibleWard = Object.entries(wardLayers).find(
+      ([_, value]) => value.visible,
+    );
+    if (visibleWard) {
+      setSelectedWard(Number(visibleWard[0]));
+    } else {
+      setSelectedWard(null);
+    }
+  }, [wardLayers]);
 
   React.useEffect(() => {
     onGeometryChange(geometry);
@@ -57,7 +92,7 @@ const CreateAreaMap = ({ onGeometryChange }: CreateAreaMapProps) => {
     <>
       <LayerControlWrapper />
       <Card className="relative mt-4 min-h-[400px] h-[calc(100vh-400px)]">
-        <div className="absolute top-5 left-10 z-[400]">
+        <div className="absolute top-5 left-10 z-[400] flex items-center gap-4">
           <Button
             variant="secondary"
             size="sm"
@@ -69,6 +104,30 @@ const CreateAreaMap = ({ onGeometryChange }: CreateAreaMapProps) => {
           >
             <MapIcon className="h-4 w-4 mr-2" />
             {isStreetView ? "Satellite View" : "Street View"}
+          </Button>
+
+          {/* Redesigned Toggle Button */}
+          <Button
+            variant="secondary"
+            size="sm"
+            className={`relative pl-9 transition-colors ${
+              showPointRequests
+                ? "bg-primary/10 text-primary hover:bg-primary/20"
+                : "bg-white hover:bg-gray-100"
+            }`}
+            onClick={() => setShowPointRequests(!showPointRequests)}
+          >
+            <MapPinned
+              className={`h-4 w-4 absolute left-2.5 transition-colors ${
+                showPointRequests ? "text-primary" : "text-muted-foreground"
+              }`}
+            />
+            Area Requests
+            <span
+              className={`ml-2 rounded-full h-2 w-2 ${
+                showPointRequests ? "bg-primary" : "bg-muted"
+              }`}
+            />
           </Button>
         </div>
         <Map
@@ -132,6 +191,46 @@ const CreateAreaMap = ({ onGeometryChange }: CreateAreaMapProps) => {
               />
             );
           })}
+
+          {/* Add Point Request Markers */}
+          {showPointRequests &&
+            selectedWard &&
+            pointRequests.data?.map((request) => {
+              if (!request.coordinates?.coordinates) return null;
+              const [lng, lat] = request.coordinates.coordinates;
+
+              return (
+                <Marker
+                  key={request.id}
+                  position={[lat, lng]}
+                  icon={L.divIcon({
+                    className: "custom-div-icon",
+                    html: `<div class="bg-yellow-500 w-3 h-3 rounded-full border-2 border-white shadow-md"></div>`,
+                    iconSize: [12, 12],
+                    iconAnchor: [6, 6],
+                  })}
+                >
+                  <Popup>
+                    <div className="space-y-2 p-1">
+                      <p className="font-medium">Area Request</p>
+                      <p className="text-sm text-muted-foreground">
+                        Requested by: {request.enumeratorName}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Status:{" "}
+                        <span className="capitalize">{request.status}</span>
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Message: {request.message}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(request.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
 
           {/* Drawing Layer - Always on top */}
           <MapDrawer zIndex={10000} />

@@ -180,3 +180,47 @@ export const buildingTokens = pgTable("kerabari_building_tokens", {
 });
 
 export type BuildingToken = typeof buildingTokens.$inferSelect;
+
+export const buildingsWithUpdatedNames = pgTable("kerabari_buildings_with_updated_names", {
+  id: varchar("id", { length: 48 }),
+  surveyDate: timestamp("survey_date"),
+  enumeratorName: varchar("enumerator_name", { length: 255 }),
+  mainEnumeratorName: varchar("main_enumerator_name", { length: 255 }),
+  locality: varchar("locality", { length: 255 }),
+  totalFamilies: integer("total_families"),
+  totalBusinesses: integer("total_businesses"),
+  surveyAudioRecording: varchar("survey_audio_recording", { length: 255 }),
+  gps: geometry("gps", { type: "Point" }),
+  altitude: doublePrecision("altitude"),
+  gpsAccuracy: doublePrecision("gps_accuracy"),
+  buildingImage: varchar("building_image", { length: 255 }),
+  enumeratorSelfie: varchar("enumerator_selfie", { length: 255 }),
+  landOwnership: varchar("land_ownership", { length: 255 }),
+  base: varchar("base", { length: 255 }),
+  outerWall: varchar("outer_wall", { length: 255 }),
+  roof: varchar("roof", { length: 255 }),
+  floor: varchar("floor", { length: 255 }),
+  mapStatus: varchar("map_status", { length: 255 }),
+  naturalDisasters: text("natural_disasters").array(),
+  timeToMarket: varchar("time_to_market", { length: 255 }),
+  timeToActiveRoad: varchar("time_to_active_road", { length: 255 }),
+  timeToPublicBus: varchar("time_to_public_bus", { length: 255 }),
+  timeToHealthOrganization: varchar("time_to_health_organization", { length: 255 }),
+  timeToFinancialOrganization: varchar("time_to_financial_organization", { length: 255 }),
+  roadStatus: varchar("road_status", { length: 255 }),
+  status: buildingStatusEnum("status"),
+  tmpAreaCode: varchar("tmp_area_code", { length: 255 }),
+  tmpWardNumber: integer("tmp_ward_number"),
+  tmpEnumeratorId: varchar("tmp_enumerator_id", { length: 255 }),
+  tmpBuildingToken: varchar("tmp_building_token", { length: 255 }),
+  areaId: varchar("area_id", { length: 255 }),
+  enumeratorId: varchar("user_id", { length: 21 }),
+  wardId: integer("ward_id"),
+  buildingToken: varchar("building_token", { length: 255 }),
+  isAreaValid: boolean("is_area_invalid"),
+  isWardValid: boolean("is_ward_invalid"),
+  isBuildingTokenValid: boolean("is_building_token_invalid"),
+  isEnumeratorValid: boolean("is_enumerator_invalid"),
+});
+
+export type BuildingsWithUpdatedNames = typeof buildingsWithUpdatedNames.$inferSelect;

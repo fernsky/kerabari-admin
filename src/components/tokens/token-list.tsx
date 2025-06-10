@@ -16,6 +16,8 @@ import { ChevronLeft, ChevronRight, Copy, Filter, Key } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import BuildingForm from "@/components/forms/BuildingForm";
 import FamilyForm from "@/components/forms/FamilyForm";
+import InstitutionalForm from "../forms/InstitutionalForm";
+import BusinessForm from "../forms/BusinessForm";
 
 interface TokenListProps {
   areaId: string;
@@ -32,9 +34,7 @@ const TokenCard = ({
   <div className="bg-white rounded-lg shadow-sm p-4 space-y-2 hover:shadow-md transition-shadow">
     <div className="flex justify-between items-center">
       <div className="space-y-1">
-        <div className="font-mono text-sm font-medium">
-          {token.token.slice(0, 8)}
-        </div>
+        <div className="font-mono text-sm font-medium">{token.token}</div>
         <Badge
           variant={token.status === "allocated" ? "default" : "secondary"}
           className="mt-1"
@@ -85,9 +85,9 @@ const TokenTable = ({
         </TableHeader>
         <TableBody>
           {data.tokens.map((token) => (
-            <TableRow key={token.token.slice(0, 8)}>
+            <TableRow key={token.token}>
               <TableCell className="font-mono break-all">
-                {token.token.slice(0, 8)}
+                {token.token}
               </TableCell>
               <TableCell>
                 <Badge
@@ -206,6 +206,8 @@ export const TokenList = ({ areaId }: TokenListProps) => {
                     .map((t) => t.token)}
                   areaId={areaId}
                 />
+                <InstitutionalForm areaId={areaId} />
+                <BusinessForm areaId={areaId} />
               </div>
             </div>
 

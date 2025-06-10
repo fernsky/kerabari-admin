@@ -117,6 +117,20 @@ export const areas = pgTable("areas", {
 
 export type Area = typeof areas.$inferSelect;
 
+export const areaWithStatus=pgTable("area_status_view",{
+   id: varchar("area_id", { length: 36 }).primaryKey(),
+  code: integer("code").notNull(),
+  wardNumber: integer("ward")
+    .notNull()
+    .references(() => wards.wardNumber),
+  assignedTo: varchar("assigned_to", { length: 21 }).references(() => users.id),
+  areaStatus: areaStatusEnum("area_status").default("unassigned"),
+  completedBy: varchar("completed_by", { length: 21 }).references(() => users.id),
+  completed_by_name: varchar("completed_by_name", { length: 255 }),
+  assigned_to_name: varchar("assigned_to_name", { length: 255 }),
+})
+
+
 /*
 I need a table that stores the following things:
 1. List of all the assignments that have ever occurred for all enumerators.
@@ -233,3 +247,22 @@ export const stagingToProduction = pgTable(
     pk: primaryKey(t.staging_table, t.production_table, t.recordId),
   }),
 );
+
+export const pointRequests = pgTable('point_requests', {
+  id: text('id').primaryKey().$defaultFn(() => nanoid()),
+  wardNumber: integer('ward_number').notNull(),
+  enumeratorId: text('enumerator_id').notNull().references(() => users.id),
+  coordinates: geometry('coordinates', { type: 'Point' }),
+  message: text('message').notNull(),
+  status: text('status', { enum: ['pending', 'approved', 'rejected'] }).notNull().default('pending'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// Add this type for TypeScript support
+export type PointRequest = typeof pointRequests.$inferSelect;
+export type NewPointRequest = typeof pointRequests.$inferInsert;
+function nanoid(): string | import("drizzle-orm").SQL<unknown> {
+  throw new Error("Function not implemented.");
+}
+

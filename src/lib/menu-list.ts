@@ -1,3 +1,4 @@
+import { PersonIcon } from "@radix-ui/react-icons";
 import {
   LayoutGrid,
   LucideIcon,
@@ -11,7 +12,14 @@ import {
   Store,
   User2Icon,
   Paperclip,
+  Home,
+  PersonStanding,
+  Cloud,
+  Gauge,
+  PlusCircle,
+  Clock
 } from "lucide-react";
+import { Form } from "react-hook-form";
 
 export type Role = "admin" | "superadmin" | "enumerator";
 
@@ -57,17 +65,17 @@ const menuConfig: Menu[] = [
   },
   {
     href: "/account",
-    label: "User Account", 
+    label: "User Account",
     icon: User2Icon,
     roles: ["enumerator"],
   },
   {
     href: "/collections",
-    label: "My Collections", 
+    label: "My Collections",
     icon: Paperclip,
     roles: ["enumerator"],
   },
-  
+
   {
     href: "/ward",
     label: "Wards",
@@ -76,7 +84,7 @@ const menuConfig: Menu[] = [
     submenus: [],
   },
   {
-    href: "/area", 
+    href: "/area",
     label: "Areas",
     icon: LandPlot,
     roles: ["admin", "superadmin"],
@@ -90,7 +98,7 @@ const menuConfig: Menu[] = [
   },
   {
     href: "/businesses",
-    label: "Businesses", 
+    label: "Businesses",
     icon: Store,
     roles: ["admin", "superadmin"],
   },
@@ -100,11 +108,52 @@ const menuConfig: Menu[] = [
     icon: UsersRound,
     roles: ["admin", "superadmin"],
   },
-{
+  {
     href: "/submissions",
-    label: "Submissions",
-    icon: Paperclip, 
-    roles: ["admin", "superadmin"],
+    label: "Submitted Data",
+    icon: Paperclip,
+    roles: ["admin", "superadmin", "enumerator"],
+    submenus: [],
+  },
+  {
+    href: "/form-archive",
+    label: "Physical Form Submission",
+    icon: FormInput,
+    roles: ["admin", "superadmin", "enumerator"],
+    submenus: [],
+  },
+   {
+    href: "/aggregate",
+    label: "Aggregate Data",
+    icon: PlusCircle,
+    roles: ["admin", "superadmin", "enumerator"],
+  },
+  {
+    href: "/remaining-locations",
+    label: "Remaining Areas",
+    icon: Clock,
+    roles: ["admin", "superadmin", "enumerator"],
+    submenus: [],
+  },
+  {
+    href: "/cbs-comparison",
+    label: "CBS Comparison",
+    icon: Gauge, 
+    roles: ["admin", "superadmin", "enumerator"],
+    submenus: [],
+  },
+  {
+    href: "/wardwise",
+    label: "Ward-wise Data",
+    icon: Home,
+    roles: ["admin", "superadmin", "enumerator"],
+    submenus: [],
+  },
+  {
+    href: "/enumeratorwise",
+    label: "Enumerator-wise Data",
+    icon: PersonStanding,
+    roles: ["admin", "superadmin", "enumerator"],
     submenus: [],
   },
 
@@ -123,7 +172,7 @@ const menuConfig: Menu[] = [
   {
     href: "/enumerators",
     label: "Enumerators",
-    icon: UsersRound, 
+    icon: UsersRound,
     roles: ["admin", "superadmin"],
     submenus: [],
   },

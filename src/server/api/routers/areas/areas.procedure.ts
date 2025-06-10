@@ -5,6 +5,7 @@ import {
   getUnassignedWardAreasofEnumerator,
   getAreaDetails,
   getAreasByWardforRequest,
+  manualAssignAreaToEnumerator
 } from "./procedures/assignment";
 import {
   createArea,
@@ -14,7 +15,15 @@ import {
   getAvailableAreaCodes,
   getLayerAreas,
   getAreaBoundaryByCode,
-  getAreasWithSubmissionCounts
+  getAreasWithSubmissionCounts,
+  getAreaBoundariesByCodes,
+  getAreaCodesByUserId,
+  createPointRequest, 
+  getPointRequestsByWard,
+  getAreasByEnumeratorName,
+  getAreasSummaryByEnumerator,
+  getAllAreasWithStatus,
+  getAreaCodesByEnumeratorId
 } from "./procedures/basic";
 import {
   requestArea,
@@ -28,9 +37,11 @@ export const areaRouter = createTRPCRouter({
   getAreas,
   getLayerAreas,
   getAreaById,
+  getAreaCodesByUserId,
   updateArea,
   requestArea,
   getUserAreaRequests,
+  getAreaBoundariesByCodes,
   getAreaBoundaryByCode,
   getAllAreaRequests,
   getAreasWithSubmissionCounts,
@@ -42,4 +53,11 @@ export const areaRouter = createTRPCRouter({
   getUnassignedWardAreasofEnumerator,
   getAreaDetails,
   getAreasByWardforRequest,
+  createPointRequest,
+  getPointRequestsByWard,
+  getAreasByEnumeratorName,
+  getAreasSummaryByEnumerator,
+  getAllAreasWithStatus,
+  getAreaCodesByEnumeratorId,
+  manualAssignAreaToEnumerator,
 });

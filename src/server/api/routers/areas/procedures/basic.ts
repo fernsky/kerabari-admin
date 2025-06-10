@@ -1,12 +1,14 @@
 import { createTRPCRouter, protectedProcedure } from "../../../trpc";
 import { z } from "zod";
-import { areas, users } from "@/server/db/schema/basic";
-import { and, eq, sql } from "drizzle-orm";
+import { areas, users, pointRequests, areaWithStatus } from "@/server/db/schema/basic";
+import { and, cosineDistance, eq, sql } from "drizzle-orm";
 import {
   Area,
   areaQuerySchema,
   createAreaSchema,
+  createPointRequestSchema,
   updateAreaSchema,
+  areaWithStatusSchema,
 } from "../area.schema";
 import { nanoid } from "nanoid";
 import { BuildingToken, buildingTokens } from "@/server/db/schema/building";
@@ -28,8 +30,8 @@ export const createArea = protectedProcedure
       geometry: sql`ST_GeomFromGeoJSON(${geoJson})`,
     });
     // Create 200 tokens for the newly created area
-    const tokens = Array.from({ length: 200 }, () => ({
-      token: nanoid(),
+    const tokens = Array.from({ length: 200 }, (_, index) => ({
+      token: `0${input.wardNumber}L${input.code}G${(index + 1).toString().padStart(3, '0')}`,
       areaId: id as string,
       status: "unallocated",
     })) as BuildingToken[];
@@ -236,6 +238,38 @@ export const getAreaBoundaryByCode = protectedProcedure
     };
   });
 
+export const getAreaBoundariesByCodes = protectedProcedure
+  .input(z.object({ codes: z.array(z.number()) }))
+  .query(async ({ ctx, input }) => {
+    if (!input.codes.length) return [];
+
+    const boundaries = await Promise.all(
+      input.codes.map(async (code) => {
+        const areaResult = await ctx.db.execute(
+          sql`SELECT 
+              ${areas.id} as "id",
+              ${areas.code} as "code",
+              ${areas.wardNumber} as "wardNumber",
+              ST_AsGeoJSON(${areas.geometry}) as "boundary"
+              FROM ${areas} 
+              WHERE ${areas.code} = ${code}
+              LIMIT 1`
+        );
+
+        if (!areaResult[0]) return null;
+
+        return {
+          id: areaResult[0].id,
+          code: areaResult[0].code,
+          wardNumber: areaResult[0].wardNumber,
+          boundary: areaResult[0].boundary ? JSON.parse(areaResult[0].boundary as string) : null
+        };
+      })
+    );
+
+    return boundaries.filter((b): b is NonNullable<typeof b> => b !== null);
+  });
+
 export const getAreasWithSubmissionCounts = protectedProcedure
   .input(z.object({ wardNumber: z.number().optional() }))
   .query(async ({ ctx, input }) => {
@@ -254,4 +288,160 @@ export const getAreasWithSubmissionCounts = protectedProcedure
 
     const result = await ctx.db.execute(query);
     return result;
+  });
+
+export const getAreaCodesByUserId = protectedProcedure
+  .input(z.object({ userId: z.string() }))
+  .query(async ({ ctx, input }) => {
+    const assignedAreas = await ctx.db
+      .select({
+        code: areas.code
+      })
+      .from(areas)
+      .where(eq(areas.assignedTo, input.userId))
+      .orderBy(areas.code);
+
+    return assignedAreas.map(area => area.code);
+  });
+
+export const createPointRequest = protectedProcedure
+  .input(createPointRequestSchema)
+  .mutation(async ({ ctx, input }) => {
+    // Create a Point geometry from coordinates
+    const point = {
+      type: "Point",
+      coordinates: [input.coordinates.lng, input.coordinates.lat] // GeoJSON uses [longitude, latitude]
+    };
+
+    const pointGeojson = JSON.stringify(point);
+
+    try {
+      const newRequest = await ctx.db.insert(pointRequests).values({
+        id: nanoid(),
+        wardNumber: input.wardNumber,
+        enumeratorId: ctx.user!.id,
+        coordinates: sql`ST_GeomFromGeoJSON(${pointGeojson})`,
+        message: input.message,
+        status: 'pending',
+      }).returning({ id: pointRequests.id });
+
+      return { success: true, id: newRequest[0].id };
+    } catch (error) {
+      throw new Error("Failed to create point request");
+    }
+  });
+
+export const getPointRequestsByWard = protectedProcedure
+  .input(z.object({ wardNumber: z.number() }))
+  .query(async ({ ctx, input }) => {
+    const requests = await ctx.db.execute(
+      sql`SELECT 
+          p.id,
+          p.ward_number as "wardNumber",
+          p.enumerator_id as "enumeratorId",
+          u.name as "enumeratorName",
+          ST_AsGeoJSON(p.coordinates) as coordinates,
+          p.message,
+          p.status,
+          p.created_at as "createdAt"
+        FROM ${pointRequests} p
+        LEFT JOIN ${users} u ON p.enumerator_id = u.id
+        WHERE p.ward_number = ${input.wardNumber}
+        ORDER BY p.created_at DESC`
+    );
+
+    return requests.map(request => ({
+      ...request,
+      coordinates: request.coordinates && typeof request.coordinates === 'string' ? JSON.parse(request.coordinates) : null
+    }));
+  });
+
+export const getAreasByEnumeratorName = protectedProcedure
+  .input(z.object({ 
+    enumeratorName: z.string(),
+    wardNumber: z.number().optional() 
+  }))
+  .query(async ({ ctx, input }) => {
+    const query = ctx.db
+      .select({
+        id: areaWithStatus.id,
+        code: areaWithStatus.code,
+        wardNumber: areaWithStatus.wardNumber,
+        areaStatus: areaWithStatus.areaStatus,
+        assignedTo: areaWithStatus.assignedTo,
+        assignedToName: areaWithStatus.assigned_to_name,
+        completedBy: areaWithStatus.completedBy,
+        completedByName: areaWithStatus.completed_by_name,
+      })
+      .from(areaWithStatus)
+      .where(
+        input.wardNumber
+          ? and(
+              eq(areaWithStatus.assigned_to_name, input.enumeratorName),
+              eq(areaWithStatus.wardNumber, input.wardNumber)
+            )
+          : eq(areaWithStatus.assigned_to_name, input.enumeratorName)
+      )
+      .orderBy(areaWithStatus.code);
+    
+    const result = await query;
+    
+    return result;
+  });
+
+export const getAreasSummaryByEnumerator = protectedProcedure
+  .query(async ({ ctx }) => {
+    const query = ctx.db
+      .select({
+        enumeratorName: areaWithStatus.assigned_to_name,
+        totalAreas: sql<number>`COUNT(*)::int`,
+        completed: sql<number>`SUM(CASE WHEN ${areaWithStatus.areaStatus} = 'completed' THEN 1 ELSE 0 END)::int`,
+        ongoingSurvey: sql<number>`SUM(CASE WHEN ${areaWithStatus.areaStatus} = 'ongoing_survey' THEN 1 ELSE 0 END)::int`,
+        revision: sql<number>`SUM(CASE WHEN ${areaWithStatus.areaStatus} = 'revision' THEN 1 ELSE 0 END)::int`,
+        askedForCompletion: sql<number>`SUM(CASE WHEN ${areaWithStatus.areaStatus} = 'asked_for_completion' THEN 1 ELSE 0 END)::int`,
+        newlyAssigned: sql<number>`SUM(CASE WHEN ${areaWithStatus.areaStatus} = 'newly_assigned' THEN 1 ELSE 0 END)::int`,
+      })
+      .from(areaWithStatus)
+      .where(sql`${areaWithStatus.assigned_to_name} IS NOT NULL`)
+      .groupBy(areaWithStatus.assigned_to_name)
+      .orderBy(areaWithStatus.assigned_to_name);
+    
+    return await query;
+  });
+
+export const getAllAreasWithStatus = protectedProcedure
+  .input(z.object({ wardNumber: z.number().optional() }))
+  .query(async ({ ctx, input }) => {
+    const query = ctx.db
+      .select()
+      .from(areaWithStatus)
+      .orderBy(areaWithStatus.code);
+    
+    if (input.wardNumber) {
+      query.where(eq(areaWithStatus.wardNumber, input.wardNumber));
+    }
+    
+    return await query;
+  });
+
+
+
+export const getAreaCodesByEnumeratorId = protectedProcedure
+  .input(z.object({ enumeratorId: z.string() }))
+  .query(async ({ ctx, input }) => {
+    const assignedAreas = await ctx.db
+      .select({
+        code: areas.code
+      })
+      .from(areas)
+      .where(eq(areas.assignedTo, input.enumeratorId))
+      .orderBy(areas.code);
+
+    // Return "Not Assigned" if no areas are found
+    if (assignedAreas.length === 0) {
+      return ["Not Assigned"];
+    }
+
+    // Return array of area codes
+    return assignedAreas.map(area => area.code);
   });

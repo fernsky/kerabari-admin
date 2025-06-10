@@ -4,11 +4,12 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useMapViewStore } from "@/store/toggle-layer-store";
 import dynamic from "next/dynamic";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MapIcon } from "lucide-react";
 import { Polygon } from "react-leaflet";
 import { useRouter } from "next/navigation";
+import { cosineDistance } from "drizzle-orm";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((mod) => mod.MapContainer),
@@ -46,15 +47,18 @@ interface Point {
 
 interface AreaPointsMapProps {
   points: Point[];
-  boundary: GeoJSON.Feature | GeoJSON.FeatureCollection;
+  boundaries: Array<
+    (GeoJSON.Feature | GeoJSON.FeatureCollection) & { areaCode?: string }
+  >;
 }
 
 export default function AreaPointsMap({
   points,
-  boundary,
+  boundaries, // Changed prop name
 }: AreaPointsMapProps) {
   const router = useRouter();
   const { isStreetView, toggleView } = useMapViewStore();
+  const [showAreaCodes, setShowAreaCodes] = useState(false);
 
   const validPoints = useMemo(
     () =>
@@ -65,13 +69,31 @@ export default function AreaPointsMap({
     [points],
   );
 
+  console.log(boundaries);
+
+  // New bounds calculation that includes both points and boundaries
   const bounds = useMemo(() => {
-    if (validPoints.length === 0) return null;
-    const latLngs = validPoints.map(
-      (p) => [p.gpsPoint.lat, p.gpsPoint.lng] as [number, number],
+    const allLatLngs: [number, number][] = [];
+
+    // Add points to bounds calculation
+    validPoints.forEach((p) =>
+      allLatLngs.push([p.gpsPoint.lat, p.gpsPoint.lng]),
     );
-    return L.latLngBounds(latLngs);
-  }, [validPoints]);
+
+    // Add boundary coordinates to bounds calculation
+    boundaries.forEach((boundary) => {
+      const coords =
+        boundary.type === "Feature"
+          ? (boundary.geometry as GeoJSON.Polygon).coordinates[0]
+          : (boundary as unknown as GeoJSON.Polygon).coordinates[0];
+
+      coords.forEach((coord) => {
+        allLatLngs.push([coord[1], coord[0]]);
+      });
+    });
+
+    return allLatLngs.length > 0 ? L.latLngBounds(allLatLngs) : null;
+  }, [validPoints, boundaries]);
 
   const handleMarkerClick = (point: Point) => {
     console.log("Marker clicked", point.type);
@@ -98,7 +120,15 @@ export default function AreaPointsMap({
 
   return (
     <>
-      <div className="absolute top-4 right-4 z-[400]">
+      <div className="absolute top-4 right-4 z-[400] flex gap-2">
+        <Button
+          variant="secondary"
+          size="sm"
+          className="bg-white/90 backdrop-blur-sm hover:bg-white/95 text-xs"
+          onClick={() => setShowAreaCodes(!showAreaCodes)}
+        >
+          {showAreaCodes ? "Hide Area Codes" : "Show Area Codes"}
+        </Button>
         <Button
           variant="secondary"
           size="sm"
@@ -110,7 +140,7 @@ export default function AreaPointsMap({
         </Button>
       </div>
       <MapContainer
-        bounds={bounds}
+        bounds={bounds || undefined}
         style={{ width: "100%", height: "100%" }}
         zoomControl={true}
         scrollWheelZoom={false}
@@ -157,15 +187,47 @@ export default function AreaPointsMap({
             </Tooltip>
           </Marker>
         ))}
-        {boundary && (
-          <Polygon
-            positions={(boundary.type === "Feature"
+        {boundaries.map((boundary, index) => {
+          // Calculate center of the polygon for label placement
+          const coords =
+            boundary.type === "Feature"
               ? (boundary.geometry as GeoJSON.Polygon).coordinates[0]
-              : (boundary as unknown as GeoJSON.Polygon).coordinates[0]
-            ).map((coord: number[]) => [coord[1], coord[0]])}
-            pathOptions={{ color: "red", weight: 2 }}
-          />
-        )}
+              : (boundary as unknown as GeoJSON.Polygon).coordinates[0];
+
+          const center = coords.reduce(
+            (acc, coord) => ({
+              lat: acc.lat + coord[1],
+              lng: acc.lng + coord[0],
+            }),
+            { lat: 0, lng: 0 },
+          );
+
+          center.lat /= coords.length;
+          center.lng /= coords.length;
+
+          return (
+            <div key={index}>
+              <Polygon
+                positions={(boundary.type === "Feature"
+                  ? (boundary.geometry as GeoJSON.Polygon).coordinates[0]
+                  : (boundary as unknown as GeoJSON.Polygon).coordinates[0]
+                ).map((coord: number[]) => [coord[1], coord[0]])}
+                pathOptions={{
+                  color: `hsl(${(index * 137) % 360}, 70%, 50%)`,
+                  weight: 2,
+                }}
+              >
+                {showAreaCodes && (
+                  <Tooltip permanent direction="center" offset={[0, 0]}>
+                    <div className="px-2 py-1 font-semibold bg-white/90 backdrop-blur-sm rounded shadow">
+                      Area {boundary.areaCode}
+                    </div>
+                  </Tooltip>
+                )}
+              </Polygon>
+            </div>
+          );
+        })}
       </MapContainer>
     </>
   );

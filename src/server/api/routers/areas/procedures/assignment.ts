@@ -15,6 +15,17 @@ export const assignAreaToEnumerator = protectedProcedure
     return { success: true };
   });
 
+  export const manualAssignAreaToEnumerator = protectedProcedure
+  .input(assignAreaToEnumeratorSchema)
+  .mutation(async ({ ctx, input }) => {
+    const updatedArea = await ctx.db
+      .update(areas)
+      .set({ assignedTo: input.enumeratorId, areaStatus: "newly_assigned" })
+      .where(eq(areas.id, input.id));
+
+    return { success: true, updatedArea };
+  });
+
 export const getUnassignedWardAreasofEnumerator = protectedProcedure.query(
   async ({ ctx }) => {
     const fetchedUser = await ctx.db

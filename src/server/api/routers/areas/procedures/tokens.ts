@@ -37,7 +37,7 @@ export const getAreaTokens = protectedProcedure
     z.object({
       areaId: z.string(),
       status: z.enum(["allocated", "unallocated"]).optional(),
-      limit: z.number().min(1).max(200).default(100),
+      limit: z.number().min(1).max(200).default(200),
       offset: z.number().min(0).default(0),
     }),
   )
@@ -47,21 +47,27 @@ export const getAreaTokens = protectedProcedure
       conditions.push(eq(buildingTokens.status, input.status));
     }
 
-    const [tokens, totalCount] = await Promise.all([
+    const [tokensData, totalCount] = await Promise.all([
       ctx.db
-        .select()
-        .from(buildingTokens)
-        .where(and(...conditions))
-        .limit(input.limit)
-        .offset(input.offset)
-        .orderBy(buildingTokens.token),
+      .select()
+      .from(buildingTokens)
+      .where(and(...conditions))
+      .limit(input.limit)
+      .offset(input.offset)
+      .orderBy(buildingTokens.token),
 
       ctx.db
-        .select({ count: sql<number>`count(*)` })
-        .from(buildingTokens)
-        .where(and(...conditions))
-        .then((result) => result[0].count),
+      .select({ count: sql<number>`count(*)` })
+      .from(buildingTokens)
+      .where(and(...conditions))
+      .then((result) => result[0].count),
     ]);
+
+    // Transform tokens to include only the first 8 characters
+    const tokens = tokensData.map(token => ({
+      ...token,
+      token: token.token
+    }));
 
     return {
       tokens,

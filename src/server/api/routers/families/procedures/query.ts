@@ -200,6 +200,36 @@ export const getByAreaCode = publicProcedure
     }));
   });
 
+export const getByEnumeratorName = publicProcedure
+  .input(z.object({ enumeratorName: z.string() }))
+  .query(async ({ ctx, input }) => {
+    const familyDetails = await ctx.db
+      .select({
+        id: family.id,
+        headName: family.headName,
+        wardNo: family.wardNo,
+        lat: sql<number>`ST_Y(${family.gps}::geometry)`,
+        lng: sql<number>`ST_X(${family.gps}::geometry)`,
+        gpsAccuracy: family.gpsAccuracy,
+        enumeratorName: family.enumeratorName,
+      })
+      .from(family)
+      .where(ilike(family.enumeratorName, `%${input.enumeratorName}%`));
+
+    return familyDetails.map(family => ({
+      id: family.id,
+      type: "family",
+      name: family.headName,
+      wardNo: family.wardNo,
+      enumeratorName: family.enumeratorName,
+      gpsPoint: family.lat && family.lng ? {
+        lat: family.lat,
+        lng: family.lng,
+        accuracy: family.gpsAccuracy ?? 0
+      } : null
+    }));
+  });
+
 export const getStats = publicProcedure.query(async ({ ctx }) => {
   const stats = await ctx.db
     .select({
@@ -211,3 +241,64 @@ export const getStats = publicProcedure.query(async ({ ctx }) => {
 
   return stats[0];
 });
+
+export const getEnumeratorNames = publicProcedure.query(async ({ ctx }) => {
+  const results = await ctx.db
+    .selectDistinct({
+      enumeratorName: family.enumeratorName,
+    })
+    .from(family)
+    .where(sql`${family.enumeratorName} IS NOT NULL`)
+    .orderBy(family.enumeratorName);
+
+  return results.map(result => result.enumeratorName);
+});
+
+export const getAreaCodesByEnumeratorName = publicProcedure
+  .input(z.object({ enumeratorName: z.string() }))
+  .query(async ({ ctx, input }) => {
+    const results = await ctx.db
+      .selectDistinct({
+        areaCode: family.areaCode,
+      })
+      .from(family)
+      .where(
+        and(
+          eq(family.enumeratorName, input.enumeratorName),
+          sql`${family.areaCode} IS NOT NULL`
+        )
+      )
+      .orderBy(family.areaCode);
+
+    return results.map(result => result.areaCode);
+  });
+
+  export const getGpsByWard = publicProcedure
+    .input(z.object({ wardNo: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const familyDetails = await ctx.db
+        .select({
+          id: family.id,
+          headName: family.headName,
+          wardNo: family.wardNo,
+          lat: sql<number>`ST_Y(${family.gps}::geometry)`,
+          lng: sql<number>`ST_X(${family.gps}::geometry)`,
+          gpsAccuracy: family.gpsAccuracy,
+          enumeratorName: family.enumeratorName,
+        })
+        .from(family)
+        .where(eq(family.wardNo, parseInt(input.wardNo, 10)));
+
+      return familyDetails.map(family => ({
+        id: family.id,
+        type: "family",
+        familyHeadName: family.headName,
+        wardNo: family.wardNo,
+        enumeratorName: family.enumeratorName,
+        gpsPoint: family.lat && family.lng ? {
+          lat: family.lat,
+          lng: family.lng,
+          accuracy: family.gpsAccuracy ?? 0
+        } : null
+      }));
+    });

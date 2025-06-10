@@ -2,7 +2,7 @@ import { publicProcedure } from "@/server/api/trpc";
 import { businessQuerySchema } from "../business.schema";
 import { business } from "@/server/db/schema/business/business";
 import { surveyAttachments } from "@/server/db/schema";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, sql, ilike } from "drizzle-orm";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { env } from "@/env";
@@ -188,6 +188,36 @@ export const getByAreaCode = publicProcedure
     }));
   });
 
+export const getByEnumeratorName = publicProcedure
+  .input(z.object({ enumeratorName: z.string() }))
+  .query(async ({ ctx, input }) => {
+    const businessDetails = await ctx.db
+      .select({
+        id: business.id,
+        businessName: business.businessName,
+        wardId: business.wardId,
+        lat: sql<number>`ST_Y(${business.gps}::geometry)`,
+        lng: sql<number>`ST_X(${business.gps}::geometry)`,
+        gpsAccuracy: business.gpsAccuracy,
+        enumeratorName: business.enumeratorName,
+      })
+      .from(business)
+      .where(ilike(business.enumeratorName, `%${input.enumeratorName}%`));
+
+    return businessDetails.map(business => ({
+      id: business.id,
+      type: "business",
+      name: business.businessName,
+      wardNo: business.wardId?.toString(),
+      enumeratorName: business.enumeratorName,
+      gpsPoint: business.lat && business.lng ? {
+        lat: business.lat,
+        lng: business.lng,
+        accuracy: business.gpsAccuracy ?? 0
+      } : null
+    }));
+  });
+
 export const getStats = publicProcedure.query(async ({ ctx }) => {
   const stats = await ctx.db
     .select({
@@ -205,3 +235,64 @@ export const getStats = publicProcedure.query(async ({ ctx }) => {
 
   return stats[0];
 });
+
+export const getEnumeratorNames = publicProcedure.query(async ({ ctx }) => {
+  const results = await ctx.db
+    .selectDistinct({
+      enumeratorName: business.enumeratorName,
+    })
+    .from(business)
+    .where(sql`${business.enumeratorName} IS NOT NULL`)
+    .orderBy(business.enumeratorName);
+
+  return results.map(result => result.enumeratorName);
+});
+
+export const getAreaCodesByEnumeratorName = publicProcedure
+  .input(z.object({ enumeratorName: z.string() }))
+  .query(async ({ ctx, input }) => {
+    const results = await ctx.db
+      .selectDistinct({
+        areaCode: business.areaCode,
+      })
+      .from(business)
+      .where(
+        and(
+          eq(business.enumeratorName, input.enumeratorName),
+          sql`${business.areaCode} IS NOT NULL`
+        )
+      )
+      .orderBy(business.areaCode);
+
+    return results.map(result => result.areaCode);
+  });
+
+  export const getGpsByWard = publicProcedure
+    .input(z.object({ wardId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const businessDetails = await ctx.db
+        .select({
+          id: business.id,
+          businessName: business.businessName,
+          wardId: business.wardId,
+          lat: sql<number>`ST_Y(${business.gps}::geometry)`,
+          lng: sql<number>`ST_X(${business.gps}::geometry)`,
+          gpsAccuracy: business.gpsAccuracy,
+          enumeratorName: business.enumeratorName,
+        })
+        .from(business)
+        .where(eq(business.wardId, input.wardId));
+
+      return businessDetails.map(business => ({
+        id: business.id,
+        type: "business",
+        name: business.businessName,
+        wardNo: business.wardId?.toString(),
+        enumeratorName: business.enumeratorName,
+        gpsPoint: business.lat && business.lng ? {
+          lat: business.lat,
+          lng: business.lng,
+          accuracy: business.gpsAccuracy ?? 0
+        } : null
+      }));
+    });
